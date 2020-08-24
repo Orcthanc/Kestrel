@@ -22,7 +22,7 @@ std::shared_ptr<spdlog::logger> Kestrel::Logger::app_logger;
 
 
 void Kestrel::Logger::LogInit(){
-	spdlog::set_pattern( "[%d %m %Y %T][%n] %^%v%$" );
+	spdlog::set_pattern( "[%d/%m/%Y %T][%n] %^%v%$" );
 
 	core_logger = spdlog::stdout_color_mt( "KESTREL CORE" );
 	app_logger = spdlog::stdout_color_mt( "KESTREL" );
