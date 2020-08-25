@@ -14,7 +14,7 @@
  * =====================================================================================
  */
 
-#include "Application.h"
+#include "Application.hpp"
 
 void Kestrel::Application::operator()(){
 	std::cout << "Test" << std::endl;

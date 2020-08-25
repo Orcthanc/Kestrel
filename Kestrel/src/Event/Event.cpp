@@ -1,20 +1,20 @@
 /*
  * =====================================================================================
  *
- *       Filename:  Sandbox.cpp
+ *       Filename:  Event.cpp
  *
- *    Description:  Implementation of Sandbox.h
+ *    Description:  Implementation of Event.hpp
  *
  *        Version:  1.0
- *        Created:  08/23/2020 03:33:05 PM
+ *        Created:  08/25/2020 02:57:47 PM
  *       Revision:  none
  *
  *         Author:  Samuel Knoethig (), samuel@knoethig.net
  *
  * =====================================================================================
  */
-#include "Sandbox.hpp"
 
-Kestrel::Application* createApplication(){
-	return new Sandbox();
+#include "Event.hpp"
+
+Kestrel::EventDispatcher::EventDispatcher( Event& e ): e{ e }{
 }

@@ -14,7 +14,7 @@
  * =====================================================================================
  */
 #include <memory>
-#include "Application.h"
+#include "Application.hpp"
 #include "Log.hpp"
 #include <spdlog/sinks/stdout_color_sinks.h>
 

@@ -15,7 +15,7 @@
  */
 
 #include "kstpch.hpp"
-#include "Core/Application.h"
+#include "Core/Application.hpp"
 
 class Sandbox : public Kestrel::Application {
 
