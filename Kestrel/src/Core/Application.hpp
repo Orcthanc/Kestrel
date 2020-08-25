@@ -29,5 +29,7 @@ namespace Kestrel {
 		private:
 			void operator()();
 			friend int ::main( int, char** );
+
+			bool running;
 	};
 }

@@ -17,5 +17,7 @@
 #include "Application.hpp"
 
 void Kestrel::Application::operator()(){
-	std::cout << "Test" << std::endl;
+	while( running ){
+		running = false;
+	}
 }
