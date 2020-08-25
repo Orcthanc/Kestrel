@@ -17,19 +17,30 @@
 #pragma once
 
 #include "kstpch.hpp"
+#include "LayerStack.hpp"
 
 int main( int, char** );
 
 namespace Kestrel {
 	class Application {
 		public:
-			Application() = default;
+			Application();
 			virtual ~Application() = default;
 
+			void addLayer( Layer* l ){ stack.pushLayer( l ); };
+			void removeLayer( Layer* l ){ stack.PopLayer( l ); };
+
+			static Application* getInstance(){ return instance; }
+
+
+			bool running;
 		private:
+			LayerStack stack;
+
 			void operator()();
 			friend int ::main( int, char** );
 
-			bool running;
+
+			static Application* instance;
 	};
 }

@@ -1,12 +1,12 @@
 /*
  * =====================================================================================
  *
- *       Filename:  Sandbox.h
+ *       Filename:  SandboxLayer.cpp
  *
- *    Description:  Entry point for the test application
+ *    Description:  
  *
  *        Version:  1.0
- *        Created:  08/23/2020 03:33:28 PM
+ *        Created:  08/25/2020 05:14:28 PM
  *       Revision:  none
  *
  *         Author:  Samuel Knoethig (), samuel@knoethig.net
@@ -14,10 +14,5 @@
  * =====================================================================================
  */
 
-#include "kstpch.hpp"
-#include "Core/Application.hpp"
+#include "SandboxLayer.hpp"
 
-class Sandbox : public Kestrel::Application {
-	public:
-		Sandbox();
-};

@@ -14,6 +14,11 @@
  * =====================================================================================
  */
 #include "Sandbox.hpp"
+#include "SandboxLayer.hpp"
+
+Sandbox::Sandbox(): Kestrel::Application(){
+	addLayer( new SandboxLayer( "Sandbox" ));
+}
 
 Kestrel::Application* createApplication(){
 	return new Sandbox();
