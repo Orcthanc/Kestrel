@@ -18,13 +18,14 @@
 
 #include "kstpch.hpp"
 #include "LayerStack.hpp"
+#include "Window.hpp"
 
 int main( int, char** );
 
 namespace Kestrel {
 	class Application {
 		public:
-			Application();
+			Application( WindowSettings w = {} );
 			virtual ~Application() = default;
 
 			void addLayer( Layer* l ){ stack.pushLayer( l ); };
@@ -36,6 +37,8 @@ namespace Kestrel {
 			bool running;
 		private:
 			LayerStack stack;
+
+			Window window;
 
 			void operator()();
 			friend int ::main( int, char** );

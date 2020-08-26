@@ -25,8 +25,7 @@ struct SandboxLayer: public Kestrel::Layer {
 
 	virtual void onUpdate() override {
 		static int calls = 0;
-		KST_INFO( "Test {}", calls++ );
-		if( calls > 10 )
+		if( calls > 1000000 )
 			Kestrel::Application::getInstance()->running = false;
 	}
 };

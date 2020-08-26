@@ -16,7 +16,7 @@
 
 #include "Application.hpp"
 
-Kestrel::Application::Application(): running( true ), stack(){
+Kestrel::Application::Application( WindowSettings w ): running( true ), stack(), window{ w }{
 	if( instance )
 		throw std::runtime_error( "Can not create multiple applications" );
 	instance = this;
@@ -24,6 +24,8 @@ Kestrel::Application::Application(): running( true ), stack(){
 
 void Kestrel::Application::operator()(){
 	while( running ){
+		window.onUpdate();
+
 		for( auto l: stack ){
 			l->onUpdate();
 		}

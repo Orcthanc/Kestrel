@@ -25,8 +25,8 @@ int main( int argc, char** argv ){
 
 	KST_CORE_WARN( "Warn" );
 	KST_CORE_INFO( "Test {} {} {}", 1, 2, 3 );
-	KST_ERROR( "Error" );
-	KST_CRITICAL( "Critical" );
+	KST_ERROR( "Test Error" );
+	KST_CRITICAL( "Test Critical" );
 
 	auto app = std::unique_ptr<Kestrel::Application>( createApplication() );
 	(*app)();
