@@ -38,6 +38,7 @@ function(compile_shaders)
     add_dependencies(${PROJECT_NAME} shaders)
 endfunction()
 
+add_subdirectory( external )
 add_subdirectory( Kestrel )
 add_subdirectory( Sandbox )
 
