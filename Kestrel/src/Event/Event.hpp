@@ -60,7 +60,7 @@ namespace Kestrel {
 
 			template <typename T, typename F>
 			bool dispatch( const F& func ){
-				if( e.getType() == T::getStaticType ){
+				if( e.getType() == T::getStaticType() ){
 					e.handled = func( static_cast<T&>( e ));
 					return true;
 				}

@@ -47,11 +47,10 @@ namespace Kestrel {
 
 			void onUpdate();
 
-			void setCallback( EventCallback e );
+			void setCallback( const EventCallback& e );
 
 		private:
-			WindowSettings s;
-			EventCallback callback;
+			WindowSettings w_settings;
 			GLFWwindow* window;
 	};
 }

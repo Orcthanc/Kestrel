@@ -15,12 +15,13 @@
  */
 
 #include "Window.hpp"
+#include "Event/Events.hpp"
 
 using namespace Kestrel;
 
 static int glfwInitialized = 0;
 
-Window::Window( WindowSettings s ): s{ s }{
+Window::Window( WindowSettings s ): w_settings{ s }{
 
 	if( !glfwInitialized++ ){
 		if( !glfwInit() ){
@@ -39,7 +40,7 @@ Window::Window( WindowSettings s ): s{ s }{
 		throw std::runtime_error( "Could not create glfw window" );
 	}
 
-	glfwSetWindowUserPointer( window, &s );
+	glfwSetWindowUserPointer( window, &w_settings );
 
 	glfwSetWindowSizeCallback( window, []( GLFWwindow* window, int width, int height ){
 			WindowSettings* s = static_cast<WindowSettings*>( glfwGetWindowUserPointer( window ));
@@ -48,7 +49,9 @@ Window::Window( WindowSettings s ): s{ s }{
 		});
 
 	glfwSetWindowCloseCallback( window, []( GLFWwindow* window ){
-			KST_CORE_ASSERT( false, "TODO::fixme::Unimplemented method" );
+			WindowSettings* s = static_cast<WindowSettings*>( glfwGetWindowUserPointer( window ));
+			WindowCloseEvent e;
+			s->callback( e );
 		});
 
 	glfwSetKeyCallback( window, []( GLFWwindow* window, int key, int scancode, int action, int mods ){
@@ -93,13 +96,13 @@ Window::~Window(){
 }
 
 std::pair<unsigned int, unsigned int> Window::getResolution(){
-	return { s.width, s.height };
+	return { w_settings.width, w_settings.height };
 }
 
 void Window::onUpdate(){
 	glfwPollEvents();
 }
 
-void Window::setCallback( EventCallback e ){
-	callback = e;
+void Window::setCallback( const EventCallback& e ){
+	w_settings.callback = e;
 }
