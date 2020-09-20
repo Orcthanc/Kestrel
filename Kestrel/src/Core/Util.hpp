@@ -24,12 +24,41 @@
 		throw std::runtime_error( fmt::format( __VA_ARGS__ ));				\
 	}
 
-#define KST_ASSERT( val, ... )											\
+#define KST_ASSERT( val, ... )												\
 	if( !val ){																\
-		KST_CRITICAL( __VA_ARGS__ );									\
+		KST_CRITICAL( __VA_ARGS__ );										\
 		throw std::runtime_error( fmt::format( __VA_ARGS__ ));				\
 	}
 #else
 #define KST_CORE_ASSERT( ... )
 #define KST_ASSERT( ... )
 #endif
+
+
+namespace Kestrel {
+	template<typename E, typename = std::enable_if_t<std::is_enum_v<E>>>
+	E operator&( const E& lhs, const E& rhs ){
+		return static_cast<E>( static_cast<std::underlying_type_t<E>>( lhs ) & static_cast<std::underlying_type_t<E>>( rhs ));
+	}
+	template<typename E, typename = std::enable_if_t<std::is_enum_v<E>>>
+	E operator^( const E& lhs, const E& rhs ){
+		return static_cast<E>( static_cast<std::underlying_type_t<E>>( lhs ) ^ static_cast<std::underlying_type_t<E>>( rhs ));
+	}
+	template<typename E, typename = std::enable_if_t<std::is_enum_v<E>>>
+	E operator|( const E& lhs, const E& rhs ){
+		return static_cast<E>( static_cast<std::underlying_type_t<E>>( lhs ) | static_cast<std::underlying_type_t<E>>( rhs ));
+	}
+
+	template<typename E, typename = std::enable_if_t<std::is_enum_v<E>>>
+	E& operator&=( const E& lhs, const E& rhs ){
+		return lhs = static_cast<E>( static_cast<std::underlying_type_t<E>>( lhs ) & static_cast<std::underlying_type_t<E>>( rhs ));
+	}
+	template<typename E, typename = std::enable_if_t<std::is_enum_v<E>>>
+	E& operator^=( const E& lhs, const E& rhs ){
+		return lhs = static_cast<E>( static_cast<std::underlying_type_t<E>>( lhs ) ^ static_cast<std::underlying_type_t<E>>( rhs ));
+	}
+	template<typename E, typename = std::enable_if_t<std::is_enum_v<E>>>
+	E& operator|=( const E& lhs, const E& rhs ){
+		return lhs = static_cast<E>( static_cast<std::underlying_type_t<E>>( lhs ) | static_cast<std::underlying_type_t<E>>( rhs ));
+	}
+}

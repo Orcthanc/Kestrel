@@ -27,6 +27,20 @@ struct SandboxLayer: public Kestrel::Layer {
 		static int calls = 0;
 		if( !( ++calls % 1000000 ))
 			KST_INFO( "{}", calls );
-
 	}
+
+	virtual void onEvent( Kestrel::Event& e ) override {
+		Kestrel::EventDispatcher d{ e };
+
+		d.dispatch<Kestrel::KeyPushEvent>( []( Kestrel::KeyPushEvent& e ){
+				KST_INFO( "Key {} pushed", e.getKeyName() );
+				return true;
+			});
+
+		d.dispatch<Kestrel::KeyReleaseEvent>( []( Kestrel::KeyReleaseEvent& e ){
+				KST_INFO( "Key {} released", e.getKeyName() );
+				return true;
+			});
+	}
+	
 };

@@ -28,16 +28,14 @@ namespace Kestrel {
 		eAppUpdate, eAppRender
 	};
 
-	namespace EventDomain {
-		enum EventDomain {
-			eNone = 0,
-			eApp = 1 << 0,
-			eInput = 1 << 1,
-			eKeyboard = 1 << 2,
-			eMouse = 1 << 3,
-			eController = 1 << 4
-		};
-	}
+	enum class EventDomain {
+		eNone = 0,
+		eApp = 1 << 0,
+		eInput = 1 << 1,
+		eKeyboard = 1 << 2,
+		eMouse = 1 << 3,
+		eController = 1 << 4
+	};
 
 	class Event {
 		public:
@@ -46,11 +44,11 @@ namespace Kestrel {
 			bool handled = false;
 
 			virtual EventType getType() = 0;
-			virtual EventDomain::EventDomain getDomain() = 0;
+			virtual EventDomain getDomain() = 0;
 			virtual const char* getName() = 0;
 
-			bool isDomain( EventDomain::EventDomain e ){
-				return getDomain() & e;
+			bool isDomain( EventDomain e ){
+				return ( getDomain() & e ) != EventDomain::eNone;
 			}
 	};
 

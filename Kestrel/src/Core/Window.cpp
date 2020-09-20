@@ -55,15 +55,18 @@ Window::Window( WindowSettings s ): w_settings{ s }{
 		});
 
 	glfwSetKeyCallback( window, []( GLFWwindow* window, int key, int scancode, int action, int mods ){
+			WindowSettings* s = static_cast<WindowSettings*>( glfwGetWindowUserPointer( window ));
 			switch( action ){
 				case GLFW_PRESS:
 				{
-					KST_CORE_WARN( "GLFW_PRESS unimplemented" );
+					KeyPushEvent e{ scancode };
+					s->callback( e );
 				}
 				break;
 				case GLFW_RELEASE:
 				{
-					KST_CORE_WARN( "GLFW_RELEASE unimplemented" );
+					KeyReleaseEvent e{ scancode };
+					s->callback( e );
 				}
 				break;
 				case GLFW_REPEAT:
