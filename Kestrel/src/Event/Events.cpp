@@ -32,38 +32,39 @@ const char* WindowCloseEvent::getName(){
 }
 
 
-InputEvent::InputEvent( int keycode ): scancode( keycode ){}
+KeyEvent::KeyEvent( int keycode ): scancode( keycode ){}
 
-const char* InputEvent::getKeyName(){
+const std::string KeyEvent::getKeyName(){
+	//TODO replace glfw
 	const char* temp = glfwGetKeyName( GLFW_KEY_UNKNOWN, scancode );
 	if( temp )
 		return temp;
-	return "UNKNOWN_KEY";
+	return "UNKNOWN_KEY_" + std::to_string( scancode );
 }
 
 
-KeyPushEvent::KeyPushEvent( int keycode ): InputEvent( keycode ){}
+KeyPushEvent::KeyPushEvent( int keycode ): KeyEvent( keycode ){}
 
 EventType KeyPushEvent::getType(){
 	return EventType::eInputKeyPressed;
 }
 
 EventDomain KeyPushEvent::getDomain(){
-	return EventDomain::eInput | EventDomain::eController;
+	return EventDomain::eInput | EventDomain::eKeyboard;
 }
 
 const char* KeyPushEvent::getName(){
 	return "KeyPushEvent";
 }
 
-KeyReleaseEvent::KeyReleaseEvent( int keycode ): InputEvent( keycode ){}
+KeyReleaseEvent::KeyReleaseEvent( int keycode ): KeyEvent( keycode ){}
 
 EventType KeyReleaseEvent::getType(){
-	return EventType::eInputKeyPressed;
+	return EventType::eInputKeyReleased;
 }
 
 EventDomain KeyReleaseEvent::getDomain(){
-	return EventDomain::eInput | EventDomain::eController;
+	return EventDomain::eInput | EventDomain::eKeyboard;
 }
 
 const char* KeyReleaseEvent::getName(){

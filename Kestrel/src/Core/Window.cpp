@@ -61,19 +61,19 @@ Window::Window( WindowSettings s ): w_settings{ s }{
 				{
 					KeyPushEvent e{ scancode };
 					s->callback( e );
+					break;
 				}
-				break;
 				case GLFW_RELEASE:
 				{
 					KeyReleaseEvent e{ scancode };
 					s->callback( e );
+					break;
 				}
-				break;
 				case GLFW_REPEAT:
 				{
 					KST_CORE_WARN( "GLFW_REPEAT unimplemented" );
+					break;
 				}
-				break;
 			}
 		});
 

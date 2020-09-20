@@ -32,18 +32,18 @@ namespace Kestrel {
 			}
 	};
 
-	class InputEvent: public Event {
+	class KeyEvent: public Event {
 		public:
-			InputEvent() = default;
-			InputEvent( int keycode );
-			virtual ~InputEvent() = default;
+			KeyEvent() = default;
+			KeyEvent( int keycode );
+			virtual ~KeyEvent() = default;
 
-			virtual const char* getKeyName();
+			virtual const std::string getKeyName();
 
 			int scancode;
 	};
 
-	class KeyPushEvent: public InputEvent {
+	class KeyPushEvent: public KeyEvent {
 		public:
 			KeyPushEvent() = default;
 			KeyPushEvent( int keycode );
@@ -58,7 +58,7 @@ namespace Kestrel {
 			}
 	};
 
-	class KeyReleaseEvent: public InputEvent {
+	class KeyReleaseEvent: public KeyEvent {
 		public:
 			KeyReleaseEvent() = default;
 			KeyReleaseEvent( int keycode );
@@ -69,7 +69,7 @@ namespace Kestrel {
 			virtual const char * getName() override;
 
 			static constexpr EventType getStaticType(){
-				return EventType::eInputKeyPressed;
+				return EventType::eInputKeyReleased;
 			}
 	};
 };
