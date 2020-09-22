@@ -38,10 +38,10 @@ namespace Kestrel {
 
 
 			bool running;
+
+			std::unique_ptr<Window> window;
 		private:
 			LayerStack stack;
-
-			Window window;
 
 			void operator()();
 			friend int ::main( int, char** );

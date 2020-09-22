@@ -1,7 +1,7 @@
 /*
  * =====================================================================================
  *
- *       Filename:  Window.cpp
+ *       Filename:  KST_GLFWWindow.cpp
  *
  *    Description:
  *
@@ -14,14 +14,14 @@
  * =====================================================================================
  */
 
-#include "Window.hpp"
+#include "GLFWWindow.hpp"
 #include "Event/Events.hpp"
 
 using namespace Kestrel;
 
 static int glfwInitialized = 0;
 
-Window::Window( WindowSettings s ): w_settings{ s }{
+KST_GLFWWindow::KST_GLFWWindow( WindowSettings s ): w_settings{ s }{
 
 	if( !glfwInitialized++ ){
 		if( !glfwInit() ){
@@ -108,21 +108,49 @@ Window::Window( WindowSettings s ): w_settings{ s }{
 		});
 }
 
-Window::~Window(){
+KST_GLFWWindow::~KST_GLFWWindow(){
 	glfwDestroyWindow( window );
 	if( --glfwInitialized == 0 ){
 		glfwTerminate();
 	}
 }
 
-std::pair<unsigned int, unsigned int> Window::getResolution(){
+std::pair<unsigned int, unsigned int> KST_GLFWWindow::getResolution(){
 	return { w_settings.width, w_settings.height };
 }
 
-void Window::onUpdate(){
+void KST_GLFWWindow::onUpdate(){
 	glfwPollEvents();
 }
 
-void Window::setCallback( const EventCallback& e ){
+void KST_GLFWWindow::setCallback( const EventCallback& e ){
 	w_settings.callback = e;
+}
+
+void KST_GLFWWindow::setCursor( const CursorMode& cm ){
+	switch( cm ){
+		case CursorMode::Normal:
+		{
+			KST_INFO( "Normal" );
+			glfwSetInputMode( window, GLFW_CURSOR, GLFW_CURSOR_NORMAL );
+			break;
+		}
+		case CursorMode::Hidden:
+		{
+			KST_INFO( "Hidden" );
+			glfwSetInputMode( window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN );
+			break;
+		}
+		case CursorMode::Disabled:
+		{
+			KST_INFO( "Disabled" );
+			glfwSetInputMode( window, GLFW_CURSOR, GLFW_CURSOR_DISABLED );
+			break;
+		}
+		default:
+		{
+			KST_CORE_ERROR( "Invalid cursor mode {}", static_cast<std::underlying_type_t<CursorMode>>( cm ));
+			break;
+		}
+	}
 }

@@ -21,46 +21,8 @@
 #include "Core/Application.hpp"
 
 struct SandboxLayer: public Kestrel::Layer {
-	SandboxLayer( const std::string& s ): Layer( s ){}
+	SandboxLayer( const std::string& s );
 
-	virtual void onUpdate() override {
-		static int calls = 0;
-		if( !( ++calls % 1000000 ))
-			KST_INFO( "{}", calls );
-	}
-
-	virtual void onEvent( Kestrel::Event& e ) override {
-		Kestrel::EventDispatcher d{ e };
-
-		d.dispatch<Kestrel::KeyPushEvent>( []( Kestrel::KeyPushEvent& e ){
-				KST_INFO( "Key {} pushed", e.getKeyName() );
-				return true;
-			});
-
-		d.dispatch<Kestrel::KeyReleaseEvent>( []( Kestrel::KeyReleaseEvent& e ){
-				KST_INFO( "Key {} released", e.getKeyName() );
-				return true;
-			});
-
-		d.dispatch<Kestrel::MousePressedEvent>( []( Kestrel::MousePressedEvent& e ){
-				KST_INFO( "Key {} pressed", e.getButtonName() );
-				return true;
-			});
-
-		d.dispatch<Kestrel::MouseReleasedEvent>( []( Kestrel::MouseReleasedEvent& e ){
-				KST_INFO( "Key {} released", e.getButtonName() );
-				return true;
-			});
-
-		d.dispatch<Kestrel::MouseMovedEvent>( []( Kestrel::MouseMovedEvent& e ){
-				KST_INFO( "Mouse moved to {}, {}", e.x, e.y );
-				return true;
-			});
-
-		d.dispatch<Kestrel::MouseScrollEvent>( []( Kestrel::MouseScrollEvent& e ){
-				KST_INFO( "Mouse scrolled {}, {}", e.x, e.y );
-				return true;
-			});
-	}
-	
+	virtual void onUpdate() override;
+	virtual void onEvent( Kestrel::Event &e ) override;
 };

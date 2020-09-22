@@ -37,20 +37,20 @@ namespace Kestrel {
 			): name{ name }, width{ width }, height{ height }, callback{ callback }{}
 	};
 
+	enum class CursorMode {
+		Normal,
+		Hidden,
+		Disabled,
+	};
+
 	class Window {
 		public:
 			using EventCallback = std::function<void(Event&)>;
-			Window( WindowSettings settings = {} );
-			~Window();
+			virtual std::pair<unsigned int, unsigned int> getResolution() = 0;
 
-			std::pair<unsigned int, unsigned int> getResolution();
+			virtual void onUpdate() = 0;
 
-			void onUpdate();
-
-			void setCallback( const EventCallback& e );
-
-		private:
-			WindowSettings w_settings;
-			GLFWwindow* window;
+			virtual void setCallback( const EventCallback& e ) = 0;
+			virtual void setCursor( const CursorMode& cm ) = 0;
 	};
 }

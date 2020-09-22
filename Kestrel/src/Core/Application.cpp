@@ -16,11 +16,14 @@
 
 #include "Application.hpp"
 
-Kestrel::Application::Application( WindowSettings w ): running( true ), stack(), window{ w }{
+#include "Platform/GLFWWindow.hpp"
+
+Kestrel::Application::Application( WindowSettings w ): running( true ), stack(){
+	window = std::make_unique<KST_GLFWWindow>( std::move( w ));
 	if( instance )
 		throw std::runtime_error( "Can not create multiple applications" );
 	instance = this;
-	window.setCallback( std::bind( &Kestrel::Application::onEvent, this, std::placeholders::_1 ));
+	window->setCallback( std::bind( &Kestrel::Application::onEvent, this, std::placeholders::_1 ));
 }
 
 void Kestrel::Application::onEvent( Event& e ){
@@ -36,7 +39,7 @@ void Kestrel::Application::onEvent( Event& e ){
 
 void Kestrel::Application::operator()(){
 	while( running ){
-		window.onUpdate();
+		window->onUpdate();
 
 		for( auto l: stack ){
 			l->onUpdate();
