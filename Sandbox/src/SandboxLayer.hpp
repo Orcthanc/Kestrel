@@ -56,6 +56,11 @@ struct SandboxLayer: public Kestrel::Layer {
 				KST_INFO( "Mouse moved to {}, {}", e.x, e.y );
 				return true;
 			});
+
+		d.dispatch<Kestrel::MouseScrollEvent>( []( Kestrel::MouseScrollEvent& e ){
+				KST_INFO( "Mouse scrolled {}, {}", e.x, e.y );
+				return true;
+			});
 	}
 	
 };

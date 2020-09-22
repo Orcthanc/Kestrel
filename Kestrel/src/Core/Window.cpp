@@ -84,7 +84,9 @@ Window::Window( WindowSettings s ): w_settings{ s }{
 		});
 
 	glfwSetScrollCallback( window, []( GLFWwindow* window, double x, double y ){
-			KST_CORE_WARN( "ScrollCallback unimplemented" );
+			WindowSettings* s = static_cast<WindowSettings*>( glfwGetWindowUserPointer( window ));
+			MouseScrollEvent e( x, y );
+			s->callback( e );
 		});
 
 	glfwSetMouseButtonCallback( window, []( GLFWwindow* window, int button, int action, int mods ){

@@ -120,3 +120,18 @@ EventDomain MouseMovedEvent::getDomain(){
 const char* MouseMovedEvent::getName(){
 	return "MouseMovedEvent";
 }
+
+
+MouseScrollEvent::MouseScrollEvent( float x, float y ): x( x ), y( y ){}
+
+EventType MouseScrollEvent::getType(){
+	return EventType::eInputMouseScroll;
+}
+
+EventDomain MouseScrollEvent::getDomain(){
+	return EventDomain::eInput | EventDomain::eMouse;
+}
+
+const char* MouseScrollEvent::getName(){
+	return "MouseScrollEvent";
+}

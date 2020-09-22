@@ -22,7 +22,7 @@ namespace Kestrel {
 	enum class EventType {
 		eNone = 0,
 		eWindowResize, eWindowMove, eWindowMinimize, eWindowClose,
-		eInputMouseMoved, eInputMousePressed, eInputMouseReleased,
+		eInputMouseMoved, eInputMousePressed, eInputMouseReleased, eInputMouseScroll,
 		eInputKeyPressed, eInputKeyReleased,
 		eInputControllerPressed, eInputControllerReleased,
 		eAppUpdate, eAppRender
