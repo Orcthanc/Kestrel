@@ -72,4 +72,62 @@ namespace Kestrel {
 				return EventType::eInputKeyReleased;
 			}
 	};
+
+	class MouseButtonEvent: public Event {
+		public:
+			MouseButtonEvent() = default;
+			MouseButtonEvent( int button );
+			~MouseButtonEvent() = default;
+
+			virtual std::string getButtonName();
+
+			int button;
+	};
+
+	class MousePressedEvent: public MouseButtonEvent {
+		public:
+			MousePressedEvent() = default;
+			MousePressedEvent( int button );
+			~MousePressedEvent() = default;
+
+			virtual EventType getType() override;
+			virtual EventDomain getDomain() override;
+			virtual const char* getName() override;
+
+			static constexpr EventType getStaticType(){
+				return EventType::eInputMousePressed;
+			}
+	};
+
+	class MouseReleasedEvent: public MouseButtonEvent {
+		public:
+			MouseReleasedEvent() = default;
+			MouseReleasedEvent( int button );
+			~MouseReleasedEvent() = default;
+
+			virtual EventType getType() override;
+			virtual EventDomain getDomain() override;
+			virtual const char* getName() override;
+
+			static constexpr EventType getStaticType(){
+				return EventType::eInputMouseReleased;
+			}
+	};
+
+	class MouseMovedEvent: public Event {
+		public:
+			MouseMovedEvent() = default;
+			MouseMovedEvent( float x, float y );
+			~MouseMovedEvent() = default;
+
+			virtual EventType getType() override;
+			virtual EventDomain getDomain() override;
+			virtual const char * getName() override;
+
+			float x, y;
+
+			static constexpr EventType getStaticType(){
+				return EventType::eInputMouseMoved;
+			}
+	};
 };

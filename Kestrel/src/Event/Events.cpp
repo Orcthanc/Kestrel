@@ -70,3 +70,53 @@ EventDomain KeyReleaseEvent::getDomain(){
 const char* KeyReleaseEvent::getName(){
 	return "KeyReleaseEvent";
 }
+
+
+MouseButtonEvent::MouseButtonEvent( int button ): button( button ){}
+
+std::string MouseButtonEvent::getButtonName(){
+	return "Mouse " + std::to_string( button );
+}
+
+MousePressedEvent::MousePressedEvent( int button ): MouseButtonEvent( button ){}
+
+EventType MousePressedEvent::getType(){
+	return EventType::eInputMousePressed;
+}
+
+EventDomain MousePressedEvent::getDomain(){
+	return EventDomain::eInput | EventDomain::eMouse;
+}
+
+const char* MousePressedEvent::getName(){
+	return "MousePressedEvent";
+}
+
+MouseReleasedEvent::MouseReleasedEvent( int button ): MouseButtonEvent( button ){}
+
+EventType MouseReleasedEvent::getType(){
+	return EventType::eInputMouseReleased;
+}
+
+EventDomain MouseReleasedEvent::getDomain(){
+	return EventDomain::eInput | EventDomain::eMouse;
+}
+
+const char* MouseReleasedEvent::getName(){
+	return "MouseReleasedEvent";
+}
+
+
+MouseMovedEvent::MouseMovedEvent( float x, float y ): x( x ), y( y ){}
+
+EventType MouseMovedEvent::getType(){
+	return EventType::eInputMouseMoved;
+}
+
+EventDomain MouseMovedEvent::getDomain(){
+	return EventDomain::eInput | EventDomain::eMouse;
+}
+
+const char* MouseMovedEvent::getName(){
+	return "MouseMovedEvent";
+}

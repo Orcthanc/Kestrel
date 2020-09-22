@@ -78,8 +78,9 @@ Window::Window( WindowSettings s ): w_settings{ s }{
 		});
 
 	glfwSetCursorPosCallback( window, []( GLFWwindow* window, double x, double y ){
-			KST_CORE_INFO( "Mouse moved to {}, {}", x, y );
-			KST_CORE_WARN( "CursorPosCallback unimplemented" );
+			WindowSettings* s = static_cast<WindowSettings*>( glfwGetWindowUserPointer( window ));
+			MouseMovedEvent e( x, y );
+			s->callback( e );
 		});
 
 	glfwSetScrollCallback( window, []( GLFWwindow* window, double x, double y ){
@@ -87,7 +88,21 @@ Window::Window( WindowSettings s ): w_settings{ s }{
 		});
 
 	glfwSetMouseButtonCallback( window, []( GLFWwindow* window, int button, int action, int mods ){
-			KST_CORE_WARN( "MouseButtonCallback unimplemented" );
+			WindowSettings* s = static_cast<WindowSettings*>( glfwGetWindowUserPointer( window ));
+			switch( action ){
+				case GLFW_PRESS:
+				{
+					MousePressedEvent e( button );
+					s->callback( e );
+					break;
+				}
+				case GLFW_RELEASE:
+				{
+					MouseReleasedEvent e( button );
+					s->callback( e );
+					break;
+				}
+			}
 		});
 }
 

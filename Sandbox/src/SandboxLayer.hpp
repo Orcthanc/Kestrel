@@ -41,6 +41,21 @@ struct SandboxLayer: public Kestrel::Layer {
 				KST_INFO( "Key {} released", e.getKeyName() );
 				return true;
 			});
+
+		d.dispatch<Kestrel::MousePressedEvent>( []( Kestrel::MousePressedEvent& e ){
+				KST_INFO( "Key {} pressed", e.getButtonName() );
+				return true;
+			});
+
+		d.dispatch<Kestrel::MouseReleasedEvent>( []( Kestrel::MouseReleasedEvent& e ){
+				KST_INFO( "Key {} released", e.getButtonName() );
+				return true;
+			});
+
+		d.dispatch<Kestrel::MouseMovedEvent>( []( Kestrel::MouseMovedEvent& e ){
+				KST_INFO( "Mouse moved to {}, {}", e.x, e.y );
+				return true;
+			});
 	}
 	
 };
