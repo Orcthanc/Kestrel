@@ -14,8 +14,11 @@
  * =====================================================================================
  */
 
-#include "kstpch.hpp"
-#include "Log.hpp"
+#include <kstpch.hpp>
+
+#include "Core/Log.hpp"
+
+#include <type_traits>
 
 #ifndef NDEBUG
 #define KST_CORE_ASSERT( val, ... )											\

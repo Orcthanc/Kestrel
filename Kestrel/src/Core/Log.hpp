@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include <kstpch.hpp>
 #include <spdlog/spdlog.h>
 
 namespace Kestrel {

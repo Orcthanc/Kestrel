@@ -19,11 +19,17 @@
 #include "Platform/GLFWWindow.hpp"
 
 Kestrel::Application::Application( WindowSettings w ): running( true ), stack(){
+	PROFILE_SESSION_START();
 	window = std::make_unique<KST_GLFWWindow>( std::move( w ));
 	if( instance )
 		throw std::runtime_error( "Can not create multiple applications" );
 	instance = this;
 	window->setCallback( std::bind( &Kestrel::Application::onEvent, this, std::placeholders::_1 ));
+}
+
+Kestrel::Application::~Application(){
+	KST_CORE_INFO( "Shut down" );
+	PROFILE_SESSION_END();
 }
 
 void Kestrel::Application::onEvent( Event& e ){

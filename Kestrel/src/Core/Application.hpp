@@ -16,7 +16,8 @@
 
 #pragma once
 
-#include "kstpch.hpp"
+#include <kstpch.hpp>
+
 #include "LayerStack.hpp"
 #include "Window.hpp"
 #include "Event/Events.hpp"
@@ -27,7 +28,7 @@ namespace Kestrel {
 	class Application {
 		public:
 			Application( WindowSettings w = {} );
-			virtual ~Application() = default;
+			virtual ~Application();
 
 			void addLayer( Layer* l ){ stack.pushLayer( l ); };
 			void removeLayer( Layer* l ){ stack.PopLayer( l ); };

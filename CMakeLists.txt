@@ -1,12 +1,13 @@
 cmake_minimum_required( VERSION 3.7 )
 
 set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
-set( CMAKE_CXX_STANDARD 17 )
+set( CMAKE_CXX_STANDARD 20 )
 set( CMAKE_CXX_STANDARD_REQUIRED ON )
 
 project( Kestrel )
 
 option( COLOR_CONSOLE "Enables colored console output" OFF )
+option( KST_PROFILING "Enables performance measuring" OFF )
 
 
 find_program(GLSLANG_VALIDATOR NAMES glslangValidator)

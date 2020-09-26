@@ -33,3 +33,4 @@
 #include <string>
 
 #include "Core/Util.hpp"
+#include "Debug/Profiler.hpp"
