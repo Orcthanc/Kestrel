@@ -16,10 +16,11 @@
 
 #include "SandboxLayer.hpp"
 
+#include "Renderer/Context.hpp"
+
 SandboxLayer::SandboxLayer( const std::string& s ): Layer{ s }{}
 
 void SandboxLayer::onUpdate(){
-	PROFILE_FUNCTION();
 	static int calls = 0;
 	if( !( ++calls % 1000000 ))
 		KST_INFO( "{}", calls );

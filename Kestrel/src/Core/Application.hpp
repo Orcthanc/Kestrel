@@ -1,19 +1,3 @@
-/*
- * =====================================================================================
- *
- *       Filename:  Application.h
- *
- *    Description:  Main application to inherit
- *
- *        Version:  1.0
- *        Created:  08/23/2020 03:06:43 PM
- *       Revision:  none
- *
- *         Author:  Samuel Knoethig (), samuel@knoethig.net
- *
- * =====================================================================================
- */
-
 #pragma once
 
 #include <kstpch.hpp>
@@ -21,6 +5,7 @@
 #include "LayerStack.hpp"
 #include "Window.hpp"
 #include "Event/Events.hpp"
+#include "Renderer/Context.hpp"
 
 int main( int, char** );
 
@@ -41,6 +26,7 @@ namespace Kestrel {
 			bool running;
 
 			std::unique_ptr<Window> window;
+			std::unique_ptr<Context> graphics_context;
 		private:
 			LayerStack stack;
 

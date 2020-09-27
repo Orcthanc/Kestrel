@@ -37,6 +37,10 @@
 #define KST_ASSERT( ... )
 #endif
 
+#define VERSION_MAJOR 0
+#define VERSION_MINOR 0
+#define VERSION_PATCH 1
+
 
 namespace Kestrel {
 	template<typename E, typename = std::enable_if_t<std::is_enum_v<E>>>

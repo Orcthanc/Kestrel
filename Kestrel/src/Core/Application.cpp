@@ -17,14 +17,18 @@
 #include "Application.hpp"
 
 #include "Platform/GLFWWindow.hpp"
+#include "Platform/Vulkan/VKContext.hpp"
 
 Kestrel::Application::Application( WindowSettings w ): running( true ), stack(){
 	PROFILE_SESSION_START();
+	PROFILE_FUNCTION();
 	window = std::make_unique<KST_GLFWWindow>( std::move( w ));
 	if( instance )
 		throw std::runtime_error( "Can not create multiple applications" );
 	instance = this;
 	window->setCallback( std::bind( &Kestrel::Application::onEvent, this, std::placeholders::_1 ));
+	graphics_context = std::make_unique<VKContext>();
+	graphics_context->Init({ "Sandbox", 0, 0, 1 });
 }
 
 Kestrel::Application::~Application(){
