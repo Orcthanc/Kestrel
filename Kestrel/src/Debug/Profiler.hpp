@@ -83,7 +83,13 @@ namespace Kestrel {
 #define PROFILE_SESSION_START( filename ) Profiler::Get().begin( filename )
 #define PROFILE_SESSION_END() Profiler::Get().end()
 #define PROFILE_SCOPE( name ) Kestrel::ScopeTimer timer##__LINE__( name )
+#ifdef __linux__
+#define PROFILE_FUNCTION() PROFILE_SCOPE( __PRETTY_FUNCTION__ )
+#elif defined _WIN32
+#define PROFILE_FUNCTION() PROFILE_SCOPE( __FUNCSIG__ )
+#else
 #define PROFILE_FUNCTION() PROFILE_SCOPE( __func__ )
+#endif
 #else
 #define PROFILE_SESSION_START()
 #define PROFILE_SESSION_END()

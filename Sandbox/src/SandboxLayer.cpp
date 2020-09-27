@@ -60,7 +60,7 @@ void SandboxLayer::onEvent( Kestrel::Event& e ){
 		});
 
 	d.dispatch<Kestrel::MouseMovedEvent>( []( Kestrel::MouseMovedEvent& e ){
-			KST_INFO( "Mouse moved to {}, {}", e.x, e.y );
+			//KST_INFO( "Mouse moved to {}, {}", e.x, e.y );
 			return true;
 		});
 
