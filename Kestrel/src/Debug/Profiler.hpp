@@ -79,14 +79,14 @@ namespace Kestrel {
 	};
 }
 
-//#ifdef KST_PROFILING
+#ifdef KST_PROFILING
 #define PROFILE_SESSION_START( filename ) Profiler::Get().begin( filename )
 #define PROFILE_SESSION_END() Profiler::Get().end()
 #define PROFILE_SCOPE( name ) Kestrel::ScopeTimer timer##__LINE__( name )
 #define PROFILE_FUNCTION() PROFILE_SCOPE( __func__ )
-/*  #else
+#else
 #define PROFILE_SESSION_START()
 #define PROFILE_SESSION_END()
 #define PROFILE_SCOPE( name )
 #define PROFILE_FUNCTION()
-#endif */
+#endif
