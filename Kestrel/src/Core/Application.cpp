@@ -27,7 +27,7 @@ Kestrel::Application::Application( WindowSettings w ): running( true ), stack(){
 		throw std::runtime_error( "Can not create multiple applications" );
 	instance = this;
 	window->setCallback( std::bind( &Kestrel::Application::onEvent, this, std::placeholders::_1 ));
-	graphics_context = std::make_unique<VKContext>();
+	graphics_context = std::make_unique<KSTVKContext>();
 	graphics_context->Init({ "Sandbox", 0, 0, 1 });
 }
 

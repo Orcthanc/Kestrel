@@ -31,8 +31,8 @@ namespace Kestrel {
 			void setCallback(const EventCallback &e) override;
 			void setCursor(const CursorMode &cm) override;
 
+			GLFWwindow* window;
 		private:
 			WindowSettings w_settings;
-			GLFWwindow* window;
 	};
 }
