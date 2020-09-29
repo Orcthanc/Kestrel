@@ -19,24 +19,42 @@ namespace Kestrel {
 		std::optional<uint32_t> graphics;
 		std::optional<uint32_t> present;
 		//TODO
-		
+
 		bool complete();
 	};
 
-	struct KSTVKDevice {
+	struct KSTVKSwapchain {
 		public:
-			KSTVKDevice( vk::Instance instance, vk::SurfaceKHR surface );
+			KSTVKSwapchain() = default;
+
+			void Create( const KSTVKSwapchainDetails&, vk::SurfaceKHR surface, vk::Device device );
+
+			vk::UniqueSwapchainKHR swapchain;
+			std::vector<vk::Image> images;
+			vk::SurfaceFormatKHR format;
+			vk::Extent2D size;
+			std::vector<vk::UniqueImageView> views;
 
 		private:
-			void choose_card( const std::vector<vk::ExtensionProperties>& requiredExtensions, vk::Instance instance, vk::SurfaceKHR surface );
-			KSTVKQueueFamilies find_queue_families( vk::PhysicalDevice dev, vk::SurfaceKHR surface );
+			vk::SurfaceFormatKHR find_format( const KSTVKSwapchainDetails& capabilities );
+			vk::PresentModeKHR find_mode( const KSTVKSwapchainDetails& capabilities );
+			vk::Extent2D find_extent( const KSTVKSwapchainDetails& capabilities );
+	};
+
+	struct KSTVKDeviceSurface {
+		public:
+			KSTVKDeviceSurface( vk::Instance instance, vk::SurfaceKHR surface );
 
 			vk::PhysicalDevice phys_dev;
 			KSTVKQueueFamilies queue_families;
 			vk::UniqueDevice device;
 			KSTVKSwapchainDetails swapchain_support;
 
-			std::vector<const char*> dev_exts = {
+		private:
+			void choose_card( const std::vector<vk::ExtensionProperties>& requiredExtensions, vk::Instance instance, vk::SurfaceKHR surface );
+			KSTVKQueueFamilies find_queue_families( vk::PhysicalDevice dev, vk::SurfaceKHR surface );
+
+			const std::vector<const char*> dev_exts = {
 				VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 			};
 	};
@@ -49,6 +67,7 @@ namespace Kestrel {
 		private:
 			vk::UniqueInstance instance;
 			vk::UniqueSurfaceKHR surface;
-			std::optional<KSTVKDevice> device;
+			KSTVKSwapchain swapchain;
+			std::optional<KSTVKDeviceSurface> device;
 	};
 }

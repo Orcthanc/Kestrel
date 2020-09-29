@@ -12,6 +12,84 @@ KSTVKSwapchainDetails::KSTVKSwapchainDetails( vk::PhysicalDevice phys, vk::Surfa
 	present_modes = phys.getSurfacePresentModesKHR( surface );
 }
 
+vk::SurfaceFormatKHR KSTVKSwapchain::find_format( const KSTVKSwapchainDetails& capabilities ){
+	PROFILE_FUNCTION();
+	
+	for( const auto& format: capabilities.formats ){
+		if( format.format == vk::Format::eB8G8R8A8Srgb
+				&& format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear ){
+			return format;
+		}
+	}
+	KST_CORE_WARN( "Falling back to format {}/{}",
+			vk::to_string( capabilities.formats[0].format ),
+			vk::to_string( capabilities.formats[0].colorSpace ));
+	return capabilities.formats[0];
+}
+
+vk::PresentModeKHR KSTVKSwapchain::find_mode( const KSTVKSwapchainDetails& capabilities ){
+	PROFILE_FUNCTION();
+	
+	for( const auto& mode: capabilities.present_modes ){
+		//TODO vsync on/off
+		if( mode == vk::PresentModeKHR::eMailbox ){
+			return mode;
+		}
+	}
+	KST_CORE_WARN( "Falling back to Fifo present mode" );
+	return vk::PresentModeKHR::eFifo;
+}
+
+vk::Extent2D KSTVKSwapchain::find_extent( const KSTVKSwapchainDetails& capabilities ){
+	PROFILE_FUNCTION();
+
+	if( capabilities.capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max() ){
+		return capabilities.capabilities.currentExtent;
+	} else {
+		auto Wsize = Application::getInstance()->window->getResolution();
+		auto size = vk::Extent2D{ Wsize.first, Wsize.second };
+
+		size = std::max( capabilities.capabilities.minImageExtent,
+				std::min( capabilities.capabilities.maxImageExtent, size ));
+		return size;
+	}
+}
+
+void KSTVKSwapchain::Create( const KSTVKSwapchainDetails& capabilities, vk::SurfaceKHR surface, vk::Device device ){
+	PROFILE_FUNCTION();
+
+	format = find_format( capabilities );
+	auto present_mode = find_mode( capabilities );
+	size = find_extent( capabilities );
+
+	//Image count
+	uint32_t count = capabilities.capabilities.minImageCount + 1;
+	if( capabilities.capabilities.maxImageCount > 0 && capabilities.capabilities.maxImageCount < count ){
+		count = capabilities.capabilities.maxImageCount;
+	}
+
+	//Create swapchain
+	vk::SwapchainCreateInfoKHR cr_inf(
+			{},
+			surface,
+			count,
+			format.format,
+			format.colorSpace,
+			size,
+			1,
+			vk::ImageUsageFlagBits::eColorAttachment,
+			vk::SharingMode::eExclusive,
+			{},
+			capabilities.capabilities.currentTransform,
+			vk::CompositeAlphaFlagBitsKHR::eOpaque,
+			present_mode,
+			true,
+			{} );
+
+	device.createSwapchainKHRUnique( cr_inf );
+}
+
+
 bool KSTVKQueueFamilies::complete(){
 	return graphics.has_value() && present.has_value();
 }
@@ -44,12 +122,14 @@ void KSTVKContext::Init( const ContextInformation& c_inf ){
 			for( auto& l2: d_layers ){
 				if( !strcmp( l, l2.layerName )){
 					found = true;
-					KST_INFO( "Enabled vulkan layer {}", l );
+					KST_CORE_INFO( "Enabled vulkan layer {}", l );
 					layers.push_back( l );
+					found = true;
 					break;
 				}
 			}
-			KST_INFO( "Could not enable layer {}. (Not present)", l );
+			if( !found )
+				KST_CORE_INFO( "Could not enable layer {}. (Not present)", l );
 		}
 	}
 #endif //NDEBUG
@@ -75,11 +155,13 @@ void KSTVKContext::Init( const ContextInformation& c_inf ){
 		surface = vk::UniqueSurfaceKHR{ temp, *instance };
 	}
 
-	device = { *instance, *surface };
+	device.emplace( *instance, *surface );
+
+	swapchain.Create( device.value().swapchain_support, *surface, *device.value().device );
 }
 
 
-KSTVKDevice::KSTVKDevice( vk::Instance i, vk::SurfaceKHR s ){
+KSTVKDeviceSurface::KSTVKDeviceSurface( vk::Instance i, vk::SurfaceKHR s ){
 	PROFILE_FUNCTION();
 
 	choose_card( {}, i, s );
@@ -107,7 +189,7 @@ KSTVKDevice::KSTVKDevice( vk::Instance i, vk::SurfaceKHR s ){
 	device = phys_dev.createDeviceUnique( dev_cr_inf );
 }
 
-KSTVKQueueFamilies KSTVKDevice::find_queue_families( vk::PhysicalDevice dev, vk::SurfaceKHR surface ){
+KSTVKQueueFamilies KSTVKDeviceSurface::find_queue_families( vk::PhysicalDevice dev, vk::SurfaceKHR surface ){
 	PROFILE_FUNCTION();
 
 	KSTVKQueueFamilies indices;
@@ -142,7 +224,7 @@ static std::unordered_set<std::string> get_missing_dev_extensions( vk::PhysicalD
 	return req_exts;
 }
 
-void KSTVKDevice::choose_card( const std::vector<vk::ExtensionProperties>& requiredExtensions, vk::Instance instance, vk::SurfaceKHR surface ){
+void KSTVKDeviceSurface::choose_card( const std::vector<vk::ExtensionProperties>& requiredExtensions, vk::Instance instance, vk::SurfaceKHR surface ){
 	PROFILE_FUNCTION();
 	auto physical_devs{ instance.enumeratePhysicalDevices() };
 
