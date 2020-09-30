@@ -1,5 +1,8 @@
 #pragma once
 
+#include <kstpch.hpp>
+#include <optional>
+
 #include "Renderer/Context.hpp"
 
 #include "vulkan/vulkan.hpp"

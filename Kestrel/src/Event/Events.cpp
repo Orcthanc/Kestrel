@@ -107,7 +107,7 @@ const char* MouseReleasedEvent::getName(){
 }
 
 
-MouseMovedEvent::MouseMovedEvent( float x, float y ): x( x ), y( y ){}
+MouseMovedEvent::MouseMovedEvent( double x, double y ): x( x ), y( y ){}
 
 EventType MouseMovedEvent::getType(){
 	return EventType::eInputMouseMoved;
@@ -122,7 +122,7 @@ const char* MouseMovedEvent::getName(){
 }
 
 
-MouseScrollEvent::MouseScrollEvent( float x, float y ): x( x ), y( y ){}
+MouseScrollEvent::MouseScrollEvent( double x, double y ): x( x ), y( y ){}
 
 EventType MouseScrollEvent::getType(){
 	return EventType::eInputMouseScroll;

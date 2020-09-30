@@ -17,7 +17,10 @@
 #pragma once
 
 #ifdef _WIN32
-#include <Windows.h>
+	#ifndef NOMINMAX
+		#define NOMINMAX
+	#endif
+	#include <Windows.h>
 #endif
 
 #include <iostream>

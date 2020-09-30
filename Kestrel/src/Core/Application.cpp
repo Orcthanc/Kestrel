@@ -20,7 +20,7 @@
 #include "Platform/Vulkan/VKContext.hpp"
 
 Kestrel::Application::Application( WindowSettings w ): running( true ), stack(){
-	PROFILE_SESSION_START();
+	PROFILE_SESSION_START( "startup.json" );
 	PROFILE_FUNCTION();
 	window = std::make_unique<KST_GLFWWindow>( std::move( w ));
 	if( instance )

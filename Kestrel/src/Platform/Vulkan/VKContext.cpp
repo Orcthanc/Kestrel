@@ -196,7 +196,7 @@ KSTVKQueueFamilies KSTVKDeviceSurface::find_queue_families( vk::PhysicalDevice d
 
 	auto qfprops = dev.getQueueFamilyProperties();
 
-	for( size_t i = 0; i < qfprops.size(); ++i ){
+	for( uint32_t i = 0; i < qfprops.size(); ++i ){
 		if( qfprops[i].queueFlags & vk::QueueFlagBits::eGraphics )
 			indices.graphics = i;
 
@@ -269,7 +269,7 @@ void KSTVKDeviceSurface::choose_card( const std::vector<vk::ExtensionProperties>
 
 		if( score > best_score ){
 			swapchain_support = swapchain_details;
-			best_name = std::string( properties.deviceName );
+			best_name = std::string( properties.deviceName.begin(), properties.deviceName.end() );
 			best_score = score;
 			this->phys_dev = phys_dev;
 		}

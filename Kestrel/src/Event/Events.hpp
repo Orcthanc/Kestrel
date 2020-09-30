@@ -117,14 +117,14 @@ namespace Kestrel {
 	class MouseMovedEvent: public Event {
 		public:
 			MouseMovedEvent() = default;
-			MouseMovedEvent( float x, float y );
+			MouseMovedEvent( double x, double y );
 			~MouseMovedEvent() = default;
 
 			virtual EventType getType() override;
 			virtual EventDomain getDomain() override;
 			virtual const char * getName() override;
 
-			float x, y;
+			double x, y;
 
 			static constexpr EventType getStaticType(){
 				return EventType::eInputMouseMoved;
@@ -134,14 +134,14 @@ namespace Kestrel {
 	class MouseScrollEvent: public Event {
 		public:
 			MouseScrollEvent() = default;
-			MouseScrollEvent( float x, float y );
+			MouseScrollEvent( double x, double y );
 			~MouseScrollEvent() = default;
 
 			virtual EventType getType() override;
 			virtual EventDomain getDomain() override;
 			virtual const char * getName() override;
 
-			float x, y;
+			double x, y;
 
 			static constexpr EventType getStaticType(){
 				return EventType::eInputMouseScroll;
