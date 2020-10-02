@@ -149,8 +149,9 @@ void KSTVKContext::Init( const ContextInformation& c_inf ){
 	{
 		PROFILE_SCOPE( "Create Surface" );
 		//TODO
-		VkSurfaceKHR temp;
-		glfwCreateWindowSurface( *instance, static_cast<KST_GLFWWindow*>( Application::getInstance()->window.get() )->window, nullptr, &temp );
+		vk::SurfaceKHR temp;
+		glfwCreateWindowSurface(static_cast<VkInstance>(*instance), static_cast<KST_GLFWWindow*>( Application::getInstance()->window.get() )->window, nullptr,
+                                reinterpret_cast<VkSurfaceKHR *>(&temp));
 
 		surface = vk::UniqueSurfaceKHR{ temp, *instance };
 	}

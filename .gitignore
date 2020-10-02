@@ -3,3 +3,5 @@ build/
 out/
 performance.json
 CMakeSettings.json
+cmake-build-debug
+.idea
