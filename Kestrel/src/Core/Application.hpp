@@ -26,7 +26,7 @@ namespace Kestrel {
 			bool running;
 
 			std::vector<std::unique_ptr<Window>> window;
-			std::unique_ptr<Context> graphics_context;
+			std::shared_ptr<Context> graphics_context;
 		private:
 			LayerStack stack;
 

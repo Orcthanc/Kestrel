@@ -31,9 +31,8 @@ namespace Kestrel {
 			void choose_card( const std::vector<vk::ExtensionProperties>& requiredExtensions, vk::Instance instance );
 			KSTVKQueueFamilies find_queue_families( vk::PhysicalDevice dev, vk::SurfaceKHR surface );
 
-			const std::vector<const char*> dev_exts = {
-				VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-			};
+			const static std::vector<const char*> dev_exts;
+			std::shared_ptr<Context> instance;
 	};
 
 	struct KSTVKContext: public Context {
@@ -43,6 +42,6 @@ namespace Kestrel {
 			virtual void Init( const ContextInformation& ) override;
 		private:
 			vk::UniqueInstance instance;
-			KSTVKDeviceSurface device;
+			std::shared_ptr<KSTVKDeviceSurface> device;
 	};
 }

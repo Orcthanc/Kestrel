@@ -5,3 +5,4 @@ performance.json
 CMakeSettings.json
 cmake-build-debug
 .idea
+startup.json

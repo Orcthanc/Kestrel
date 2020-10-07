@@ -19,21 +19,22 @@
 #include "Platform/GLFWWindow.hpp"
 #include "Platform/Vulkan/VKContext.hpp"
 
-Kestrel::Application::Application( WindowSettings w ): running( true ), stack(){
+Kestrel::Application::Application( WindowSettings ws ): running( true ), stack(){
 	PROFILE_SESSION_START( "startup.json" );
 	PROFILE_FUNCTION();
-	window.push_back( std::make_unique<KST_GLFW_VK_Window>( std::move( w )));
+	window.push_back( std::make_unique<KST_GLFW_VK_Window>( std::move( ws )));
 	if( instance )
 		throw std::runtime_error( "Can not create multiple applications" );
 	instance = this;
 	for( auto& w: window )
 		w->setCallback( std::bind( &Kestrel::Application::onEvent, this, std::placeholders::_1 ));
-	graphics_context = std::make_unique<KSTVKContext>();
+	graphics_context = std::make_shared<KSTVKContext>();
 	graphics_context->Init({ "Sandbox", 0, 0, 1 });
 }
 
 Kestrel::Application::~Application(){
 	KST_CORE_INFO( "Shut down" );
+	KST_CORE_INFO( "{} windows", window.size() );
 	PROFILE_SESSION_END();
 }
 

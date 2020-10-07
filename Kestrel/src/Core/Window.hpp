@@ -46,6 +46,8 @@ namespace Kestrel {
 	class Window {
 		public:
 			using EventCallback = std::function<void(Event&)>;
+			virtual ~Window() = default;
+
 			virtual std::pair<unsigned int, unsigned int> getResolution() = 0;
 
 			virtual void onUpdate() = 0;

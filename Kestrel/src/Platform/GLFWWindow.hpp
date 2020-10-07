@@ -22,6 +22,8 @@
 
 namespace Kestrel {
 
+	struct KSTVKDeviceSurface;
+
 	struct KSTVKSwapchainDetails {
 		KSTVKSwapchainDetails() = default;
 		KSTVKSwapchainDetails( vk::PhysicalDevice phys, vk::SurfaceKHR surface );
@@ -40,6 +42,11 @@ namespace Kestrel {
 	struct KSTVKSwapchain {
 		public:
 			KSTVKSwapchain() = default;
+			KSTVKSwapchain( const KSTVKSwapchain& ) = delete;
+			KSTVKSwapchain( KSTVKSwapchain&& ) = default;
+
+			KSTVKSwapchain& operator=( const KSTVKSwapchain& ) = delete;
+			KSTVKSwapchain& operator=( KSTVKSwapchain&& ) = default;
 
 			void Create( const KSTVKSwapchainDetails&, vk::SurfaceKHR surface, vk::Device device );
 
@@ -68,6 +75,7 @@ namespace Kestrel {
 			void setCursor(const CursorMode &cm) override;
 
 			GLFWwindow* window;
+			std::shared_ptr<KSTVKDeviceSurface> device;
 			KST_VK_Surface surface;
 			KSTVKSwapchain swapchain;
 		private:

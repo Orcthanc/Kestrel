@@ -110,6 +110,7 @@ KST_GLFW_VK_Window::KST_GLFW_VK_Window( WindowSettings s ): w_settings{ s }{
 
 KST_GLFW_VK_Window::~KST_GLFW_VK_Window(){
 	glfwDestroyWindow( window );
+	KST_INFO( "Device ref count {}", device.use_count() );
 	if( --glfwInitialized == 0 ){
 		glfwTerminate();
 	}
@@ -237,7 +238,5 @@ void KSTVKSwapchain::Create( const KSTVKSwapchainDetails& capabilities, vk::Surf
 			true,
 			{} );
 
-	device.createSwapchainKHRUnique( cr_inf );
+	swapchain = device.createSwapchainKHRUnique( cr_inf );
 }
-
-

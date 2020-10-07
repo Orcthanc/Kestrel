@@ -5,6 +5,9 @@
 
 using namespace Kestrel;
 
+const std::vector<const char*> KSTVKDeviceSurface::dev_exts = {
+	VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+};
 
 bool KSTVKQueueFamilies::complete(){
 	return graphics.has_value() && present.has_value();
@@ -25,7 +28,7 @@ void KSTVKContext::Init( const ContextInformation& c_inf ){
 #ifndef NDEBUG
 	const std::vector<const char*> wanted_layers = {
 		"VK_LAYER_KHRONOS_validation",
-		"VK_LAYER_MANGOHUD_overlay",
+//		"VK_LAYER_MANGOHUD_overlay",
 //		"VK_LAYER_LUNARG_api_dump",
 	};
 
@@ -73,19 +76,23 @@ void KSTVKContext::Init( const ContextInformation& c_inf ){
 		}
 	}
 
-	device.create( *instance );
+	device = std::make_shared<KSTVKDeviceSurface>();
+	device->create( *instance );
 
 	for( auto& w: Application::getInstance()->window ){
 		static_cast<KST_GLFW_VK_Window*>( w.get())->swapchain.Create(
 				static_cast<KST_GLFW_VK_Window*>( w.get())->surface.details,
 				*static_cast<KST_GLFW_VK_Window*>( w.get())->surface.surface,
-				*device.device );
+				*device->device );
+		static_cast<KST_GLFW_VK_Window*>( w.get())->device = device;
 	}
 }
 
 
 void KSTVKDeviceSurface::create( vk::Instance i ){
 	PROFILE_FUNCTION();
+
+	instance = Application::getInstance()->graphics_context;
 
 	choose_card( {}, i );
 	queue_families = find_queue_families( phys_dev,
@@ -177,7 +184,7 @@ void KSTVKDeviceSurface::choose_card( const std::vector<vk::ExtensionProperties>
 		std::vector<KSTVKSwapchainDetails> window_swapchain_details;
 
 		for( auto& w: Application::getInstance()->window ){
-			vk::SurfaceKHR surface = *static_cast<KST_GLFW_VK_Window*>( w.get())->surface.surface;
+			vk::SurfaceKHR& surface = *static_cast<KST_GLFW_VK_Window*>( w.get())->surface.surface;
 
 
 			auto qfindices = find_queue_families( phys_dev, surface );
