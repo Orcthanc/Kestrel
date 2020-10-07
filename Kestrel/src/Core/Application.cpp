@@ -22,11 +22,12 @@
 Kestrel::Application::Application( WindowSettings w ): running( true ), stack(){
 	PROFILE_SESSION_START( "startup.json" );
 	PROFILE_FUNCTION();
-	window = std::make_unique<KST_GLFWWindow>( std::move( w ));
+	window.push_back( std::make_unique<KST_GLFW_VK_Window>( std::move( w )));
 	if( instance )
 		throw std::runtime_error( "Can not create multiple applications" );
 	instance = this;
-	window->setCallback( std::bind( &Kestrel::Application::onEvent, this, std::placeholders::_1 ));
+	for( auto& w: window )
+		w->setCallback( std::bind( &Kestrel::Application::onEvent, this, std::placeholders::_1 ));
 	graphics_context = std::make_unique<KSTVKContext>();
 	graphics_context->Init({ "Sandbox", 0, 0, 1 });
 }
@@ -49,7 +50,8 @@ void Kestrel::Application::onEvent( Event& e ){
 
 void Kestrel::Application::operator()(){
 	while( running ){
-		window->onUpdate();
+		for( auto& w: window )
+			w->onUpdate();
 
 		for( auto l: stack ){
 			l->onUpdate();

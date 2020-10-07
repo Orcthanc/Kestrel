@@ -9,15 +9,6 @@
 
 namespace Kestrel {
 
-	struct KSTVKSwapchainDetails {
-		KSTVKSwapchainDetails() = default;
-		KSTVKSwapchainDetails( vk::PhysicalDevice phys, vk::SurfaceKHR surface );
-
-		vk::SurfaceCapabilitiesKHR capabilities;
-		std::vector<vk::SurfaceFormatKHR> formats;
-		std::vector<vk::PresentModeKHR> present_modes;
-	};
-
 	struct KSTVKQueueFamilies {
 		std::optional<uint32_t> graphics;
 		std::optional<uint32_t> present;
@@ -26,35 +17,18 @@ namespace Kestrel {
 		bool complete();
 	};
 
-	struct KSTVKSwapchain {
-		public:
-			KSTVKSwapchain() = default;
-
-			void Create( const KSTVKSwapchainDetails&, vk::SurfaceKHR surface, vk::Device device );
-
-			vk::UniqueSwapchainKHR swapchain;
-			std::vector<vk::Image> images;
-			vk::SurfaceFormatKHR format;
-			vk::Extent2D size;
-			std::vector<vk::UniqueImageView> views;
-
-		private:
-			vk::SurfaceFormatKHR find_format( const KSTVKSwapchainDetails& capabilities );
-			vk::PresentModeKHR find_mode( const KSTVKSwapchainDetails& capabilities );
-			vk::Extent2D find_extent( const KSTVKSwapchainDetails& capabilities );
-	};
-
 	struct KSTVKDeviceSurface {
 		public:
-			KSTVKDeviceSurface( vk::Instance instance, vk::SurfaceKHR surface );
+			KSTVKDeviceSurface() = default;
+
+			void create( vk::Instance instance );
 
 			vk::PhysicalDevice phys_dev;
 			KSTVKQueueFamilies queue_families;
 			vk::UniqueDevice device;
-			KSTVKSwapchainDetails swapchain_support;
 
 		private:
-			void choose_card( const std::vector<vk::ExtensionProperties>& requiredExtensions, vk::Instance instance, vk::SurfaceKHR surface );
+			void choose_card( const std::vector<vk::ExtensionProperties>& requiredExtensions, vk::Instance instance );
 			KSTVKQueueFamilies find_queue_families( vk::PhysicalDevice dev, vk::SurfaceKHR surface );
 
 			const std::vector<const char*> dev_exts = {
@@ -69,8 +43,6 @@ namespace Kestrel {
 			virtual void Init( const ContextInformation& ) override;
 		private:
 			vk::UniqueInstance instance;
-			vk::UniqueSurfaceKHR surface;
-			KSTVKSwapchain swapchain;
-			std::optional<KSTVKDeviceSurface> device;
+			KSTVKDeviceSurface device;
 	};
 }

@@ -5,90 +5,6 @@
 
 using namespace Kestrel;
 
-KSTVKSwapchainDetails::KSTVKSwapchainDetails( vk::PhysicalDevice phys, vk::SurfaceKHR surface ){
-	PROFILE_FUNCTION();
-	capabilities = phys.getSurfaceCapabilitiesKHR( surface );
-	formats = phys.getSurfaceFormatsKHR( surface );
-	present_modes = phys.getSurfacePresentModesKHR( surface );
-}
-
-vk::SurfaceFormatKHR KSTVKSwapchain::find_format( const KSTVKSwapchainDetails& capabilities ){
-	PROFILE_FUNCTION();
-	
-	for( const auto& format: capabilities.formats ){
-		if( format.format == vk::Format::eB8G8R8A8Srgb
-				&& format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear ){
-			return format;
-		}
-	}
-	KST_CORE_WARN( "Falling back to format {}/{}",
-			vk::to_string( capabilities.formats[0].format ),
-			vk::to_string( capabilities.formats[0].colorSpace ));
-	return capabilities.formats[0];
-}
-
-vk::PresentModeKHR KSTVKSwapchain::find_mode( const KSTVKSwapchainDetails& capabilities ){
-	PROFILE_FUNCTION();
-	
-	for( const auto& mode: capabilities.present_modes ){
-		//TODO vsync on/off
-		if( mode == vk::PresentModeKHR::eMailbox ){
-			return mode;
-		}
-	}
-	KST_CORE_WARN( "Falling back to Fifo present mode" );
-	return vk::PresentModeKHR::eFifo;
-}
-
-vk::Extent2D KSTVKSwapchain::find_extent( const KSTVKSwapchainDetails& capabilities ){
-	PROFILE_FUNCTION();
-
-	if( capabilities.capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max() ){
-		return capabilities.capabilities.currentExtent;
-	} else {
-		auto Wsize = Application::getInstance()->window->getResolution();
-		auto size = vk::Extent2D{ Wsize.first, Wsize.second };
-
-		size = std::max( capabilities.capabilities.minImageExtent,
-				std::min( capabilities.capabilities.maxImageExtent, size ));
-		return size;
-	}
-}
-
-void KSTVKSwapchain::Create( const KSTVKSwapchainDetails& capabilities, vk::SurfaceKHR surface, vk::Device device ){
-	PROFILE_FUNCTION();
-
-	format = find_format( capabilities );
-	auto present_mode = find_mode( capabilities );
-	size = find_extent( capabilities );
-
-	//Image count
-	uint32_t count = capabilities.capabilities.minImageCount + 1;
-	if( capabilities.capabilities.maxImageCount > 0 && capabilities.capabilities.maxImageCount < count ){
-		count = capabilities.capabilities.maxImageCount;
-	}
-
-	//Create swapchain
-	vk::SwapchainCreateInfoKHR cr_inf(
-			{},
-			surface,
-			count,
-			format.format,
-			format.colorSpace,
-			size,
-			1,
-			vk::ImageUsageFlagBits::eColorAttachment,
-			vk::SharingMode::eExclusive,
-			{},
-			capabilities.capabilities.currentTransform,
-			vk::CompositeAlphaFlagBitsKHR::eOpaque,
-			present_mode,
-			true,
-			{} );
-
-	device.createSwapchainKHRUnique( cr_inf );
-}
-
 
 bool KSTVKQueueFamilies::complete(){
 	return graphics.has_value() && present.has_value();
@@ -149,24 +65,31 @@ void KSTVKContext::Init( const ContextInformation& c_inf ){
 	{
 		PROFILE_SCOPE( "Create Surface" );
 		//TODO
-		vk::SurfaceKHR temp;
-		glfwCreateWindowSurface(static_cast<VkInstance>(*instance), static_cast<KST_GLFWWindow*>( Application::getInstance()->window.get() )->window, nullptr,
-                                reinterpret_cast<VkSurfaceKHR *>(&temp));
+		for( auto& w: Application::getInstance()->window ){
+			vk::SurfaceKHR temp;
+			glfwCreateWindowSurface(static_cast<VkInstance>(*instance), static_cast<KST_GLFW_VK_Window*>( w.get() )->window, nullptr, reinterpret_cast<VkSurfaceKHR *>(&temp));
 
-		surface = vk::UniqueSurfaceKHR{ temp, *instance };
+			static_cast<KST_GLFW_VK_Window*>( w.get())->surface.surface = vk::UniqueSurfaceKHR{ temp, *instance };
+		}
 	}
 
-	device.emplace( *instance, *surface );
+	device.create( *instance );
 
-	swapchain.Create( device.value().swapchain_support, *surface, *device.value().device );
+	for( auto& w: Application::getInstance()->window ){
+		static_cast<KST_GLFW_VK_Window*>( w.get())->swapchain.Create(
+				static_cast<KST_GLFW_VK_Window*>( w.get())->surface.details,
+				*static_cast<KST_GLFW_VK_Window*>( w.get())->surface.surface,
+				*device.device );
+	}
 }
 
 
-KSTVKDeviceSurface::KSTVKDeviceSurface( vk::Instance i, vk::SurfaceKHR s ){
+void KSTVKDeviceSurface::create( vk::Instance i ){
 	PROFILE_FUNCTION();
 
-	choose_card( {}, i, s );
-	queue_families = find_queue_families( phys_dev, s );
+	choose_card( {}, i );
+	queue_families = find_queue_families( phys_dev,
+			*static_cast<KST_GLFW_VK_Window*>( Application::getInstance()->window[0].get())->surface.surface );
 
 	std::unordered_set<uint32_t> families{ queue_families.graphics.value(), queue_families.present.value() };
 	const float priorities[] = { 1.0 };
@@ -225,7 +148,7 @@ static std::unordered_set<std::string> get_missing_dev_extensions( vk::PhysicalD
 	return req_exts;
 }
 
-void KSTVKDeviceSurface::choose_card( const std::vector<vk::ExtensionProperties>& requiredExtensions, vk::Instance instance, vk::SurfaceKHR surface ){
+void KSTVKDeviceSurface::choose_card( const std::vector<vk::ExtensionProperties>& requiredExtensions, vk::Instance instance ){
 	PROFILE_FUNCTION();
 	auto physical_devs{ instance.enumeratePhysicalDevices() };
 
@@ -246,16 +169,34 @@ void KSTVKDeviceSurface::choose_card( const std::vector<vk::ExtensionProperties>
 		if( !supported )
 			continue;
 
-		auto qfindices = find_queue_families( phys_dev, surface );
-		if( !qfindices.complete() )
-			continue;
-
 		if( !get_missing_dev_extensions( phys_dev, dev_exts ).empty() )
 			continue;
 
-		KSTVKSwapchainDetails swapchain_details( phys_dev, surface );
-		if( swapchain_details.formats.empty() || swapchain_details.present_modes.empty() )
+		bool suitable = true;
+
+		std::vector<KSTVKSwapchainDetails> window_swapchain_details;
+
+		for( auto& w: Application::getInstance()->window ){
+			vk::SurfaceKHR surface = *static_cast<KST_GLFW_VK_Window*>( w.get())->surface.surface;
+
+
+			auto qfindices = find_queue_families( phys_dev, surface );
+			if( !qfindices.complete() ){
+				suitable = false;
+				break;
+			}
+
+			KSTVKSwapchainDetails swapchain_details( phys_dev, surface );
+			if( swapchain_details.formats.empty() || swapchain_details.present_modes.empty() ){
+				suitable = false;
+				break;
+			}
+			window_swapchain_details.push_back( swapchain_details );
+		}
+
+		if( !suitable ){
 			continue;
+		}
 
 
 		auto properties = phys_dev.getProperties();
@@ -269,7 +210,9 @@ void KSTVKDeviceSurface::choose_card( const std::vector<vk::ExtensionProperties>
 		KST_CORE_INFO( "Found suitable physical device {} with score {}.", properties.deviceName, score );
 
 		if( score > best_score ){
-			swapchain_support = swapchain_details;
+			for( size_t i = 0; i < window_swapchain_details.size(); ++i ){
+				static_cast<KST_GLFW_VK_Window*>( Application::getInstance()->window[i].get())->surface.details = window_swapchain_details[i];
+			}
 			best_name = std::string( properties.deviceName.begin(), properties.deviceName.end() );
 			best_score = score;
 			this->phys_dev = phys_dev;

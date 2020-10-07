@@ -16,13 +16,49 @@
 
 #include <kstpch.hpp>
 
+#include <vulkan/vulkan.hpp>
+
 #include "Core/Window.hpp"
 
 namespace Kestrel {
-	class KST_GLFWWindow: public Window {
+
+	struct KSTVKSwapchainDetails {
+		KSTVKSwapchainDetails() = default;
+		KSTVKSwapchainDetails( vk::PhysicalDevice phys, vk::SurfaceKHR surface );
+
+		vk::SurfaceCapabilitiesKHR capabilities;
+		std::vector<vk::SurfaceFormatKHR> formats;
+		std::vector<vk::PresentModeKHR> present_modes;
+	};
+
+	struct KST_VK_Surface {
 		public:
-			KST_GLFWWindow( WindowSettings settings = {} );
-			~KST_GLFWWindow();
+			KSTVKSwapchainDetails details;
+			vk::UniqueSurfaceKHR surface;
+	};
+
+	struct KSTVKSwapchain {
+		public:
+			KSTVKSwapchain() = default;
+
+			void Create( const KSTVKSwapchainDetails&, vk::SurfaceKHR surface, vk::Device device );
+
+			vk::UniqueSwapchainKHR swapchain;
+			std::vector<vk::Image> images;
+			vk::SurfaceFormatKHR format;
+			vk::Extent2D size;
+			std::vector<vk::UniqueImageView> views;
+
+		private:
+			vk::SurfaceFormatKHR find_format( const KSTVKSwapchainDetails& capabilities );
+			vk::PresentModeKHR find_mode( const KSTVKSwapchainDetails& capabilities );
+			vk::Extent2D find_extent( const KSTVKSwapchainDetails& capabilities );
+	};
+
+	class KST_GLFW_VK_Window: public Window {
+		public:
+			KST_GLFW_VK_Window( WindowSettings settings = {} );
+			~KST_GLFW_VK_Window();
 
 			std::pair<unsigned int, unsigned int> getResolution() override;
 
@@ -32,6 +68,8 @@ namespace Kestrel {
 			void setCursor(const CursorMode &cm) override;
 
 			GLFWwindow* window;
+			KST_VK_Surface surface;
+			KSTVKSwapchain swapchain;
 		private:
 			WindowSettings w_settings;
 	};

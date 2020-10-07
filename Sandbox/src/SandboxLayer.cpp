@@ -35,11 +35,11 @@ void SandboxLayer::onEvent( Kestrel::Event& e ){
 			KST_INFO( "{}", e.scancode );
 			// F1
 			if( e.scancode == 67 ){
-				Kestrel::Application::getInstance()->window->setCursor( Kestrel::CursorMode::Normal );
+				Kestrel::Application::getInstance()->window[0]->setCursor( Kestrel::CursorMode::Normal );
 			} else if( e.scancode == 68 ){
-				Kestrel::Application::getInstance()->window->setCursor( Kestrel::CursorMode::Hidden );
+				Kestrel::Application::getInstance()->window[0]->setCursor( Kestrel::CursorMode::Hidden );
 			} else if( e.scancode == 69 ){
-				Kestrel::Application::getInstance()->window->setCursor( Kestrel::CursorMode::Disabled );
+				Kestrel::Application::getInstance()->window[0]->setCursor( Kestrel::CursorMode::Disabled );
 			}
 			return true;
 		});

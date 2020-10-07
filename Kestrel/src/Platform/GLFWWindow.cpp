@@ -15,13 +15,13 @@
  */
 
 #include "GLFWWindow.hpp"
-#include "Event/Events.hpp"
+#include "Core/Application.hpp"
 
 using namespace Kestrel;
 
 static int glfwInitialized = 0;
 
-KST_GLFWWindow::KST_GLFWWindow( WindowSettings s ): w_settings{ s }{
+KST_GLFW_VK_Window::KST_GLFW_VK_Window( WindowSettings s ): w_settings{ s }{
 
 	if( !glfwInitialized++ ){
 		if( !glfwInit() ){
@@ -108,26 +108,26 @@ KST_GLFWWindow::KST_GLFWWindow( WindowSettings s ): w_settings{ s }{
 		});
 }
 
-KST_GLFWWindow::~KST_GLFWWindow(){
+KST_GLFW_VK_Window::~KST_GLFW_VK_Window(){
 	glfwDestroyWindow( window );
 	if( --glfwInitialized == 0 ){
 		glfwTerminate();
 	}
 }
 
-std::pair<unsigned int, unsigned int> KST_GLFWWindow::getResolution(){
+std::pair<unsigned int, unsigned int> KST_GLFW_VK_Window::getResolution(){
 	return { w_settings.width, w_settings.height };
 }
 
-void KST_GLFWWindow::onUpdate(){
+void KST_GLFW_VK_Window::onUpdate(){
 	glfwPollEvents();
 }
 
-void KST_GLFWWindow::setCallback( const EventCallback& e ){
+void KST_GLFW_VK_Window::setCallback( const EventCallback& e ){
 	w_settings.callback = e;
 }
 
-void KST_GLFWWindow::setCursor( const CursorMode& cm ){
+void KST_GLFW_VK_Window::setCursor( const CursorMode& cm ){
 	switch( cm ){
 		case CursorMode::Normal:
 		{
@@ -154,3 +154,90 @@ void KST_GLFWWindow::setCursor( const CursorMode& cm ){
 		}
 	}
 }
+
+KSTVKSwapchainDetails::KSTVKSwapchainDetails( vk::PhysicalDevice phys, vk::SurfaceKHR surface ){
+	PROFILE_FUNCTION();
+	capabilities = phys.getSurfaceCapabilitiesKHR( surface );
+	formats = phys.getSurfaceFormatsKHR( surface );
+	present_modes = phys.getSurfacePresentModesKHR( surface );
+}
+
+vk::SurfaceFormatKHR KSTVKSwapchain::find_format( const KSTVKSwapchainDetails& capabilities ){
+	PROFILE_FUNCTION();
+
+	for( const auto& format: capabilities.formats ){
+		if( format.format == vk::Format::eB8G8R8A8Srgb
+				&& format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear ){
+			return format;
+		}
+	}
+	KST_CORE_WARN( "Falling back to format {}/{}",
+			vk::to_string( capabilities.formats[0].format ),
+			vk::to_string( capabilities.formats[0].colorSpace ));
+	return capabilities.formats[0];
+}
+
+vk::PresentModeKHR KSTVKSwapchain::find_mode( const KSTVKSwapchainDetails& capabilities ){
+	PROFILE_FUNCTION();
+
+	for( const auto& mode: capabilities.present_modes ){
+		//TODO vsync on/off
+		if( mode == vk::PresentModeKHR::eMailbox ){
+			return mode;
+		}
+	}
+	KST_CORE_WARN( "Falling back to Fifo present mode" );
+	return vk::PresentModeKHR::eFifo;
+}
+
+vk::Extent2D KSTVKSwapchain::find_extent( const KSTVKSwapchainDetails& capabilities ){
+	PROFILE_FUNCTION();
+
+	if( capabilities.capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max() ){
+		return capabilities.capabilities.currentExtent;
+	} else {
+		//TODO
+		auto Wsize = Application::getInstance()->window[0]->getResolution();
+		auto size = vk::Extent2D{ Wsize.first, Wsize.second };
+
+		size = std::max( capabilities.capabilities.minImageExtent,
+				std::min( capabilities.capabilities.maxImageExtent, size ));
+		return size;
+	}
+}
+
+void KSTVKSwapchain::Create( const KSTVKSwapchainDetails& capabilities, vk::SurfaceKHR surface, vk::Device device ){
+	PROFILE_FUNCTION();
+
+	format = find_format( capabilities );
+	auto present_mode = find_mode( capabilities );
+	size = find_extent( capabilities );
+
+	//Image count
+	uint32_t count = capabilities.capabilities.minImageCount + 1;
+	if( capabilities.capabilities.maxImageCount > 0 && capabilities.capabilities.maxImageCount < count ){
+		count = capabilities.capabilities.maxImageCount;
+	}
+
+	//Create swapchain
+	vk::SwapchainCreateInfoKHR cr_inf(
+			{},
+			surface,
+			count,
+			format.format,
+			format.colorSpace,
+			size,
+			1,
+			vk::ImageUsageFlagBits::eColorAttachment,
+			vk::SharingMode::eExclusive,
+			{},
+			capabilities.capabilities.currentTransform,
+			vk::CompositeAlphaFlagBitsKHR::eOpaque,
+			present_mode,
+			true,
+			{} );
+
+	device.createSwapchainKHRUnique( cr_inf );
+}
+
+
