@@ -4,7 +4,7 @@
 
 using namespace Kestrel;
 
-const std::vector<const char*> KSTVKDeviceSurface::dev_exts = {
+const std::vector<const char*> KST_VK_DeviceSurface::dev_exts = {
 	VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 };
 
@@ -12,7 +12,7 @@ bool KSTVKQueueFamilies::complete(){
 	return graphics.has_value() && present.has_value();
 }
 
-void KSTVKContext::Init( const ContextInformation& c_inf ){
+void KST_VK_Context::Init( const ContextInformation& c_inf ){
 	PROFILE_FUNCTION();
 
 	vk::ApplicationInfo appinfo(
@@ -88,18 +88,18 @@ void KSTVKContext::Init( const ContextInformation& c_inf ){
 	}
 }
 
-void KSTVKContext::onUpdate(){
+void KST_VK_Context::onUpdate(){
 	for( auto& w: windows ){
 		w.onUpdate();
 	}
 }
 
-void KSTVKContext::registerWindow( Window &&w ){
+void KST_VK_Context::registerWindow( Window &&w ){
 	windows.emplace_back( std::move( static_cast<KST_GLFW_VK_Window&&>( w )));
 	device.windows = &windows;
 }
 
-void KSTVKDeviceSurface::create( KSTVKContext& c ){
+void KST_VK_DeviceSurface::create( KST_VK_Context& c ){
 	PROFILE_FUNCTION();
 
 	windows = &c.windows;
@@ -108,7 +108,7 @@ void KSTVKDeviceSurface::create( KSTVKContext& c ){
 	choose_card( {}, i );
 	//TODO
 	queue_families = find_queue_families( phys_dev,
-			*static_cast<KSTVKContext*>( Application::getInstance()->graphics_context.get() )->windows[0].surface.surface );
+			*static_cast<KST_VK_Context*>( Application::getInstance()->graphics_context.get() )->windows[0].surface.surface );
 
 	std::unordered_set<uint32_t> families{ queue_families.graphics.value(), queue_families.present.value() };
 	const float priorities[] = { 1.0 };
@@ -132,7 +132,7 @@ void KSTVKDeviceSurface::create( KSTVKContext& c ){
 	device = phys_dev.createDeviceUnique( dev_cr_inf );
 }
 
-KSTVKQueueFamilies KSTVKDeviceSurface::find_queue_families( vk::PhysicalDevice dev, vk::SurfaceKHR surface ){
+KSTVKQueueFamilies KST_VK_DeviceSurface::find_queue_families( vk::PhysicalDevice dev, vk::SurfaceKHR surface ){
 	PROFILE_FUNCTION();
 
 	KSTVKQueueFamilies indices;
@@ -167,7 +167,7 @@ static std::unordered_set<std::string> get_missing_dev_extensions( vk::PhysicalD
 	return req_exts;
 }
 
-void KSTVKDeviceSurface::choose_card( const std::vector<vk::ExtensionProperties>& requiredExtensions, vk::Instance instance ){
+void KST_VK_DeviceSurface::choose_card( const std::vector<vk::ExtensionProperties>& requiredExtensions, vk::Instance instance ){
 	PROFILE_FUNCTION();
 	auto physical_devs{ instance.enumeratePhysicalDevices() };
 

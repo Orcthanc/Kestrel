@@ -19,18 +19,18 @@ namespace Kestrel {
 		bool complete();
 	};
 
-	struct KSTVKContext;
+	struct KST_VK_Context;
 
-	struct KSTVKDeviceSurface {
+	struct KST_VK_DeviceSurface {
 		public:
-			KSTVKDeviceSurface() = default;
+			KST_VK_DeviceSurface() = default;
 
-			void create( KSTVKContext& instance );
+			void create( KST_VK_Context& instance );
 
 			vk::PhysicalDevice phys_dev;
 			KSTVKQueueFamilies queue_families;
 			vk::UniqueDevice device;
-			std::vector<KSTVKSwapchain> swapchains;
+			std::vector<KST_VK_Swapchain> swapchains;
 			std::vector<KST_GLFW_VK_Window>* windows;
 
 		private:
@@ -40,9 +40,9 @@ namespace Kestrel {
 			const static std::vector<const char*> dev_exts;
 	};
 
-	struct KSTVKContext: public Context {
+	struct KST_VK_Context: public Context {
 		public:
-			KSTVKContext() = default;
+			KST_VK_Context() = default;
 
 			virtual void Init( const ContextInformation& ) override;
 			virtual void onUpdate() override;
@@ -50,6 +50,6 @@ namespace Kestrel {
 			vk::UniqueInstance instance;
 			std::vector<KST_GLFW_VK_Window> windows;
 		private:
-			KSTVKDeviceSurface device;
+			KST_VK_DeviceSurface device;
 	};
 }

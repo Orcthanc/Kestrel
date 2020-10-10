@@ -191,7 +191,7 @@ KSTVKSwapchainDetails::KSTVKSwapchainDetails( vk::PhysicalDevice phys, vk::Surfa
 	present_modes = phys.getSurfacePresentModesKHR( surface );
 }
 
-vk::SurfaceFormatKHR KSTVKSwapchain::find_format( const KSTVKSwapchainDetails& capabilities ){
+vk::SurfaceFormatKHR KST_VK_Swapchain::find_format( const KSTVKSwapchainDetails& capabilities ){
 	PROFILE_FUNCTION();
 
 	for( const auto& format: capabilities.formats ){
@@ -206,7 +206,7 @@ vk::SurfaceFormatKHR KSTVKSwapchain::find_format( const KSTVKSwapchainDetails& c
 	return capabilities.formats[0];
 }
 
-vk::PresentModeKHR KSTVKSwapchain::find_mode( const KSTVKSwapchainDetails& capabilities ){
+vk::PresentModeKHR KST_VK_Swapchain::find_mode( const KSTVKSwapchainDetails& capabilities ){
 	PROFILE_FUNCTION();
 
 	for( const auto& mode: capabilities.present_modes ){
@@ -219,7 +219,7 @@ vk::PresentModeKHR KSTVKSwapchain::find_mode( const KSTVKSwapchainDetails& capab
 	return vk::PresentModeKHR::eFifo;
 }
 
-vk::Extent2D KSTVKSwapchain::find_extent( const KSTVKSwapchainDetails& capabilities ){
+vk::Extent2D KST_VK_Swapchain::find_extent( const KSTVKSwapchainDetails& capabilities ){
 	PROFILE_FUNCTION();
 
 	if( capabilities.capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max() ){
@@ -236,7 +236,7 @@ vk::Extent2D KSTVKSwapchain::find_extent( const KSTVKSwapchainDetails& capabilit
 	}
 }
 
-void KSTVKSwapchain::Create( const KSTVKSwapchainDetails& capabilities, vk::SurfaceKHR surface, vk::Device device ){
+void KST_VK_Swapchain::Create( const KSTVKSwapchainDetails& capabilities, vk::SurfaceKHR surface, vk::Device device ){
 	PROFILE_FUNCTION();
 
 	format = find_format( capabilities );

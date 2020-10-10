@@ -24,7 +24,7 @@
 
 namespace Kestrel {
 
-	struct KSTVKDeviceSurface;
+	struct KST_VK_DeviceSurface;
 
 	struct KSTVKSwapchainDetails {
 		KSTVKSwapchainDetails() = default;
@@ -35,14 +35,14 @@ namespace Kestrel {
 		std::vector<vk::PresentModeKHR> present_modes;
 	};
 
-	struct KSTVKSwapchain {
+	struct KST_VK_Swapchain {
 		public:
-			KSTVKSwapchain() = default;
-			KSTVKSwapchain( const KSTVKSwapchain& ) = delete;
-			KSTVKSwapchain( KSTVKSwapchain&& ) = default;
+			KST_VK_Swapchain() = default;
+			KST_VK_Swapchain( const KST_VK_Swapchain& ) = delete;
+			KST_VK_Swapchain( KST_VK_Swapchain&& ) = default;
 
-			KSTVKSwapchain& operator=( const KSTVKSwapchain& ) = delete;
-			KSTVKSwapchain& operator=( KSTVKSwapchain&& ) = default;
+			KST_VK_Swapchain& operator=( const KST_VK_Swapchain& ) = delete;
+			KST_VK_Swapchain& operator=( KST_VK_Swapchain&& ) = default;
 
 			void Create( const KSTVKSwapchainDetails&, vk::SurfaceKHR surface, vk::Device device );
 
@@ -59,7 +59,7 @@ namespace Kestrel {
 			vk::Extent2D find_extent( const KSTVKSwapchainDetails& capabilities );
 	};
 
-	struct KSTVKSurface {
+	struct KST_VK_Surface {
 		vk::UniqueSurfaceKHR surface;
 		KSTVKSwapchainDetails details;
 	};
@@ -83,7 +83,7 @@ namespace Kestrel {
 			void setCursor(const CursorMode &cm) override;
 
 			GLFWwindow* window;
-			KSTVKSurface surface;
+			KST_VK_Surface surface;
 			WindowSettings w_settings;
 		private:
 			bool destroy = true;

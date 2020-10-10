@@ -28,7 +28,7 @@ Kestrel::Application::Application( WindowSettings ws ): running( true ), stack()
 
 	KST_GLFW_VK_Window temp{ std::move( ws )};
 	temp.setCallback( std::bind( &Kestrel::Application::onEvent, this, std::placeholders::_1 ));
-	graphics_context = std::make_shared<KSTVKContext>();
+	graphics_context = std::make_shared<KST_VK_Context>();
 	graphics_context->registerWindow( std::move( temp ));
 	graphics_context->Init({ "Sandbox", 0, 0, 1 });
 }
