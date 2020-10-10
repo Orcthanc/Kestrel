@@ -76,16 +76,6 @@ void KST_VK_Context::Init( const ContextInformation& c_inf ){
 	}
 
 	device.create( *this );
-
-	//TODO move to device
-	device.swapchains.resize( windows.size() );
-
-	for( size_t i = 0; i < windows.size(); ++i ){
-		device.swapchains[i].Create(
-				windows[i].surface.details,
-				*windows[i].surface.surface,
-				*device.device );
-	}
 }
 
 void KST_VK_Context::onUpdate(){
@@ -95,6 +85,8 @@ void KST_VK_Context::onUpdate(){
 }
 
 void KST_VK_Context::registerWindow( Window &&w ){
+	PROFILE_FUNCTION();
+
 	windows.emplace_back( std::move( static_cast<KST_GLFW_VK_Window&&>( w )));
 	device.windows = &windows;
 }
@@ -130,6 +122,15 @@ void KST_VK_DeviceSurface::create( KST_VK_Context& c ){
 		);
 
 	device = phys_dev.createDeviceUnique( dev_cr_inf );
+
+	swapchains.resize( windows->size() );
+
+	for( size_t i = 0; i < windows->size(); ++i ){
+		swapchains[i].Create(
+				(*windows)[i].surface.details,
+				*(*windows)[i].surface.surface,
+				*device );
+	}
 }
 
 KSTVKQueueFamilies KST_VK_DeviceSurface::find_queue_families( vk::PhysicalDevice dev, vk::SurfaceKHR surface ){
@@ -169,6 +170,7 @@ static std::unordered_set<std::string> get_missing_dev_extensions( vk::PhysicalD
 
 void KST_VK_DeviceSurface::choose_card( const std::vector<vk::ExtensionProperties>& requiredExtensions, vk::Instance instance ){
 	PROFILE_FUNCTION();
+
 	auto physical_devs{ instance.enumeratePhysicalDevices() };
 
 	size_t best_score = 0;

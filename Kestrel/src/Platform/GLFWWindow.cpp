@@ -22,6 +22,7 @@ using namespace Kestrel;
 static int glfwInitialized = 0;
 
 KST_GLFW_VK_Window::KST_GLFW_VK_Window( WindowSettings s ): w_settings{ std::move( s )}{
+	PROFILE_FUNCTION();
 
 	if( !glfwInitialized++ ){
 		if( !glfwInit() ){
@@ -186,6 +187,7 @@ void KST_GLFW_VK_Window::setCursor( const CursorMode& cm ){
 
 KSTVKSwapchainDetails::KSTVKSwapchainDetails( vk::PhysicalDevice phys, vk::SurfaceKHR surface ){
 	PROFILE_FUNCTION();
+
 	capabilities = phys.getSurfaceCapabilitiesKHR( surface );
 	formats = phys.getSurfaceFormatsKHR( surface );
 	present_modes = phys.getSurfacePresentModesKHR( surface );
