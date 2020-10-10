@@ -13,10 +13,12 @@
  *
  * =====================================================================================
  */
+#pragma once
 
 #include <kstpch.hpp>
 
 #include <vulkan/vulkan.hpp>
+#include <GLFW/glfw3.h>
 
 #include "Core/Window.hpp"
 
@@ -31,12 +33,6 @@ namespace Kestrel {
 		vk::SurfaceCapabilitiesKHR capabilities;
 		std::vector<vk::SurfaceFormatKHR> formats;
 		std::vector<vk::PresentModeKHR> present_modes;
-	};
-
-	struct KST_VK_Surface {
-		public:
-			KSTVKSwapchainDetails details;
-			vk::UniqueSurfaceKHR surface;
 	};
 
 	struct KSTVKSwapchain {
@@ -55,6 +51,7 @@ namespace Kestrel {
 			vk::SurfaceFormatKHR format;
 			vk::Extent2D size;
 			std::vector<vk::UniqueImageView> views;
+			KSTVKSwapchainDetails details;
 
 		private:
 			vk::SurfaceFormatKHR find_format( const KSTVKSwapchainDetails& capabilities );
@@ -62,10 +59,21 @@ namespace Kestrel {
 			vk::Extent2D find_extent( const KSTVKSwapchainDetails& capabilities );
 	};
 
+	struct KSTVKSurface {
+		vk::UniqueSurfaceKHR surface;
+		KSTVKSwapchainDetails details;
+	};
+
 	class KST_GLFW_VK_Window: public Window {
 		public:
 			KST_GLFW_VK_Window( WindowSettings settings = {} );
 			~KST_GLFW_VK_Window();
+
+			KST_GLFW_VK_Window( const KST_GLFW_VK_Window& ) = delete;
+			KST_GLFW_VK_Window( KST_GLFW_VK_Window&& );
+
+			KST_GLFW_VK_Window& operator=( const KST_GLFW_VK_Window& ) = delete;
+			KST_GLFW_VK_Window& operator=( KST_GLFW_VK_Window&& );
 
 			std::pair<unsigned int, unsigned int> getResolution() override;
 
@@ -75,10 +83,9 @@ namespace Kestrel {
 			void setCursor(const CursorMode &cm) override;
 
 			GLFWwindow* window;
-			std::shared_ptr<KSTVKDeviceSurface> device;
-			KST_VK_Surface surface;
-			KSTVKSwapchain swapchain;
-		private:
+			KSTVKSurface surface;
 			WindowSettings w_settings;
+		private:
+			bool destroy = true;
 	};
 }

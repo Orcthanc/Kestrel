@@ -21,7 +21,7 @@ using namespace Kestrel;
 
 static int glfwInitialized = 0;
 
-KST_GLFW_VK_Window::KST_GLFW_VK_Window( WindowSettings s ): w_settings{ s }{
+KST_GLFW_VK_Window::KST_GLFW_VK_Window( WindowSettings s ): w_settings{ std::move( s )}{
 
 	if( !glfwInitialized++ ){
 		if( !glfwInit() ){
@@ -29,11 +29,11 @@ KST_GLFW_VK_Window::KST_GLFW_VK_Window( WindowSettings s ): w_settings{ s }{
 			throw std::runtime_error( "Could not create glfw context" );
 		}
 
-		glfwSetErrorCallback( []( int error, const char* description ){ KST_CORE_ERROR( "GLFW Error: {} ({})" ); });
+		glfwSetErrorCallback( []( int error, const char* description ){ KST_CORE_ERROR( "GLFW Error: {} ({})", error, description ); });
 	}
 
 	glfwWindowHint( GLFW_CLIENT_API, GLFW_NO_API );
-	window = glfwCreateWindow( s.width, s.height, s.name.c_str(), NULL, NULL );
+	window = glfwCreateWindow( w_settings.width, w_settings.height, w_settings.name.c_str(), NULL, NULL );
 
 	if( !window ){
 		KST_CORE_CRITICAL( "Could not create glfw window" );
@@ -109,11 +109,39 @@ KST_GLFW_VK_Window::KST_GLFW_VK_Window( WindowSettings s ): w_settings{ s }{
 }
 
 KST_GLFW_VK_Window::~KST_GLFW_VK_Window(){
-	glfwDestroyWindow( window );
-	KST_INFO( "Device ref count {}", device.use_count() );
-	if( --glfwInitialized == 0 ){
-		glfwTerminate();
+	if( destroy ){
+		glfwDestroyWindow( window );
+		if( --glfwInitialized == 0 ){
+			glfwTerminate();
+		}
 	}
+}
+
+KST_GLFW_VK_Window::KST_GLFW_VK_Window( KST_GLFW_VK_Window&& w ){
+	window = std::move( w.window );
+	surface = std::move( w.surface );
+	w_settings = std::move( w.w_settings );
+
+	glfwSetWindowUserPointer( window, &w_settings );
+
+	w.window = nullptr;
+	w.destroy = false;
+}
+
+KST_GLFW_VK_Window& KST_GLFW_VK_Window::operator=( KST_GLFW_VK_Window&& w ){
+	if( &w == this ){
+		return *this;
+	}
+
+	window = std::move( w.window );
+	surface = std::move( w.surface );
+	w_settings = std::move( w.w_settings );
+
+	glfwSetWindowUserPointer( window, &w_settings );
+
+	w.window = nullptr;
+	w.destroy = false;
+	return *this;
 }
 
 std::pair<unsigned int, unsigned int> KST_GLFW_VK_Window::getResolution(){
@@ -198,8 +226,9 @@ vk::Extent2D KSTVKSwapchain::find_extent( const KSTVKSwapchainDetails& capabilit
 		return capabilities.capabilities.currentExtent;
 	} else {
 		//TODO
-		auto Wsize = Application::getInstance()->window[0]->getResolution();
-		auto size = vk::Extent2D{ Wsize.first, Wsize.second };
+//		auto Wsize = Application::getInstance()->window[0]->getResolution();
+//		auto size = vk::Extent2D{ Wsize.first, Wsize.second };
+		auto size = vk::Extent2D{ 1920, 1080 };
 
 		size = std::max( capabilities.capabilities.minImageExtent,
 				std::min( capabilities.capabilities.maxImageExtent, size ));

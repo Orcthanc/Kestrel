@@ -1,6 +1,5 @@
 #include "VKContext.hpp"
 #include "Core/Application.hpp"
-#include <GLFW/glfw3.h>
 #include "Platform/GLFWWindow.hpp"
 
 using namespace Kestrel;
@@ -68,35 +67,48 @@ void KSTVKContext::Init( const ContextInformation& c_inf ){
 	{
 		PROFILE_SCOPE( "Create Surface" );
 		//TODO
-		for( auto& w: Application::getInstance()->window ){
+		for( auto& w: windows ){
 			vk::SurfaceKHR temp;
-			glfwCreateWindowSurface(static_cast<VkInstance>(*instance), static_cast<KST_GLFW_VK_Window*>( w.get() )->window, nullptr, reinterpret_cast<VkSurfaceKHR *>(&temp));
+			glfwCreateWindowSurface( static_cast<VkInstance>(*instance), w.window, nullptr, reinterpret_cast<VkSurfaceKHR *>( &temp ));
 
-			static_cast<KST_GLFW_VK_Window*>( w.get())->surface.surface = vk::UniqueSurfaceKHR{ temp, *instance };
+			w.surface.surface = vk::UniqueSurfaceKHR{ temp, *instance };
 		}
 	}
 
-	device = std::make_shared<KSTVKDeviceSurface>();
-	device->create( *instance );
+	device.create( *this );
 
-	for( auto& w: Application::getInstance()->window ){
-		static_cast<KST_GLFW_VK_Window*>( w.get())->swapchain.Create(
-				static_cast<KST_GLFW_VK_Window*>( w.get())->surface.details,
-				*static_cast<KST_GLFW_VK_Window*>( w.get())->surface.surface,
-				*device->device );
-		static_cast<KST_GLFW_VK_Window*>( w.get())->device = device;
+	//TODO move to device
+	device.swapchains.resize( windows.size() );
+
+	for( size_t i = 0; i < windows.size(); ++i ){
+		device.swapchains[i].Create(
+				windows[i].surface.details,
+				*windows[i].surface.surface,
+				*device.device );
 	}
 }
 
+void KSTVKContext::onUpdate(){
+	for( auto& w: windows ){
+		w.onUpdate();
+	}
+}
 
-void KSTVKDeviceSurface::create( vk::Instance i ){
+void KSTVKContext::registerWindow( Window &&w ){
+	windows.emplace_back( std::move( static_cast<KST_GLFW_VK_Window&&>( w )));
+	device.windows = &windows;
+}
+
+void KSTVKDeviceSurface::create( KSTVKContext& c ){
 	PROFILE_FUNCTION();
 
-	instance = Application::getInstance()->graphics_context;
+	windows = &c.windows;
+	vk::Instance i{ *c.instance };
 
 	choose_card( {}, i );
+	//TODO
 	queue_families = find_queue_families( phys_dev,
-			*static_cast<KST_GLFW_VK_Window*>( Application::getInstance()->window[0].get())->surface.surface );
+			*static_cast<KSTVKContext*>( Application::getInstance()->graphics_context.get() )->windows[0].surface.surface );
 
 	std::unordered_set<uint32_t> families{ queue_families.graphics.value(), queue_families.present.value() };
 	const float priorities[] = { 1.0 };
@@ -183,8 +195,8 @@ void KSTVKDeviceSurface::choose_card( const std::vector<vk::ExtensionProperties>
 
 		std::vector<KSTVKSwapchainDetails> window_swapchain_details;
 
-		for( auto& w: Application::getInstance()->window ){
-			vk::SurfaceKHR& surface = *static_cast<KST_GLFW_VK_Window*>( w.get())->surface.surface;
+		for( auto& w: *windows ){
+			vk::SurfaceKHR& surface = *w.surface.surface;
 
 
 			auto qfindices = find_queue_families( phys_dev, surface );
@@ -218,7 +230,7 @@ void KSTVKDeviceSurface::choose_card( const std::vector<vk::ExtensionProperties>
 
 		if( score > best_score ){
 			for( size_t i = 0; i < window_swapchain_details.size(); ++i ){
-				static_cast<KST_GLFW_VK_Window*>( Application::getInstance()->window[i].get())->surface.details = window_swapchain_details[i];
+				(*windows)[i].surface.details = window_swapchain_details[i];
 			}
 			best_name = std::string( properties.deviceName.begin(), properties.deviceName.end() );
 			best_score = score;

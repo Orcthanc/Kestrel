@@ -33,7 +33,7 @@ void SandboxLayer::onEvent( Kestrel::Event& e ){
 	d.dispatch<Kestrel::KeyPushEvent>( []( Kestrel::KeyPushEvent& e ){
 			KST_INFO( "Key {} pushed", e.getKeyName() );
 			KST_INFO( "{}", e.scancode );
-			// F1
+/*			// F1
 			if( e.scancode == 67 ){
 				Kestrel::Application::getInstance()->window[0]->setCursor( Kestrel::CursorMode::Normal );
 			} else if( e.scancode == 68 ){
@@ -41,6 +41,7 @@ void SandboxLayer::onEvent( Kestrel::Event& e ){
 			} else if( e.scancode == 69 ){
 				Kestrel::Application::getInstance()->window[0]->setCursor( Kestrel::CursorMode::Disabled );
 			}
+			*/
 			return true;
 		});
 

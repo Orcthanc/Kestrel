@@ -1,6 +1,7 @@
 #pragma once
 
 #include <kstpch.hpp>
+#include "Core/Window.hpp"
 
 namespace Kestrel {
 	struct ContextInformation {
@@ -9,8 +10,12 @@ namespace Kestrel {
 	};
 
 	struct Context {
-		virtual ~Context() = default;
+		virtual ~Context(){
+			KST_CORE_INFO( "Cleaning up graphics context" );
+		};
 
 		virtual void Init( const ContextInformation& ) = 0;
+		virtual void onUpdate() = 0;
+		virtual void registerWindow( Window&& w ) = 0;
 	};
 }

@@ -18,8 +18,6 @@
 #include "kstpch.hpp"
 #include "Event/Event.hpp"
 
-#include <GLFW/glfw3.h>
-
 namespace Kestrel {
 	struct WindowSettings {
 		using EventCallback = std::function<void(Event&)>;
@@ -35,6 +33,14 @@ namespace Kestrel {
 				unsigned int height = 960,
 				EventCallback callback = {}
 			): name{ name }, width{ width }, height{ height }, callback{ callback }{}
+
+		WindowSettings( const WindowSettings& ) = default;
+
+		WindowSettings( WindowSettings&& ws ) = default;
+
+		WindowSettings& operator=( const WindowSettings& ) = default;
+
+		WindowSettings& operator=( WindowSettings&& ws ) = default;
 	};
 
 	enum class CursorMode {

@@ -7,6 +7,8 @@
 
 #include "vulkan/vulkan.hpp"
 
+#include "Platform/GLFWWindow.hpp"
+
 namespace Kestrel {
 
 	struct KSTVKQueueFamilies {
@@ -17,22 +19,25 @@ namespace Kestrel {
 		bool complete();
 	};
 
+	struct KSTVKContext;
+
 	struct KSTVKDeviceSurface {
 		public:
 			KSTVKDeviceSurface() = default;
 
-			void create( vk::Instance instance );
+			void create( KSTVKContext& instance );
 
 			vk::PhysicalDevice phys_dev;
 			KSTVKQueueFamilies queue_families;
 			vk::UniqueDevice device;
+			std::vector<KSTVKSwapchain> swapchains;
+			std::vector<KST_GLFW_VK_Window>* windows;
 
 		private:
 			void choose_card( const std::vector<vk::ExtensionProperties>& requiredExtensions, vk::Instance instance );
 			KSTVKQueueFamilies find_queue_families( vk::PhysicalDevice dev, vk::SurfaceKHR surface );
 
 			const static std::vector<const char*> dev_exts;
-			std::shared_ptr<Context> instance;
 	};
 
 	struct KSTVKContext: public Context {
@@ -40,8 +45,11 @@ namespace Kestrel {
 			KSTVKContext() = default;
 
 			virtual void Init( const ContextInformation& ) override;
-		private:
+			virtual void onUpdate() override;
+			virtual void registerWindow( Window&& w ) override;
 			vk::UniqueInstance instance;
-			std::shared_ptr<KSTVKDeviceSurface> device;
+			std::vector<KST_GLFW_VK_Window> windows;
+		private:
+			KSTVKDeviceSurface device;
 	};
 }
