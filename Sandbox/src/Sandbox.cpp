@@ -17,6 +17,7 @@
 #include "SandboxLayer.hpp"
 
 Sandbox::Sandbox(): Kestrel::Application(){
+	//TODO lifetime management
 	addLayer( new SandboxLayer( "Sandbox" ));
 }
 
