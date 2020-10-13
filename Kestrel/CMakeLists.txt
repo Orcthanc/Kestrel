@@ -18,3 +18,8 @@ if( KST_PROFILING )
 	target_compile_definitions( ${PROJECT_NAME} PUBLIC KST_PROFILING=1 )
 endif( KST_PROFILING )
 
+compile_shaders(
+	"shader/basic.vert"
+	"shader/basic.frag"
+	)
+

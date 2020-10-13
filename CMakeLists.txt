@@ -22,16 +22,16 @@ function(compile_shaders)
     foreach(SHADER ${ARGN})
         get_filename_component(FILE_NAME ${SHADER} NAME)
         get_filename_component(FILE_DIR ${SHADER} DIRECTORY)
-        set(output_file ${CMAKE_CURRENT_BINARY_DIR}/res/${FILE_DIR}/${FILE_NAME}.spv)
+		set(output_file ${CMAKE_BINARY_DIR}/res/${PROJECT_NAME}/${FILE_DIR}/${FILE_NAME}.spv)
         set(compiled_shaders ${compiled_shaders} ${output_file})
         set(compiled_shaders ${compiled_shaders} PARENT_SCOPE)
 		#message(STATUS "${CMAKE_SOURCE_DIR}")
         add_custom_command(
 				OUTPUT ${output_file}
-                COMMAND ${CMAKE_COMMAND} -E make_directory "res/${FILE_DIR}"
+				COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/res/${PROJECT_NAME}/${FILE_DIR}"
                 #COMMAND mkdir -p shaders
-                COMMAND ${GLSLANG_VALIDATOR} -w -V ${CMAKE_SOURCE_DIR}/${SHADER} -o ${output_file}
-                DEPENDS ${CMAKE_SOURCE_DIR}/${SHADER}
+                COMMAND ${GLSLANG_VALIDATOR} -w -V ${PROJECT_SOURCE_DIR}/${SHADER} -o ${output_file}
+                DEPENDS ${PROJECT_SOURCE_DIR}/${SHADER}
                 COMMENT "Compiling shader ${output_file}"
         )
     endforeach()

@@ -1,6 +1,7 @@
 #include "VKContext.hpp"
 #include "Core/Application.hpp"
 #include "Platform/GLFWWindow.hpp"
+#include "Platform/Vulkan/VKMaterial.hpp"
 
 using namespace Kestrel;
 
@@ -131,6 +132,10 @@ void KST_VK_DeviceSurface::create( KST_VK_Context& c ){
 				*(*windows)[i].surface.surface,
 				*device );
 	}
+
+	//TODO
+	VK_Materials::getInstance().device = this;
+	VK_Materials::getInstance().loadMaterial( "../res/Kestrel/shader/basic" );
 }
 
 KSTVKQueueFamilies KST_VK_DeviceSurface::find_queue_families( vk::PhysicalDevice dev, vk::SurfaceKHR surface ){
