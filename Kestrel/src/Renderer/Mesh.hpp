@@ -14,7 +14,7 @@ namespace Kestrel {
 		template<typename T>
 		void load_obj( const char* path ){
 			if( !impl )
-				impl = T{};
+				impl = std::make_unique<T>();
 			impl->load_obj( path );
 		}
 		void unload();

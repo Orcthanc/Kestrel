@@ -1,24 +1,14 @@
-/*
- * =====================================================================================
- *
- *       Filename:  SandboxLayer.cpp
- *
- *    Description:
- *
- *        Version:  1.0
- *        Created:  08/25/2020 05:14:28 PM
- *       Revision:  none
- *
- *         Author:  Samuel Knoethig (), samuel@knoethig.net
- *
- * =====================================================================================
- */
-
 #include "SandboxLayer.hpp"
 
 #include "Renderer/Context.hpp"
 
-SandboxLayer::SandboxLayer( const std::string& s ): Layer{ s }{}
+#include "Platform/Vulkan/VK_Basic_Terrain.hpp"
+
+using namespace Kestrel;
+
+SandboxLayer::SandboxLayer( const std::string& s ): Layer{ s }{
+	terrain = std::make_unique<VK_BasicTerrain>();
+}
 
 void SandboxLayer::onUpdate(){
 	static int calls = 0;

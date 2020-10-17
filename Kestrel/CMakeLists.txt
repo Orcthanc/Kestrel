@@ -23,3 +23,6 @@ compile_shaders(
 	"shader/basic.frag"
 	)
 
+copy_res_dir(
+	"res/models"
+	)
