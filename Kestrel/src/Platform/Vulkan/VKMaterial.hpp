@@ -9,6 +9,8 @@ namespace Kestrel {
 	struct VK_Material_T {
 		Material id;
 		vk::UniquePipeline pipeline;
+		vk::UniquePipelineLayout layout;
+		vk::UniqueRenderPass renderpass;
 	};
 
 	struct VK_Materials: public Materials {

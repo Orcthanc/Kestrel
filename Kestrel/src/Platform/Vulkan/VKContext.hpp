@@ -24,6 +24,7 @@ namespace Kestrel {
 	struct KST_VK_DeviceSurface {
 		public:
 			KST_VK_DeviceSurface() = default;
+			~KST_VK_DeviceSurface();
 
 			void create( KST_VK_Context& instance );
 

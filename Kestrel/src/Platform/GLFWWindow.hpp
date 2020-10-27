@@ -1,18 +1,3 @@
-/*
- * =====================================================================================
- *
- *       Filename:  GLFWWindow.hpp
- *
- *    Description:  GLFW window implementation
- *
- *        Version:  1.0
- *        Created:  09/22/2020 04:46:52 PM
- *       Revision:  none
- *
- *         Author:  Samuel Knoethig (), samuel@knoethig.net
- *
- * =====================================================================================
- */
 #pragma once
 
 #include <kstpch.hpp>

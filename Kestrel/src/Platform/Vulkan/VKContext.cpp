@@ -5,6 +5,10 @@
 
 using namespace Kestrel;
 
+KST_VK_DeviceSurface::~KST_VK_DeviceSurface(){
+	VK_Materials::getInstance().materials.clear();
+}
+
 const std::vector<const char*> KST_VK_DeviceSurface::dev_exts = {
 	VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 };
