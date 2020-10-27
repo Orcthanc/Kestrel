@@ -1,19 +1,3 @@
-/*
- * =====================================================================================
- *
- *       Filename:  Application.cpp
- *
- *    Description:  Implementation of Application.h
- *
- *        Version:  1.0
- *        Created:  08/23/2020 03:21:41 PM
- *       Revision:  none
- *
- *         Author:  Samuel Knoethig (), samuel@knoethig.net
- *
- * =====================================================================================
- */
-
 #include "Application.hpp"
 
 #include "Platform/GLFWWindow.hpp"
@@ -31,6 +15,8 @@ Kestrel::Application::Application( WindowSettings ws ): running( true ), stack()
 	graphics_context = std::make_shared<KST_VK_Context>();
 	graphics_context->registerWindow( std::move( temp ));
 	graphics_context->Init({ "Sandbox", 0, 0, 1 });
+
+	current_scene = std::make_shared<Scene>();
 }
 
 Kestrel::Application::~Application(){
@@ -51,6 +37,8 @@ void Kestrel::Application::onEvent( Event& e ){
 
 void Kestrel::Application::operator()(){
 	while( running ){
+		current_scene->onUpdate();
+
 		for( auto l: stack ){
 			l->onUpdate();
 		}

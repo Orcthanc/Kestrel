@@ -6,6 +6,8 @@
 #include "Window.hpp"
 #include "Event/Events.hpp"
 #include "Renderer/Context.hpp"
+#include "Scene/Scene.hpp"
+#include "Scene/Entity.hpp"
 
 int main( int, char** );
 
@@ -26,6 +28,8 @@ namespace Kestrel {
 			bool running;
 
 			std::shared_ptr<Context> graphics_context;
+
+			std::shared_ptr<Scene> current_scene;
 		private:
 			LayerStack stack;
 

@@ -4,16 +4,22 @@
 
 #include "Platform/Vulkan/VK_Basic_Terrain.hpp"
 
+#include "Scene/Components.hpp"
+
 using namespace Kestrel;
 
 SandboxLayer::SandboxLayer( const std::string& s ): Layer{ s }{
 	terrain = std::make_unique<VK_BasicTerrain>();
+
+	auto temp = Application::getInstance()->current_scene->createEntity();
+	temp.addComponent<NameComponent>( "TestName" );
 }
 
 void SandboxLayer::onUpdate(){
 	static int calls = 0;
-	if( !( ++calls % 1000000 ))
+	if( !( ++calls % 1000000 )){
 		KST_INFO( "{}", calls );
+	}
 }
 
 

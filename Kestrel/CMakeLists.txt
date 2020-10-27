@@ -8,7 +8,7 @@ find_package( Vulkan REQUIRED )
 
 target_precompile_headers( ${PROJECT_NAME} PUBLIC "src/kstpch.hpp" )
 target_include_directories( ${PROJECT_NAME} PUBLIC "src" glm glfw spdlog::spdlog Vulkan::Vulkan )
-target_link_libraries( ${PROJECT_NAME} PUBLIC glm glfw spdlog::spdlog Vulkan::Vulkan )
+target_link_libraries( ${PROJECT_NAME} PUBLIC glm glfw spdlog::spdlog Vulkan::Vulkan entt )
 
 if( COLOR_CONSOLE )
 	target_compile_definitions( ${PROJECT_NAME} PUBLIC COLOR_CONSOLE=1 )
