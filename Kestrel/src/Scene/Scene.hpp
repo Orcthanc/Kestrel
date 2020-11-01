@@ -22,6 +22,7 @@ namespace Kestrel {
 			void onUpdate();
 
 			Entity createEntity();
+			Entity createEntity( const char* name );
 			void destroyEntity( Entity entity );
 
 		private:

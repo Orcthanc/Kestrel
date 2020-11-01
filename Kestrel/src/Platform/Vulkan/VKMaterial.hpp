@@ -20,8 +20,11 @@ namespace Kestrel {
 			//TODO wrapper and maybe refcounting
 			static VK_Materials& getInstance();
 
-			std::unordered_map<Material, VK_Material_T> materials;
+			VK_Material_T& operator[]( Material mat );
+			const VK_Material_T& operator[]( Material mat ) const;
+
 		private:
+			std::unordered_map<Material, VK_Material_T> materials;
 			KST_VK_DeviceSurface* device;
 
 			friend KST_VK_DeviceSurface;

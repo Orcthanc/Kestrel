@@ -6,6 +6,7 @@
 
 using namespace Kestrel;
 
+
 static std::vector<std::pair<ShaderType, const char*>> stages{
 	{ ShaderType::Vertex, ".vert.spv" },
 	{ ShaderType::TessControl, ".tesc.spv" },
@@ -14,16 +15,17 @@ static std::vector<std::pair<ShaderType, const char*>> stages{
 	{ ShaderType::Fragment, ".frag.spv" },
 };
 
-vk::UniqueRenderPass createRenderPass( KST_VK_DeviceSurface& device ){
+static vk::UniqueRenderPass createRenderPass( KST_VK_DeviceSurface& device ){
+	PROFILE_FUNCTION();
 	vk::UniqueRenderPass renderpass;
 
 	vk::AttachmentDescription attachment_description(
 			{},
 			device.swapchains[0].format.format, //TODO
 			vk::SampleCountFlagBits::e1,
-			vk::AttachmentLoadOp::eClear,
+			vk::AttachmentLoadOp::eLoad,
 			vk::AttachmentStoreOp::eStore,
-			vk::AttachmentLoadOp::eDontCare,
+			vk::AttachmentLoadOp::eDontCare, //TODO add stencil
 			vk::AttachmentStoreOp::eDontCare,
 			vk::ImageLayout::eUndefined,
 			vk::ImageLayout::ePresentSrcKHR );
@@ -168,7 +170,7 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 			&blend_state_info,
 			&dynamic_state_info,
 			*newMat.layout,
-			*newMat.renderpass,//renderpass
+			*newMat.renderpass,
 			0,
 			vk::Pipeline{},
 			-1 );
@@ -184,4 +186,18 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 VK_Materials& VK_Materials::getInstance(){
 	static VK_Materials mats;
 	return mats;
+}
+
+VK_Material_T& VK_Materials::operator[]( Material mat ){
+	PROFILE_FUNCTION();
+
+	KST_CORE_ASSERT( materials.contains( mat ), "Could not load material {}", mat );
+	return materials.at( mat );
+}
+
+const VK_Material_T& VK_Materials::operator[]( Material mat ) const {
+	PROFILE_FUNCTION();
+
+	KST_CORE_ASSERT( materials.contains( mat ), "Could not load material {}", mat );
+	return materials.at( mat );
 }

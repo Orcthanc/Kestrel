@@ -2,6 +2,7 @@
 
 #include <kstpch.hpp>
 #include "Core/Window.hpp"
+#include "Scene/Entity.hpp"
 
 namespace Kestrel {
 	struct ContextInformation {

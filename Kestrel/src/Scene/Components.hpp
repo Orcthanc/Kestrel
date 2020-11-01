@@ -4,6 +4,9 @@
 #include "glm/vec3.hpp"
 #include "glm/gtc/quaternion.hpp"
 
+#include "Renderer/Mesh.hpp"
+#include "Renderer/Material.hpp"
+
 namespace Kestrel {
 	struct TransformComponent {
 		TransformComponent( glm::vec3 loc, glm::vec3 scale );
@@ -37,5 +40,37 @@ namespace Kestrel {
 		operator const std::string&() const;
 
 		std::string name;
+	};
+
+	struct MeshComponent {
+		MeshComponent() = default;
+		MeshComponent( const std::shared_ptr<Mesh>& );
+		MeshComponent( std::shared_ptr<Mesh>&& );
+
+		MeshComponent( const MeshComponent& ) = default;
+		MeshComponent( MeshComponent&& ) = default;
+
+		MeshComponent& operator=( const MeshComponent& ) = default;
+		MeshComponent& operator=( MeshComponent&& ) = default;
+
+		operator const Mesh&();
+
+		std::shared_ptr<Mesh> mesh;
+	};
+
+	struct MaterialComponent {
+		MaterialComponent() = default;
+		MaterialComponent( const Material& );
+		MaterialComponent( Material&& );
+
+		MaterialComponent( const MaterialComponent& ) = default;
+		MaterialComponent( MaterialComponent&& ) = default;
+
+		MaterialComponent& operator=( const MaterialComponent& ) = default;
+		MaterialComponent& operator=( MaterialComponent&& ) = default;
+
+		operator const Material&() const;
+
+		Material mat;
 	};
 }

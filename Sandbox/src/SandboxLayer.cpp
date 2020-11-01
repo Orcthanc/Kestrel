@@ -3,16 +3,22 @@
 #include "Renderer/Context.hpp"
 
 #include "Platform/Vulkan/VK_Basic_Terrain.hpp"
+#include "Platform/Vulkan/VKMaterial.hpp"
+#include "Platform/Vulkan/VKMesh.hpp"
 
 #include "Scene/Components.hpp"
 
 using namespace Kestrel;
 
 SandboxLayer::SandboxLayer( const std::string& s ): Layer{ s }{
-	terrain = std::make_unique<VK_BasicTerrain>();
+	//terrain = std::make_unique<VK_BasicTerrain>();
 
-	auto temp = Application::getInstance()->current_scene->createEntity();
-	temp.addComponent<NameComponent>( "TestName" );
+	auto temp = Application::getInstance()->current_scene->createEntity( "TestName" );
+	auto mat = VK_Materials::getInstance().loadMaterial( "../res/Kestrel/shader/basic" );
+	auto mesh = std::make_shared<Mesh>();
+	mesh->load_obj<VK_Mesh>( "../res/Kestrel/res/models/Terrain4x4.obj" );
+	temp.addComponent<MeshComponent>( mesh );
+	temp.addComponent<MaterialComponent>( mat );
 }
 
 void SandboxLayer::onUpdate(){

@@ -30,21 +30,21 @@ namespace Kestrel {
 			return scene->entt_reg.emplace<T>( entity, std::forward<Args>( args )... );
 		}
 		
-		template<typename T>
+		template<typename... T>
 		bool hasComponent(){
-			return scene->entt_reg.has<T>( entity );
+			return scene->entt_reg.has<T...>( entity );
 		}
 
-		template<typename T>
-		T& getComponent(){
-			KST_CORE_ASSERT( scene->entt_reg.has<T>( entity ), "Object does not have component" );
-			return scene->entt_reg.get<T>( entity );
+		template<typename... T>
+		auto getComponent(){
+			KST_CORE_ASSERT( scene->entt_reg.has<T...>( entity ), "Object does not have components" );
+			return scene->entt_reg.get<T...>( entity );
 		}
 
-		template<typename T>
+		template<typename... T>
 		void removeComponent(){
-			KST_CORE_ASSERT( scene->entt_reg.has<T>( entity ), "Object does not have component" );
-			return scene->entt_reg.remove<T>( entity );
+			KST_CORE_ASSERT( scene->entt_reg.has<T...>( entity ), "Object does not have component" );
+			return scene->entt_reg.remove<T...>( entity );
 		}
 
 		Scene* scene;

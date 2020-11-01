@@ -1,19 +1,3 @@
-/*
- * =====================================================================================
- *
- *       Filename:  Log.hpp
- *
- *    Description:  A simple Logger
- *
- *        Version:  1.0
- *        Created:  08/24/2020 09:21:24 PM
- *       Revision:  none
- *
- *         Author:  Samuel Knoethig (), samuel@knoethig.net
- *
- * =====================================================================================
- */
-
 #pragma once
 
 #include <spdlog/spdlog.h>

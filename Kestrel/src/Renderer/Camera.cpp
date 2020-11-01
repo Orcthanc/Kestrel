@@ -28,3 +28,19 @@ void Camera::recalc_view(){
 
 	view = glm::translate( glm::mat4_cast( rot ), -pos );
 }
+
+void Camera::set_renderer( std::unique_ptr<CameraRenderer>&& r ){
+	renderer = std::move( r );
+}
+
+void Camera::begin_scene(){
+	renderer->begin_scene( *this );
+}
+
+void Camera::draw( Entity e ){
+	renderer->draw( e );
+}
+
+void Camera::endScene(){
+	renderer->endScene();
+}

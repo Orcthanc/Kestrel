@@ -32,7 +32,7 @@ namespace Kestrel {
 			KSTVKQueueFamilies queue_families;
 			vk::UniqueDevice device;
 			std::vector<KST_VK_Swapchain> swapchains;
-			std::vector<KST_GLFW_VK_Window>* windows;
+			std::vector<KST_GLFW_VK_Window>* windows; // Managed by context
 
 		private:
 			void choose_card( const std::vector<vk::ExtensionProperties>& requiredExtensions, vk::Instance instance );
