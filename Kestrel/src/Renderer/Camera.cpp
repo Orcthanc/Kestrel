@@ -33,8 +33,8 @@ void Camera::set_renderer( std::unique_ptr<CameraRenderer>&& r ){
 	renderer = std::move( r );
 }
 
-void Camera::begin_scene(){
-	renderer->begin_scene( *this );
+void Camera::begin_scene( size_t window_index ){
+	renderer->begin_scene( *this, window_index );
 }
 
 void Camera::draw( Entity e ){

@@ -7,6 +7,7 @@
 #include "Platform/Vulkan/VKMesh.hpp"
 
 #include "Scene/Components.hpp"
+#include "Renderer/NaiveCamera.hpp"
 
 using namespace Kestrel;
 
@@ -19,6 +20,11 @@ SandboxLayer::SandboxLayer( const std::string& s ): Layer{ s }{
 	mesh->load_obj<VK_Mesh>( "../res/Kestrel/res/models/Terrain4x4.obj" );
 	temp.addComponent<MeshComponent>( mesh );
 	temp.addComponent<MaterialComponent>( mat );
+
+
+	auto cam = Application::getInstance()->current_scene->createEntity( "Camera" );
+	cam.addComponent<TransformComponent>();
+	cam.addComponent<CameraComponent>( std::make_shared<NaiveCamera>( 90.0, 1920.0/1080.0, 0.1, 1000000.0 ));
 }
 
 void SandboxLayer::onUpdate(){

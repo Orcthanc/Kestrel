@@ -11,7 +11,9 @@ namespace Kestrel {
 	struct Camera;
 
 	struct CameraRenderer {
-		virtual void begin_scene( Camera& ) = 0;
+		virtual ~CameraRenderer() = default;
+
+		virtual void begin_scene( Camera&, size_t window_index ) = 0;
 		virtual void draw( Entity e ) = 0;
 		virtual void endScene() = 0;
 	};
@@ -37,7 +39,7 @@ namespace Kestrel {
 				renderer = std::make_unique<Renderer>( std::forward<Args>( args )... );
 			}
 
-			void begin_scene();
+			void begin_scene( size_t window_index );
 			void draw( Entity e );
 			void endScene();
 

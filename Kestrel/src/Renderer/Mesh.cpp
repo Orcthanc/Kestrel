@@ -9,3 +9,11 @@ void Mesh::unload(){
 bool Mesh::loaded(){
 	return impl->loaded();
 }
+
+const BufferView<float> Mesh::getVertices(){
+	return impl->getVertices();
+}
+
+const BufferView<uint32_t> Mesh::getIndices(){
+	return impl->getIndices();
+}

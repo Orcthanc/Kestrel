@@ -27,9 +27,8 @@ namespace Kestrel {
 
 			bool running;
 
-			std::shared_ptr<Context> graphics_context;
-
 			std::shared_ptr<Scene> current_scene;
+			std::shared_ptr<Context> graphics_context;
 		private:
 			LayerStack stack;
 

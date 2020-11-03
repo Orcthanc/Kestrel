@@ -7,6 +7,8 @@
 #include "Renderer/Mesh.hpp"
 #include "Renderer/Material.hpp"
 
+#include "Renderer/Camera.hpp"
+
 namespace Kestrel {
 	struct TransformComponent {
 		TransformComponent( glm::vec3 loc, glm::vec3 scale );
@@ -72,5 +74,21 @@ namespace Kestrel {
 		operator const Material&() const;
 
 		Material mat;
+	};
+
+	struct CameraComponent {
+		CameraComponent() = default;
+		CameraComponent( const std::shared_ptr<Camera>& );
+		CameraComponent( std::shared_ptr<Camera>&& );
+
+		CameraComponent( const CameraComponent& ) = default;
+		CameraComponent( CameraComponent&& ) = default;
+
+		CameraComponent& operator=( const CameraComponent& ) = default;
+		CameraComponent& operator=( CameraComponent&& ) = default;
+
+		operator const Camera&();
+
+		std::shared_ptr<Camera> camera;
 	};
 }

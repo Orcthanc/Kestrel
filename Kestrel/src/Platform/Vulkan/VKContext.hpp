@@ -27,6 +27,7 @@ namespace Kestrel {
 			~KST_VK_DeviceSurface();
 
 			void create( KST_VK_Context& instance );
+			uint32_t find_memory_type( uint32_t filter, vk::MemoryPropertyFlags flags );
 
 			vk::PhysicalDevice phys_dev;
 			KSTVKQueueFamilies queue_families;
@@ -50,7 +51,6 @@ namespace Kestrel {
 			virtual void registerWindow( Window&& w ) override;
 			vk::UniqueInstance instance;
 			std::vector<KST_GLFW_VK_Window> windows;
-		private:
 			KST_VK_DeviceSurface device;
 	};
 }

@@ -10,6 +10,8 @@ namespace Kestrel {
 		virtual void load_obj(const char *path) override;
 		virtual void unload() override;
 		virtual bool loaded() override;
+		virtual const BufferView<float> getVertices() override;
+		virtual const BufferView<uint32_t> getIndices() override;
 
 		std::vector<VK_Vertex3f3f> verts;
 		std::vector<uint32_t> indices;

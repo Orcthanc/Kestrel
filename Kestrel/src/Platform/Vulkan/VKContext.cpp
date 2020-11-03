@@ -1,12 +1,22 @@
 #include "VKContext.hpp"
+
 #include "Core/Application.hpp"
 #include "Platform/GLFWWindow.hpp"
 #include "Platform/Vulkan/VKMaterial.hpp"
+
+#include "Scene/Components.hpp"
 
 using namespace Kestrel;
 
 KST_VK_DeviceSurface::~KST_VK_DeviceSurface(){
 	VK_Materials::getInstance().materials.clear();
+
+	// Cameras
+	auto view = Application::getInstance()->current_scene->getView<CameraComponent>();
+	for( auto& cam: view ){
+		view.get<CameraComponent>( cam ).camera->set_renderer( nullptr );
+	}
+
 }
 
 const std::vector<const char*> KST_VK_DeviceSurface::dev_exts = {
@@ -139,7 +149,19 @@ void KST_VK_DeviceSurface::create( KST_VK_Context& c ){
 
 	//TODO
 	VK_Materials::getInstance().device = this;
-	VK_Materials::getInstance().loadMaterial( "../res/Kestrel/shader/basic" );
+	//VK_Materials::getInstance().loadMaterial( "../res/Kestrel/shader/basic" );
+}
+
+uint32_t KST_VK_DeviceSurface::find_memory_type( uint32_t filter, vk::MemoryPropertyFlags flags ){
+	auto memprops = phys_dev.getMemoryProperties();
+
+	for( auto memIndex = 0; auto& m: memprops.memoryTypes ){
+		if(( filter & ( 1 << memIndex )) && (( m.propertyFlags & flags ) == flags ))
+			return memIndex;
+		++memIndex;
+	}
+
+	throw std::runtime_error( "No memory available" );
 }
 
 KSTVKQueueFamilies KST_VK_DeviceSurface::find_queue_families( vk::PhysicalDevice dev, vk::SurfaceKHR surface ){

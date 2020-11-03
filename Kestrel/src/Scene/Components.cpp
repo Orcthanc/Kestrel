@@ -39,3 +39,11 @@ MaterialComponent::MaterialComponent( Material&& mat ): mat( std::move( mat )){}
 MaterialComponent::operator const Material&() const {
 	return mat;
 }
+
+CameraComponent::CameraComponent( const std::shared_ptr<Camera>& camera ): camera( camera ){}
+
+CameraComponent::CameraComponent( std::shared_ptr<Camera>&& camera ): camera( std::move( camera )){}
+
+CameraComponent::operator const Kestrel::Camera&(){
+	return *camera;
+}

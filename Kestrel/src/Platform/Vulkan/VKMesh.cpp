@@ -82,3 +82,11 @@ void VK_Mesh::unload(){
 bool VK_Mesh::loaded(){
 	return !indices.empty();
 }
+
+const BufferView<float> VK_Mesh::getVertices(){
+	return { reinterpret_cast<float*>( verts.data()), verts.size() * sizeof( verts[0] ), sizeof( verts[0] )}; //TODO hope padding doesn't eat this
+}
+
+const BufferView<uint32_t> VK_Mesh::getIndices(){
+	return { indices.data(), indices.size() * sizeof( indices[0] ), sizeof( indices[0] )};
+}
