@@ -27,6 +27,7 @@ namespace Kestrel {
 
 			bool running;
 
+			//TODO keep this, or is the scene owned by a layer, or the layers owned by the scene?
 			std::shared_ptr<Scene> current_scene;
 			std::shared_ptr<Context> graphics_context;
 		private:

@@ -3,6 +3,7 @@
 #include "Platform/Vulkan/VKShader.hpp"
 #include "Platform/Vulkan/VKContext.hpp"
 #include <filesystem>
+#include "Core/Application.hpp"
 
 using namespace Kestrel;
 
@@ -84,10 +85,10 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 
 	std::array<vk::VertexInputAttributeDescription, 2> attrib_desc = {
 		vk::VertexInputAttributeDescription( 0, 0, vk::Format::eR32G32B32Sfloat, 0 ),
-		vk::VertexInputAttributeDescription( 1, 0, vk::Format::eR32G32B32Sfloat, 3 ),
+		vk::VertexInputAttributeDescription( 1, 0, vk::Format::eR32G32B32Sfloat, 12 ),
 	};
 
-	vk::VertexInputBindingDescription binding_desc( 0, 6, vk::VertexInputRate::eVertex );
+	vk::VertexInputBindingDescription binding_desc( 0, 24, vk::VertexInputRate::eVertex );
 
 	vk::PipelineVertexInputStateCreateInfo vertex_input_info( {},
 			binding_desc,
@@ -105,7 +106,7 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 			VK_FALSE,
 			vk::PolygonMode::eFill,
 			vk::CullModeFlagBits::eBack,
-			vk::FrontFace::eClockwise,
+			vk::FrontFace::eCounterClockwise,
 			VK_FALSE,
 			0,
 			0,
@@ -176,6 +177,28 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 			-1 );
 
 	newMat.pipeline = device->device->createGraphicsPipelineUnique( {}, pipeline_info ).value;
+
+	KST_CORE_INFO( "{}", device->swapchains.size() );
+
+	newMat.framebuffers.resize( device->swapchains[0].views.size());
+
+	for( size_t i = 0; i < device->swapchains[0].views.size(); ++i ){
+
+		std::vector<vk::ImageView> attachments{ *device->swapchains[0].views[i] };
+
+		vk::FramebufferCreateInfo framebuf_inf(
+				{},
+				*newMat.renderpass,
+				attachments,
+				device->swapchains[0].size.width,
+				device->swapchains[0].size.height,
+				1
+			);
+
+		newMat.framebuffers[i] = device->device->createFramebufferUnique( framebuf_inf );
+
+	}
+
 
 	static Material id = 1;
 	newMat.id = id;

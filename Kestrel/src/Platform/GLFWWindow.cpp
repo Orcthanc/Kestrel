@@ -1,19 +1,3 @@
-/*
- * =====================================================================================
- *
- *       Filename:  KST_GLFWWindow.cpp
- *
- *    Description:
- *
- *        Version:  1.0
- *        Created:  08/26/2020 02:27:14 PM
- *       Revision:  none
- *
- *         Author:  Samuel Knoethig (), samuel@knoethig.net
- *
- * =====================================================================================
- */
-
 #include "GLFWWindow.hpp"
 #include "Core/Application.hpp"
 
@@ -270,4 +254,27 @@ void KST_VK_Swapchain::Create( const KSTVKSwapchainDetails& capabilities, vk::Su
 			{} );
 
 	swapchain = device.createSwapchainKHRUnique( cr_inf );
+
+	images = device.getSwapchainImagesKHR( *swapchain );
+
+	//Image Views
+	views.clear();
+
+	for( size_t i = 0; i < images.size(); ++i ){
+		vk::ImageViewCreateInfo cr_inf;
+		cr_inf.image = images[i];
+		cr_inf.viewType = vk::ImageViewType::e2D;
+		cr_inf.format = format.format;
+		cr_inf.components = vk::ComponentMapping(
+				vk::ComponentSwizzle::eIdentity,
+				vk::ComponentSwizzle::eIdentity,
+				vk::ComponentSwizzle::eIdentity,
+				vk::ComponentSwizzle::eIdentity );
+		cr_inf.subresourceRange = vk::ImageSubresourceRange(
+				vk::ImageAspectFlagBits::eColor,
+				0, 1,
+				0, 1);
+
+		views.push_back( device.createImageViewUnique( cr_inf ));
+	}
 }

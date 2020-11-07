@@ -10,9 +10,9 @@
 namespace Kestrel {
 	struct RenderInfo {
 		std::vector<vk::UniqueCommandBuffer> cmd_buffer;
-		vk::Framebuffer* framebuffer; //TODO
 		Material bound_mat = -1;
 		size_t window_index = -1;
+		uint32_t img_index;
 	};
 
 	struct KST_VK_Buffer {

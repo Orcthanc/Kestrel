@@ -128,6 +128,9 @@ void KST_VK_DeviceSurface::create( KST_VK_Context& c ){
 
 	vk::PhysicalDeviceFeatures features;
 
+	//TODO check if available
+	features.fillModeNonSolid = VK_TRUE;
+
 	vk::DeviceCreateInfo dev_cr_inf(
 			{},
 			dev_q_cr_infs,
@@ -149,7 +152,6 @@ void KST_VK_DeviceSurface::create( KST_VK_Context& c ){
 
 	//TODO
 	VK_Materials::getInstance().device = this;
-	//VK_Materials::getInstance().loadMaterial( "../res/Kestrel/shader/basic" );
 }
 
 uint32_t KST_VK_DeviceSurface::find_memory_type( uint32_t filter, vk::MemoryPropertyFlags flags ){

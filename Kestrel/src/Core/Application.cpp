@@ -3,6 +3,8 @@
 #include "Platform/GLFWWindow.hpp"
 #include "Platform/Vulkan/VKContext.hpp"
 
+#include "Scene/Components.hpp"
+
 Kestrel::Application::Application( WindowSettings ws ): running( true ), stack(){
 	PROFILE_SESSION_START( "startup.json" );
 	PROFILE_FUNCTION();
@@ -41,6 +43,18 @@ void Kestrel::Application::operator()(){
 
 		for( auto l: stack ){
 			l->onUpdate();
+		}
+
+		//TODO
+		if( current_scene ){
+			auto view = current_scene->getView<CameraComponent>();
+			for( auto& c: view ){
+				auto& cam = view.get( c ).camera;
+				cam->begin_scene( 0 );
+				for( auto& e: current_scene->getView<MeshComponent>() )
+					cam->draw( current_scene->toEntity( e ));
+				cam->endScene();
+			}
 		}
 
 		for( auto l: stack ){

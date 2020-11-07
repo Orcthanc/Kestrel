@@ -18,8 +18,10 @@ SandboxLayer::SandboxLayer( const std::string& s ): Layer{ s }{
 	auto mat = VK_Materials::getInstance().loadMaterial( "../res/Kestrel/shader/basic" );
 	auto mesh = std::make_shared<Mesh>();
 	mesh->load_obj<VK_Mesh>( "../res/Kestrel/res/models/Terrain4x4.obj" );
+	//mesh->load_obj<VK_Mesh>( "../res/Kestrel/res/models/Test.obj" );
 	temp.addComponent<MeshComponent>( mesh );
 	temp.addComponent<MaterialComponent>( mat );
+	temp.addComponent<TransformComponent>();
 
 
 	auto cam = Application::getInstance()->current_scene->createEntity( "Camera" );

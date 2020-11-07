@@ -20,6 +20,8 @@ void VK_Mesh::load_obj( const char *path ){
 	while( !file.eof() ){
 		file.clear();
 		file >> temp;
+		if( file.eof() )
+			break;
 		if( temp[0] == '#' ){
 			file.ignore( std::numeric_limits<std::streamsize>::max(), file.widen( '\n' ));
 		} else if( temp == "v" ){
@@ -31,7 +33,8 @@ void VK_Mesh::load_obj( const char *path ){
 			}
 			file >> w;
 			file.clear();
-			verts.push_back({{ x, y, z }, { 0.9, 0.9, 0.9 }});
+			//TODO color
+			verts.push_back({{ x, y, z }, { ( x + 1 ) *0.5, ( y + 1 ) * 0.5, ( z + 1 ) * 0.5 }});
 		} else if( temp == "vt" ){
 			KST_CORE_WARN( "Textures are currently not supported" );
 			file.ignore( std::numeric_limits<std::streamsize>::max(), file.widen( '\n' ));
@@ -46,7 +49,7 @@ void VK_Mesh::load_obj( const char *path ){
 			*/
 			for( size_t i = 0; i < 3; ++i ){
 				file >> x;
-				indices.push_back( x );
+				indices.push_back( x - 1 );
 				if( i != 2 )
 					file.ignore( std::numeric_limits<std::streamsize>::max(), file.widen( ' ' ));
 			}
@@ -71,7 +74,19 @@ void VK_Mesh::load_obj( const char *path ){
 		}
 	}
 
-	KST_CORE_INFO( "Finished loading file" );
+	KST_CORE_INFO( "Finished loading file, {} verts, {} indices", verts.size(), indices.size() );
+/*
+	KST_CORE_INFO( "Verts:" );
+	for( auto& v: verts ){
+		KST_CORE_INFO( "{} {} {}, {} {} {}", v.pos.x, v.pos.y, v.pos.z, v.col.x, v.col.y, v.col.z );
+	}
+
+	KST_CORE_INFO( "Indices:" );
+	for( auto& i: indices ){
+		KST_CORE_INFO( "{}", i );
+	}
+	KST_CORE_INFO("");
+*/
 }
 
 void VK_Mesh::unload(){

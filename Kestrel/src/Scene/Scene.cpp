@@ -34,3 +34,7 @@ Entity Scene::createEntity( const char *name ){
 void Scene::destroyEntity( Entity entity ){
 	entt_reg.destroy( entity );
 }
+
+Entity Scene::toEntity(entt::entity e){
+	return { this, e };
+}

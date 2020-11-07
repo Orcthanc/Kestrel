@@ -25,6 +25,9 @@ namespace Kestrel {
 			Entity createEntity( const char* name );
 			void destroyEntity( Entity entity );
 
+			//TODO remove
+			Entity toEntity( entt::entity e );
+
 			template<typename... T>
 			auto getView(){
 				return entt_reg.view<T...>();

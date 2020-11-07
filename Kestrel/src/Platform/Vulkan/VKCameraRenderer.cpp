@@ -55,7 +55,7 @@ void KST_VK_CameraRenderer::setDeviceSurface( KST_VK_DeviceSurface* surface ){
 
 		vertex_buffer.memory = device_surface->device->allocateMemoryUnique( mem_inf );
 		device_surface->device->bindBufferMemory( *vertex_buffer.buffer, *vertex_buffer.memory, 0 );
-		device_surface->device->mapMemory( *vertex_buffer.memory, 0, vert_buf_size );
+		vertex_buffer.data = device_surface->device->mapMemory( *vertex_buffer.memory, 0, vert_buf_size );
 
 		memory_reqs = device_surface->device->getBufferMemoryRequirements( *index_buffer.buffer );
 		mem_inf.allocationSize = memory_reqs.size;
@@ -65,17 +65,31 @@ void KST_VK_CameraRenderer::setDeviceSurface( KST_VK_DeviceSurface* surface ){
 
 		index_buffer.memory = device_surface->device->allocateMemoryUnique( mem_inf );
 		device_surface->device->bindBufferMemory( *index_buffer.buffer, *index_buffer.memory, 0 );
-		device_surface->device->mapMemory( *index_buffer.memory, 0, index_buf_size );
+		index_buffer.data = device_surface->device->mapMemory( *index_buffer.memory, 0, index_buf_size );
 	}
 
 	graphics_queue = device_surface->device->getQueue( device_surface->queue_families.graphics.value(), 0 );
 	present_queue = device_surface->device->getQueue( device_surface->queue_families.present.value(), 0 );
+
+	vk::SemaphoreCreateInfo sem_inf;
+	sync.start_rendering = device_surface->device->createSemaphoreUnique( sem_inf );
+	sync.image_presentable = device_surface->device->createSemaphoreUnique( sem_inf );
 }
 
 void KST_VK_CameraRenderer::begin_scene( Camera& c, size_t window_index ){
 	PROFILE_FUNCTION();
 
 	render_info.window_index = window_index;
+
+	//TODO render to offscreen buffer
+	//TODO check result
+	auto img_res = device_surface->device->acquireNextImageKHR(
+			*device_surface->swapchains[render_info.window_index].swapchain,
+			UINT64_MAX,
+			*sync.start_rendering );
+
+	render_info.img_index = img_res.value;
+
 
 	vertex_buffer.current_offset = 0;
 	index_buffer.current_offset = 0;
@@ -135,14 +149,8 @@ void KST_VK_CameraRenderer::endScene(){
 	render_info.cmd_buffer[0]->endRenderPass();
 	render_info.cmd_buffer[0]->end();
 
-	auto img_val = device_surface->device->acquireNextImageKHR(
-			*device_surface->swapchains[render_info.window_index].swapchain,
-			UINT64_MAX );
 
 //TODO check OutOfDate
-
-	auto img_ind = img_val.value;
-
 
 	std::vector wait_semas{ *sync.start_rendering };
 	std::vector<vk::Flags<vk::PipelineStageFlagBits>> wait_stages{ vk::PipelineStageFlagBits::eColorAttachmentOutput };
@@ -161,7 +169,7 @@ void KST_VK_CameraRenderer::endScene(){
 	}
 
 	std::vector swapchains{ *device_surface->swapchains[render_info.window_index].swapchain };
-	std::vector indices{ img_ind };
+	std::vector indices{ render_info.img_index };
 	vk::PresentInfoKHR pres_inf(
 			signal_semas,
 			swapchains,
@@ -176,6 +184,8 @@ void KST_VK_CameraRenderer::endScene(){
 		default:
 			break;
 	}
+
+	present_queue.waitIdle();
 }
 
 void KST_VK_CameraRenderer::bindMat( VK_Material_T& mat ){
@@ -183,7 +193,7 @@ void KST_VK_CameraRenderer::bindMat( VK_Material_T& mat ){
 
 	vk::RenderPassBeginInfo beg_inf(
 			*mat.renderpass,
-			*render_info.framebuffer,
+			*mat.framebuffers[render_info.img_index],
 			{{ 0, 0 }, device_surface->swapchains[0].size },
 			{}
 		);
