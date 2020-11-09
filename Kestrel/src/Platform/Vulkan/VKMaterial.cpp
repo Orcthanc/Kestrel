@@ -2,6 +2,7 @@
 
 #include "Platform/Vulkan/VKShader.hpp"
 #include "Platform/Vulkan/VKContext.hpp"
+#include "Platform/Vulkan/VKVertex.hpp"
 #include <filesystem>
 #include "Core/Application.hpp"
 
@@ -83,12 +84,9 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 	}
 	//TODO maybe delete Vertex3f3f
 
-	std::array<vk::VertexInputAttributeDescription, 2> attrib_desc = {
-		vk::VertexInputAttributeDescription( 0, 0, vk::Format::eR32G32B32Sfloat, 0 ),
-		vk::VertexInputAttributeDescription( 1, 0, vk::Format::eR32G32B32Sfloat, 12 ),
-	};
+	auto attrib_desc = VK_Vertex::getAttributeDescription();
 
-	vk::VertexInputBindingDescription binding_desc( 0, 24, vk::VertexInputRate::eVertex );
+	auto binding_desc = VK_Vertex::getBindingDescription();
 
 	vk::PipelineVertexInputStateCreateInfo vertex_input_info( {},
 			binding_desc,
@@ -104,9 +102,9 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 			{},
 			VK_FALSE,
 			VK_FALSE,
-			vk::PolygonMode::eFill,
+			vk::PolygonMode::eLine,
 			vk::CullModeFlagBits::eBack,
-			vk::FrontFace::eCounterClockwise,
+			vk::FrontFace::eClockwise,
 			VK_FALSE,
 			0,
 			0,
@@ -141,15 +139,39 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 			color_blend_attachments,
 			blend_constants);
 
+	std::vector<vk::PushConstantRange> push_constant_ranges{
+		{ vk::ShaderStageFlagBits::eVertex, 0, sizeof( glm::mat4 ) },
+	};
+
+	std::vector<vk::DescriptorSetLayoutBinding> layout_binding{
+		vk::DescriptorSetLayoutBinding( 0, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eVertex, {} )
+		};
+
+	vk::DescriptorSetLayoutCreateInfo layout_cr_inf(
+		{}, layout_binding );
+
+	newMat.desc_layout = device->device->createDescriptorSetLayoutUnique( layout_cr_inf );
+
 	vk::PipelineLayoutCreateInfo layout_info(
 			{},
-			{},
-			{} ); //TODO
+			1, &*newMat.desc_layout,
+			1, push_constant_ranges.data() );
 
 	newMat.layout = device->device->createPipelineLayoutUnique( layout_info );
 
+	std::array<vk::DescriptorPoolSize, 1> desc_pool_size{
+		vk::DescriptorPoolSize( vk::DescriptorType::eUniformBuffer, 1 )
+	};
+
+	vk::DescriptorPoolCreateInfo desc_pool_inf(
+			vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet,
+			1,
+			desc_pool_size );
+
+	newMat.desc_pool = device->device->createDescriptorPoolUnique( desc_pool_inf );
+
 	std::array<vk::DynamicState, 2> dynamic_states{
-		vk::DynamicState::eViewport,
+			vk::DynamicState::eViewport,
 			vk::DynamicState::eScissor };
 
 	vk::PipelineDynamicStateCreateInfo dynamic_state_info(
@@ -163,11 +185,11 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 			stage_infos,
 			&vertex_input_info,
 			&assembly_info,
-			nullptr, //TODO
+			nullptr, //TODO tesselation
 			&viewport_info,
 			&rasterizer_info,
 			&multisample_info,
-			nullptr,
+			nullptr, //TODO depth
 			&blend_state_info,
 			&dynamic_state_info,
 			*newMat.layout,
@@ -177,8 +199,6 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 			-1 );
 
 	newMat.pipeline = device->device->createGraphicsPipelineUnique( {}, pipeline_info ).value;
-
-	KST_CORE_INFO( "{}", device->swapchains.size() );
 
 	newMat.framebuffers.resize( device->swapchains[0].views.size());
 

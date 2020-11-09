@@ -15,7 +15,7 @@ namespace Kestrel {
 		TransformComponent(
 				glm::vec3 loc = glm::vec3{},
 				glm::quat = glm::quat{},
-				glm::vec3 scale = glm::vec3{} );
+				glm::vec3 scale = glm::vec3{ 1.0f, 1.0f, 1.0f });
 
 		TransformComponent( const TransformComponent& ) = default;
 		TransformComponent( TransformComponent&& ) = default;

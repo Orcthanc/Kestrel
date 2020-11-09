@@ -13,7 +13,7 @@ namespace Kestrel {
 		virtual const BufferView<float> getVertices() override;
 		virtual const BufferView<uint32_t> getIndices() override;
 
-		std::vector<VK_Vertex3f3f> verts;
+		std::vector<VK_Vertex> verts;
 		std::vector<uint32_t> indices;
 	};
 }

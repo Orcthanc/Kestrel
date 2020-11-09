@@ -9,6 +9,8 @@
 #include "Scene/Components.hpp"
 #include "Renderer/NaiveCamera.hpp"
 
+#include "glm/gtc/quaternion.hpp"
+
 using namespace Kestrel;
 
 SandboxLayer::SandboxLayer( const std::string& s ): Layer{ s }{
@@ -21,12 +23,12 @@ SandboxLayer::SandboxLayer( const std::string& s ): Layer{ s }{
 	//mesh->load_obj<VK_Mesh>( "../res/Kestrel/res/models/Test.obj" );
 	temp.addComponent<MeshComponent>( mesh );
 	temp.addComponent<MaterialComponent>( mat );
-	temp.addComponent<TransformComponent>();
+	temp.addComponent<TransformComponent>( glm::vec3{ 0, 0, 0.0 }, glm::quat( glm::vec3{ 0.0f, 0.0f, 0.2f }), glm::vec3{ 0.9, 0.9, 1.0 });
 
 
 	auto cam = Application::getInstance()->current_scene->createEntity( "Camera" );
 	cam.addComponent<TransformComponent>();
-	cam.addComponent<CameraComponent>( std::make_shared<NaiveCamera>( 90.0, 1920.0/1080.0, 0.1, 1000000.0 ));
+	cam.addComponent<CameraComponent>( std::make_shared<NaiveCamera>( 45.0, 960.0/1080.0, 0.1, 1000000.0 ));
 }
 
 void SandboxLayer::onUpdate(){

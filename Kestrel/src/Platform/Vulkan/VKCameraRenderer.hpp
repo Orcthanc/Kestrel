@@ -48,6 +48,7 @@ namespace Kestrel {
 			RenderInfo render_info;
 			KST_VK_Buffer vertex_buffer;
 			KST_VK_Buffer index_buffer;
+			KST_VK_Buffer uniform_buffer;
 			vk::Queue graphics_queue;
 			vk::Queue present_queue;
 			PresentSynchronization sync;

@@ -2,6 +2,7 @@
 
 #include "Scene/Components.hpp"
 #include "Platform/Vulkan/VKMaterial.hpp"
+#include "Platform/Vulkan/VKVertex.hpp"
 
 using namespace Kestrel;
 
@@ -40,6 +41,11 @@ void KST_VK_CameraRenderer::setDeviceSurface( KST_VK_DeviceSurface* surface ){
 		buf_cr_inf.usage = vk::BufferUsageFlagBits::eIndexBuffer;
 
 		index_buffer.buffer = device_surface->device->createBufferUnique( buf_cr_inf );
+
+		buf_cr_inf.size = sizeof( VK_ViewProj );
+		buf_cr_inf.usage = vk::BufferUsageFlagBits::eUniformBuffer;
+
+		uniform_buffer.buffer = device_surface->device->createBufferUnique( buf_cr_inf );
 	}
 
 	// Memory
@@ -66,6 +72,16 @@ void KST_VK_CameraRenderer::setDeviceSurface( KST_VK_DeviceSurface* surface ){
 		index_buffer.memory = device_surface->device->allocateMemoryUnique( mem_inf );
 		device_surface->device->bindBufferMemory( *index_buffer.buffer, *index_buffer.memory, 0 );
 		index_buffer.data = device_surface->device->mapMemory( *index_buffer.memory, 0, index_buf_size );
+
+		memory_reqs = device_surface->device->getBufferMemoryRequirements( *uniform_buffer.buffer );
+		mem_inf.allocationSize = memory_reqs.size;
+		mem_inf.memoryTypeIndex = device_surface->find_memory_type(
+				memory_reqs.memoryTypeBits,
+				vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent );
+
+		uniform_buffer.memory = device_surface->device->allocateMemoryUnique( mem_inf );
+		device_surface->device->bindBufferMemory( *uniform_buffer.buffer, *uniform_buffer.memory, 0 );
+		uniform_buffer.data = device_surface->device->mapMemory( *uniform_buffer.memory, 0, sizeof( VK_ViewProj ));
 	}
 
 	graphics_queue = device_surface->device->getQueue( device_surface->queue_families.graphics.value(), 0 );
@@ -78,6 +94,8 @@ void KST_VK_CameraRenderer::setDeviceSurface( KST_VK_DeviceSurface* surface ){
 
 void KST_VK_CameraRenderer::begin_scene( Camera& c, size_t window_index ){
 	PROFILE_FUNCTION();
+
+	render_info = {};
 
 	render_info.window_index = window_index;
 
@@ -108,6 +126,14 @@ void KST_VK_CameraRenderer::begin_scene( Camera& c, size_t window_index ){
 	vk::DeviceSize offset = 0;
 	render_info.cmd_buffer[0]->bindVertexBuffers( 0, 1, &vertex_buffer.buffer.get(), &offset );
 	render_info.cmd_buffer[0]->bindIndexBuffer( *index_buffer.buffer, 0, vk::IndexType::eUint32 );
+
+	VK_ViewProj viewproj;
+
+	viewproj.view = c.view;
+	viewproj.proj = c.proj;
+	viewproj.viewproj = c.proj * c.view;
+
+	memcpy( uniform_buffer.data, &viewproj, sizeof( VK_ViewProj ));
 }
 
 void KST_VK_CameraRenderer::draw( Entity e ){
@@ -119,7 +145,11 @@ void KST_VK_CameraRenderer::draw( Entity e ){
 
 	auto [transform, mesh, mat] = e.getComponent<TransformComponent, MeshComponent, MaterialComponent>();
 
-	//TODO transform
+	//Transform
+
+	auto model = glm::scale( glm::translate( glm::identity<glm::mat4>(), transform.loc ) * glm::mat4_cast( transform.rot ), transform.scale );
+
+	render_info.cmd_buffer[0]->pushConstants( *VK_Materials::getInstance()[ mat ].layout, vk::ShaderStageFlagBits::eVertex, 0, sizeof( model ), &model );
 
 	//Mat
 	if( mat.mat != render_info.bound_mat ){
@@ -140,7 +170,6 @@ void KST_VK_CameraRenderer::draw( Entity e ){
 	// TODO clean up (maybe amount instead of size)
 	render_info.cmd_buffer[0]->drawIndexed( indices.size / indices.elem_size, 1, index_buffer.current_offset / indices.elem_size, vertex_buffer.current_offset / verts.elem_size, 0 );
 
-	// TODO amount seems more reasonable
 	vertex_buffer.current_offset += verts.size;
 	index_buffer.current_offset += indices.size;
 }
@@ -191,6 +220,34 @@ void KST_VK_CameraRenderer::endScene(){
 void KST_VK_CameraRenderer::bindMat( VK_Material_T& mat ){
 	PROFILE_FUNCTION();
 
+	vk::DescriptorSetAllocateInfo desc_set_alloc_inf(
+			*mat.desc_pool,
+			1,
+			&*mat.desc_layout );
+
+	if( !mat.desc_sets.contains( this ))
+		mat.desc_sets.emplace( this, device_surface->device->allocateDescriptorSetsUnique( desc_set_alloc_inf ));
+
+	auto& desc_sets = mat.desc_sets.at( this );
+
+	std::array<vk::DescriptorBufferInfo, 1> desc_buf_info{
+		vk::DescriptorBufferInfo( *uniform_buffer.buffer,
+			0,
+			sizeof( VK_ViewProj ))
+	};
+
+	vk::WriteDescriptorSet write_desc(
+			*desc_sets[0],
+			0, 0,
+			vk::DescriptorType::eUniformBuffer,
+			{},
+			desc_buf_info,
+			{}
+		);
+
+	device_surface->device->updateDescriptorSets( 1, &write_desc, 0, nullptr );
+
+
 	vk::RenderPassBeginInfo beg_inf(
 			*mat.renderpass,
 			*mat.framebuffers[render_info.img_index],
@@ -215,4 +272,6 @@ void KST_VK_CameraRenderer::bindMat( VK_Material_T& mat ){
 			{ x, y });
 
 	render_info.cmd_buffer[0]->setScissor( 0, 1, &scissor );
+
+	render_info.cmd_buffer[0]->bindDescriptorSets( vk::PipelineBindPoint::eGraphics, *mat.layout, 0, *desc_sets[0], {} );
 }
