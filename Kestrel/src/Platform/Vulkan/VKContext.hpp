@@ -14,6 +14,7 @@ namespace Kestrel {
 	struct KSTVKQueueFamilies {
 		std::optional<uint32_t> graphics;
 		std::optional<uint32_t> present;
+		std::optional<uint32_t> transfer;
 		//TODO
 
 		bool complete();

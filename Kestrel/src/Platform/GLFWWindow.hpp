@@ -35,7 +35,7 @@ namespace Kestrel {
 			std::vector<vk::Image> images;
 			vk::SurfaceFormatKHR format;
 			vk::Extent2D size;
-			std::vector<vk::UniqueImageView> views;
+			//std::vector<vk::UniqueImageView> views;
 			KSTVKSwapchainDetails details;
 
 		private:

@@ -244,7 +244,7 @@ void KST_VK_Swapchain::Create( const KSTVKSwapchainDetails& capabilities, vk::Su
 			format.colorSpace,
 			size,
 			1,
-			vk::ImageUsageFlagBits::eColorAttachment,
+			vk::ImageUsageFlagBits::eTransferDst,
 			vk::SharingMode::eExclusive,
 			{},
 			capabilities.capabilities.currentTransform,
@@ -257,6 +257,8 @@ void KST_VK_Swapchain::Create( const KSTVKSwapchainDetails& capabilities, vk::Su
 
 	images = device.getSwapchainImagesKHR( *swapchain );
 
+#if 0
+	/*
 	//Image Views
 	views.clear();
 
@@ -277,4 +279,6 @@ void KST_VK_Swapchain::Create( const KSTVKSwapchainDetails& capabilities, vk::Su
 
 		views.push_back( device.createImageViewUnique( cr_inf ));
 	}
+	*/
+#endif
 }

@@ -30,7 +30,7 @@ static vk::UniqueRenderPass createRenderPass( KST_VK_DeviceSurface& device ){
 			vk::AttachmentLoadOp::eDontCare, //TODO add stencil
 			vk::AttachmentStoreOp::eDontCare,
 			vk::ImageLayout::eUndefined,
-			vk::ImageLayout::ePresentSrcKHR );
+			vk::ImageLayout::eTransferSrcOptimal );
 
 	std::array<vk::AttachmentReference, 1> attachment_references{
 		vk::AttachmentReference( 0, vk::ImageLayout::eColorAttachmentOptimal ),
@@ -199,26 +199,6 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 			-1 );
 
 	newMat.pipeline = device->device->createGraphicsPipelineUnique( {}, pipeline_info ).value;
-
-	newMat.framebuffers.resize( device->swapchains[0].views.size());
-
-	for( size_t i = 0; i < device->swapchains[0].views.size(); ++i ){
-
-		std::vector<vk::ImageView> attachments{ *device->swapchains[0].views[i] };
-
-		vk::FramebufferCreateInfo framebuf_inf(
-				{},
-				*newMat.renderpass,
-				attachments,
-				device->swapchains[0].size.width,
-				device->swapchains[0].size.height,
-				1
-			);
-
-		newMat.framebuffers[i] = device->device->createFramebufferUnique( framebuf_inf );
-
-	}
-
 
 	static Material id = 1;
 	newMat.id = id;

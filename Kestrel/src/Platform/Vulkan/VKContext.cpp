@@ -177,6 +177,9 @@ KSTVKQueueFamilies KST_VK_DeviceSurface::find_queue_families( vk::PhysicalDevice
 		if( qfprops[i].queueFlags & vk::QueueFlagBits::eGraphics )
 			indices.graphics = i;
 
+		if( qfprops[i].queueFlags & vk::QueueFlagBits::eTransfer )
+			indices.transfer = i;
+
 		if( dev.getSurfaceSupportKHR( i, surface ))
 			indices.present = i;
 

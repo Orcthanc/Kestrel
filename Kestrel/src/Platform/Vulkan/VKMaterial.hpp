@@ -13,7 +13,7 @@ namespace Kestrel {
 		vk::UniqueDescriptorSetLayout desc_layout;
 		vk::UniqueDescriptorPool desc_pool;
 		vk::UniqueRenderPass renderpass;
-		std::vector<vk::UniqueFramebuffer> framebuffers;
+		std::unordered_map<void*, std::vector<vk::UniqueFramebuffer>> framebuffers;
 		std::unordered_map<void*, std::vector<vk::UniqueDescriptorSet>> desc_sets;
 	};
 
