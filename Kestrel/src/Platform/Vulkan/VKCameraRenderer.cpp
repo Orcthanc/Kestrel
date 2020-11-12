@@ -279,20 +279,23 @@ void KST_VK_CameraRenderer::endScene(){
 
 //TODO check OutOfDate
 
-	std::vector<vk::Semaphore> wait_semas{ *render_info.target->render_ready_sema };
-	std::vector<vk::Flags<vk::PipelineStageFlagBits>> wait_stages{ vk::PipelineStageFlagBits::eColorAttachmentOutput };
-
 	std::vector<vk::CommandBuffer> buffers{ *render_info.cmd_buffer[0] };
 	std::vector signal_semas{ *render_info.target->render_done_sema };
 
 	vk::SubmitInfo sub_inf(
-			wait_semas,
-			wait_stages,
+			{},
+			{},
 			buffers,
 			signal_semas );
 
-	//TODO
-	if( vk::Result::eSuccess != graphics_queue.submit( 1, &sub_inf )){
+	if( vk::Result::eSuccess != device_surface->device->waitForFences( 1, &*render_info.target->render_done_fence, true, UINT64_MAX ))
+		KST_CORE_VERIFY( false, "Could not wait on fence" );
+
+	if( vk::Result::eSuccess != device_surface->device->resetFences( 1, &*render_info.target->render_done_fence )){
+		KST_CORE_VERIFY( false, "Could not reset fence" );
+	}
+
+	if( vk::Result::eSuccess != graphics_queue.submit( 1, &sub_inf, *render_info.target->render_done_fence )){
 		throw std::runtime_error( "Error during queue_submit" );
 	}
 
@@ -316,6 +319,7 @@ void KST_VK_CameraRenderer::endScene(){
 
 		transferbuffer[0]->begin( beg_inf );
 
+/*
 		vk::ImageMemoryBarrier img_barrier(
 				vk::AccessFlagBits::eColorAttachmentWrite,
 				vk::AccessFlagBits::eTransferRead,
@@ -333,7 +337,7 @@ void KST_VK_CameraRenderer::endScene(){
 				0, nullptr,
 				0, nullptr,
 				1, &img_barrier );
-
+*/
 
 		vk::ImageMemoryBarrier swap_barrier1(
 				vk::AccessFlagBits::eMemoryRead,
@@ -397,18 +401,25 @@ void KST_VK_CameraRenderer::endScene(){
 
 		transferbuffer[0]->end();
 
-		vk::PipelineStageFlags flags = vk::PipelineStageFlagBits::eTransfer;
+		std::array<vk::PipelineStageFlags, 2> flags = {
+			vk::PipelineStageFlagBits::eTransfer,
+			vk::PipelineStageFlagBits::eTransfer
+		};
 
-		std::array<vk::Semaphore, 2> copy_done_semas = {
+		std::array<vk::Semaphore, 1> copy_done_semas = {
 			*sync.image_presentable,
-			*render_info.target->render_ready_sema
+		};
+
+		std::array<vk::Semaphore, 2> pre_copy_semas = {
+			*render_info.target->render_done_sema,
+			*sync.start_rendering
 		};
 
 		vk::SubmitInfo submit_inf(
-				1, &*render_info.target->render_done_sema,
-				&flags,
+				2, pre_copy_semas.data(),
+				flags.data(),
 				1, &*transferbuffer[0],
-				2, copy_done_semas.data() );
+				1, copy_done_semas.data() );
 
 		if( vk::Result::eSuccess != transfer_queue.submit( 1, &submit_inf )){
 			KST_CORE_ERROR( "Rendering failed" );

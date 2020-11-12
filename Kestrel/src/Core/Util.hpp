@@ -32,10 +32,24 @@
 		KST_CRITICAL( __VA_ARGS__ );										\
 		throw std::runtime_error( fmt::format( __VA_ARGS__ ));				\
 	}
+
 #else
 #define KST_CORE_ASSERT( ... )
 #define KST_ASSERT( ... )
 #endif
+
+#define KST_CORE_VERIFY( val, ... )											\
+if( !( val )){																\
+	KST_CORE_CRITICAL( __VA_ARGS__ );										\
+	throw std::runtime_error( fmt::format( __VA_ARGS__ ));				\
+}
+
+#define KST_VERIFY( val, ... )											\
+if( !( val )){																\
+	KST_CRITICAL( __VA_ARGS__ );										\
+	throw std::runtime_error( fmt::format( __VA_ARGS__ ));				\
+}
+
 
 #define VERSION_MAJOR 0
 #define VERSION_MINOR 0
