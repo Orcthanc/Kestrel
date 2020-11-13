@@ -506,7 +506,9 @@ void KST_VK_CameraRenderer::bindMat( VK_Material_T& mat ){
 
 		for( size_t i = 0; i < framebufs.size(); ++i ){
 
-			std::vector<vk::ImageView> attachments{ *render_targets[i].color_depth_view[0] };
+			std::vector<vk::ImageView> attachments{
+				*render_targets[i].color_depth_view[0],
+				*render_targets[i].color_depth_view[1] };
 
 			vk::FramebufferCreateInfo framebuf_inf(
 					{},
@@ -526,12 +528,16 @@ void KST_VK_CameraRenderer::bindMat( VK_Material_T& mat ){
 		buf = *mat.framebuffers.at( this ).buffer[ render_targets.getIndex() ];
 	}
 
+	std::array<vk::ClearValue, 2> clear_values{
+		vk::ClearColorValue(std::array<float, 4>{ 0.0, 0.0, 0.0, 0.0 }),
+		vk::ClearDepthStencilValue( 1.0, 0.0 )
+	};
 
 	vk::RenderPassBeginInfo beg_inf(
 			*mat.renderpass,
 			buf,
 			{{ 0, 0 }, device_surface->swapchains[0].size }, //TODO
-			{}
+			clear_values
 		);
 
 	render_info.cmd_buffer[0]->beginRenderPass( beg_inf, vk::SubpassContents::eInline );

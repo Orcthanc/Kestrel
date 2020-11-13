@@ -37,39 +37,57 @@ static vk::UniqueRenderPass createRenderPass( KST_VK_DeviceSurface& device ){
 	PROFILE_FUNCTION();
 	vk::UniqueRenderPass renderpass;
 
-	vk::AttachmentDescription attachment_description(
-			{},
-			device.swapchains[0].format.format, //TODO
-			vk::SampleCountFlagBits::e1,
-			vk::AttachmentLoadOp::eLoad,
-			vk::AttachmentStoreOp::eStore,
-			vk::AttachmentLoadOp::eDontCare, //TODO add stencil
-			vk::AttachmentStoreOp::eDontCare,
-			vk::ImageLayout::eUndefined,
-			vk::ImageLayout::eTransferSrcOptimal );
+	std::array<vk::AttachmentDescription, 2> attachment_descriptions {
+		vk::AttachmentDescription(		//image
+				{},
+				device.swapchains[0].format.format, //TODO
+				vk::SampleCountFlagBits::e1,
+				vk::AttachmentLoadOp::eLoad,
+				vk::AttachmentStoreOp::eStore,
+				vk::AttachmentLoadOp::eDontCare, //TODO add stencil
+				vk::AttachmentStoreOp::eDontCare,
+				vk::ImageLayout::eUndefined,
+				vk::ImageLayout::eTransferSrcOptimal ),
+		vk::AttachmentDescription( 		//depthbuffer
+				{},
+				vk::Format::eD32Sfloat, //TODO
+				vk::SampleCountFlagBits::e1,
+				vk::AttachmentLoadOp::eClear,
+				vk::AttachmentStoreOp::eDontCare, //TODO maybe store for analysis
+				vk::AttachmentLoadOp::eDontCare,
+				vk::AttachmentStoreOp::eDontCare,
+				vk::ImageLayout::eUndefined,
+				vk::ImageLayout::eDepthStencilAttachmentOptimal )
+	};
 
 	std::array<vk::AttachmentReference, 1> attachment_references{
 		vk::AttachmentReference( 0, vk::ImageLayout::eColorAttachmentOptimal ),
+	};
+
+	vk::AttachmentReference depth_attachment_reference {
+		vk::AttachmentReference( 1, vk::ImageLayout::eDepthStencilAttachmentOptimal )
 	};
 
 	vk::SubpassDescription subpass_description(
 			{},
 			vk::PipelineBindPoint::eGraphics,
 			{},
-			attachment_references,
-			{},
-			{},
+			attachment_references,				//Color attachments
+			{},									//Resolve attachments
+			&depth_attachment_reference,		//Depth attachment
 			{} );
 
 	vk::SubpassDependency sub_dependency(
-			VK_SUBPASS_EXTERNAL, 0,
-			vk::PipelineStageFlagBits::eColorAttachmentOutput, vk::PipelineStageFlagBits::eColorAttachmentOutput,
-			{}, vk::AccessFlagBits::eColorAttachmentWrite,
+			VK_SUBPASS_EXTERNAL,
+			0,
+			vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests,
+			vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests,
+			{}, vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eDepthStencilAttachmentWrite,
 			{} );
 
 	vk::RenderPassCreateInfo render_pass_info(
 			{},
-			1, &attachment_description,
+			2, attachment_descriptions.data(),
 			1, &subpass_description,
 			1, &sub_dependency );
 
@@ -195,6 +213,18 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 
 	newMat.renderpass = createRenderPass( *device );
 
+	vk::PipelineDepthStencilStateCreateInfo depth_info (
+			{},
+			VK_TRUE,							//Depth test
+			VK_TRUE,							//Depth write
+			vk::CompareOp::eLessOrEqual,		//Depth op
+			VK_FALSE,							//Depth bounds test
+			VK_FALSE,							//Stencil test
+			{},									//Stencil front
+			{},									//Stencil back
+			0,									//Min depth
+			1 );								//Max depth
+
 	vk::GraphicsPipelineCreateInfo pipeline_info(
 			{},
 			stage_infos,
@@ -204,7 +234,7 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 			&viewport_info,
 			&rasterizer_info,
 			&multisample_info,
-			nullptr, //TODO depth
+			&depth_info,
 			&blend_state_info,
 			&dynamic_state_info,
 			*newMat.layout,

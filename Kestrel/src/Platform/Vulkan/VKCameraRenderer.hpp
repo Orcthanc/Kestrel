@@ -114,7 +114,6 @@ namespace Kestrel {
 			void bindMat( VK_Material_T& mat );
 
 
-
 			//TODO smart ptr
 			KST_VK_DeviceSurface* device_surface = nullptr;
 
