@@ -8,6 +8,22 @@
 
 using namespace Kestrel;
 
+KST_VK_Framebufferset::KST_VK_Framebufferset(): buffer(), lastUpdateID( -1 ){}
+
+KST_VK_Framebufferset::KST_VK_Framebufferset( size_t size ): buffer( size ), lastUpdateID( - 1){}
+
+KST_VK_Framebufferset::operator std::vector<vk::UniqueFramebuffer>& (){
+	return buffer;
+}
+
+KST_VK_Framebufferset::operator const std::vector<vk::UniqueFramebuffer>& () const {
+	return buffer;
+}
+
+bool KST_VK_Framebufferset::dirty( size_t current_id ){
+	return current_id == lastUpdateID;
+}
+
 
 static std::vector<std::pair<ShaderType, const char*>> stages{
 	{ ShaderType::Vertex, ".vert.spv" },
@@ -82,7 +98,6 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 	for( auto& s: shaders ){
 		stage_infos.push_back({ {}, flag_bits_from_stage( s.type ), *s.module, "main", {} });
 	}
-	//TODO maybe delete Vertex3f3f
 
 	auto attrib_desc = VK_Vertex::getAttributeDescription();
 

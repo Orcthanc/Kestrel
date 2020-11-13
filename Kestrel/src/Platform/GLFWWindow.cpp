@@ -1,5 +1,6 @@
 #include "GLFWWindow.hpp"
 #include "Core/Application.hpp"
+#include "Platform/Vulkan/VKContext.hpp"
 
 using namespace Kestrel;
 
@@ -222,6 +223,14 @@ vk::Extent2D KST_VK_Swapchain::find_extent( const KSTVKSwapchainDetails& capabil
 	}
 }
 
+void KST_VK_Swapchain::create( KST_VK_Surface &surface, KST_VK_DeviceSurface& device ){
+	PROFILE_FUNCTION();
+
+	surface.details = KSTVKSwapchainDetails( device.phys_dev, *surface.surface );
+
+	Create( surface.details, *surface.surface, *device.device );
+}
+
 void KST_VK_Swapchain::Create( const KSTVKSwapchainDetails& capabilities, vk::SurfaceKHR surface, vk::Device device ){
 	PROFILE_FUNCTION();
 
@@ -244,7 +253,7 @@ void KST_VK_Swapchain::Create( const KSTVKSwapchainDetails& capabilities, vk::Su
 			format.colorSpace,
 			size,
 			1,
-			vk::ImageUsageFlagBits::eTransferDst,
+			vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eColorAttachment,
 			vk::SharingMode::eExclusive,
 			{},
 			capabilities.capabilities.currentTransform,
@@ -256,29 +265,4 @@ void KST_VK_Swapchain::Create( const KSTVKSwapchainDetails& capabilities, vk::Su
 	swapchain = device.createSwapchainKHRUnique( cr_inf );
 
 	images = device.getSwapchainImagesKHR( *swapchain );
-
-#if 0
-	/*
-	//Image Views
-	views.clear();
-
-	for( size_t i = 0; i < images.size(); ++i ){
-		vk::ImageViewCreateInfo cr_inf;
-		cr_inf.image = images[i];
-		cr_inf.viewType = vk::ImageViewType::e2D;
-		cr_inf.format = format.format;
-		cr_inf.components = vk::ComponentMapping(
-				vk::ComponentSwizzle::eIdentity,
-				vk::ComponentSwizzle::eIdentity,
-				vk::ComponentSwizzle::eIdentity,
-				vk::ComponentSwizzle::eIdentity );
-		cr_inf.subresourceRange = vk::ImageSubresourceRange(
-				vk::ImageAspectFlagBits::eColor,
-				0, 1,
-				0, 1);
-
-		views.push_back( device.createImageViewUnique( cr_inf ));
-	}
-	*/
-#endif
 }

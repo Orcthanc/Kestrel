@@ -20,6 +20,8 @@ namespace Kestrel {
 		std::vector<vk::PresentModeKHR> present_modes;
 	};
 
+	struct KST_VK_Surface;
+
 	struct KST_VK_Swapchain {
 		public:
 			KST_VK_Swapchain() = default;
@@ -29,6 +31,7 @@ namespace Kestrel {
 			KST_VK_Swapchain& operator=( const KST_VK_Swapchain& ) = delete;
 			KST_VK_Swapchain& operator=( KST_VK_Swapchain&& ) = default;
 
+			void create( KST_VK_Surface& surface, KST_VK_DeviceSurface& device );
 			void Create( const KSTVKSwapchainDetails&, vk::SurfaceKHR surface, vk::Device device );
 
 			vk::UniqueSwapchainKHR swapchain;

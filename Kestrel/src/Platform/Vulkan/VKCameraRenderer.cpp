@@ -31,82 +31,94 @@ void KST_VK_CameraRenderer::setDeviceSurface( KST_VK_DeviceSurface* surface ){
 
 	transfer_cmd_pool = device_surface->device->createCommandPoolUnique( cmd_pl_inf );
 
-	// Buffers
-	{
-		vk::BufferCreateInfo buf_cr_inf(
-				{},
-				vert_buf_size,
-				vk::BufferUsageFlagBits::eVertexBuffer,
-				vk::SharingMode::eExclusive,
-				{}
-			);
-
-		vertex_buffer.buffer = device_surface->device->createBufferUnique( buf_cr_inf );
-
-		buf_cr_inf.size = index_buf_size;
-		buf_cr_inf.usage = vk::BufferUsageFlagBits::eIndexBuffer;
-
-		index_buffer.buffer = device_surface->device->createBufferUnique( buf_cr_inf );
-
-		buf_cr_inf.size = sizeof( VK_ViewProj );
-		buf_cr_inf.usage = vk::BufferUsageFlagBits::eUniformBuffer;
-
-		uniform_buffer.buffer = device_surface->device->createBufferUnique( buf_cr_inf );
-	}
-
-	// Memory
-	{
-		auto memory_reqs = device_surface->device->getBufferMemoryRequirements( *vertex_buffer.buffer );
-		vk::MemoryAllocateInfo mem_inf(
-				memory_reqs.size,
-				device_surface->find_memory_type(
-					memory_reqs.memoryTypeBits,
-					vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent )
-			);
-
-		vertex_buffer.memory = device_surface->device->allocateMemoryUnique( mem_inf );
-		device_surface->device->bindBufferMemory( *vertex_buffer.buffer, *vertex_buffer.memory, 0 );
-		vertex_buffer.data = device_surface->device->mapMemory( *vertex_buffer.memory, 0, vert_buf_size );
-
-		memory_reqs = device_surface->device->getBufferMemoryRequirements( *index_buffer.buffer );
-		mem_inf.allocationSize = memory_reqs.size;
-		mem_inf.memoryTypeIndex = device_surface->find_memory_type(
-				memory_reqs.memoryTypeBits,
-				vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent );
-
-		index_buffer.memory = device_surface->device->allocateMemoryUnique( mem_inf );
-		device_surface->device->bindBufferMemory( *index_buffer.buffer, *index_buffer.memory, 0 );
-		index_buffer.data = device_surface->device->mapMemory( *index_buffer.memory, 0, index_buf_size );
-
-		memory_reqs = device_surface->device->getBufferMemoryRequirements( *uniform_buffer.buffer );
-		mem_inf.allocationSize = memory_reqs.size;
-		mem_inf.memoryTypeIndex = device_surface->find_memory_type(
-				memory_reqs.memoryTypeBits,
-				vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent );
-
-		uniform_buffer.memory = device_surface->device->allocateMemoryUnique( mem_inf );
-		device_surface->device->bindBufferMemory( *uniform_buffer.buffer, *uniform_buffer.memory, 0 );
-		uniform_buffer.data = device_surface->device->mapMemory( *uniform_buffer.memory, 0, sizeof( VK_ViewProj ));
-	}
-
 	graphics_queue = device_surface->device->getQueue( device_surface->queue_families.graphics.value(), 0 );
 	present_queue = device_surface->device->getQueue( device_surface->queue_families.present.value(), 0 );
 	transfer_queue = device_surface->device->getQueue( device_surface->queue_families.transfer.value(), 0 );
 
-	//Sync
-	{
-		vk::SemaphoreCreateInfo sem_inf;
-		sync.start_rendering = device_surface->device->createSemaphoreUnique( sem_inf );
-		sync.image_presentable = device_surface->device->createSemaphoreUnique( sem_inf );
+	createBuffers();
+	allocMemory();
+	createSynchronization();
+	createImages();
+}
 
-		vk::FenceCreateInfo fence_cr_inf( vk::FenceCreateFlagBits::eSignaled );
+void KST_VK_CameraRenderer::createBuffers(){
+	PROFILE_FUNCTION();
 
-		for( auto& r: render_targets ){
-			r.render_ready_sema = device_surface->device->createSemaphoreUnique( sem_inf );
-			r.render_done_sema = device_surface->device->createSemaphoreUnique( sem_inf );
-			r.render_done_fence = device_surface->device->createFenceUnique( fence_cr_inf );
-		}
+	vk::BufferCreateInfo buf_cr_inf(
+			{},
+			vert_buf_size,
+			vk::BufferUsageFlagBits::eVertexBuffer,
+			vk::SharingMode::eExclusive,
+			{}
+		);
+
+	vertex_buffer.buffer = device_surface->device->createBufferUnique( buf_cr_inf );
+
+	buf_cr_inf.size = index_buf_size;
+	buf_cr_inf.usage = vk::BufferUsageFlagBits::eIndexBuffer;
+
+	index_buffer.buffer = device_surface->device->createBufferUnique( buf_cr_inf );
+
+	buf_cr_inf.size = sizeof( VK_ViewProj );
+	buf_cr_inf.usage = vk::BufferUsageFlagBits::eUniformBuffer;
+
+	uniform_buffer.buffer = device_surface->device->createBufferUnique( buf_cr_inf );
+}
+
+void KST_VK_CameraRenderer::allocMemory(){
+	PROFILE_FUNCTION();
+
+	auto memory_reqs = device_surface->device->getBufferMemoryRequirements( *vertex_buffer.buffer );
+	vk::MemoryAllocateInfo mem_inf(
+			memory_reqs.size,
+			device_surface->find_memory_type(
+				memory_reqs.memoryTypeBits,
+				vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent )
+		);
+
+	vertex_buffer.memory = device_surface->device->allocateMemoryUnique( mem_inf );
+	device_surface->device->bindBufferMemory( *vertex_buffer.buffer, *vertex_buffer.memory, 0 );
+	vertex_buffer.data = device_surface->device->mapMemory( *vertex_buffer.memory, 0, vert_buf_size );
+
+	memory_reqs = device_surface->device->getBufferMemoryRequirements( *index_buffer.buffer );
+	mem_inf.allocationSize = memory_reqs.size;
+	mem_inf.memoryTypeIndex = device_surface->find_memory_type(
+			memory_reqs.memoryTypeBits,
+			vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent );
+
+	index_buffer.memory = device_surface->device->allocateMemoryUnique( mem_inf );
+	device_surface->device->bindBufferMemory( *index_buffer.buffer, *index_buffer.memory, 0 );
+	index_buffer.data = device_surface->device->mapMemory( *index_buffer.memory, 0, index_buf_size );
+
+	memory_reqs = device_surface->device->getBufferMemoryRequirements( *uniform_buffer.buffer );
+	mem_inf.allocationSize = memory_reqs.size;
+	mem_inf.memoryTypeIndex = device_surface->find_memory_type(
+			memory_reqs.memoryTypeBits,
+			vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent );
+
+	uniform_buffer.memory = device_surface->device->allocateMemoryUnique( mem_inf );
+	device_surface->device->bindBufferMemory( *uniform_buffer.buffer, *uniform_buffer.memory, 0 );
+	uniform_buffer.data = device_surface->device->mapMemory( *uniform_buffer.memory, 0, sizeof( VK_ViewProj ));
+}
+
+void KST_VK_CameraRenderer::createSynchronization(){
+	PROFILE_FUNCTION();
+
+	vk::SemaphoreCreateInfo sem_inf;
+	sync.start_rendering = device_surface->device->createSemaphoreUnique( sem_inf );
+	sync.image_presentable = device_surface->device->createSemaphoreUnique( sem_inf );
+
+	vk::FenceCreateInfo fence_cr_inf( vk::FenceCreateFlagBits::eSignaled );
+
+	for( auto& r: render_targets ){
+		r.render_ready_sema = device_surface->device->createSemaphoreUnique( sem_inf );
+		r.render_done_sema = device_surface->device->createSemaphoreUnique( sem_inf );
+		r.render_done_fence = device_surface->device->createFenceUnique( fence_cr_inf );
 	}
+}
+
+void KST_VK_CameraRenderer::createImages(){
+	PROFILE_FUNCTION();
 
 	std::set<uint32_t> queue_families;
 
@@ -116,86 +128,100 @@ void KST_VK_CameraRenderer::setDeviceSurface( KST_VK_DeviceSurface* surface ){
 	std::vector<uint32_t> queue_families_v( queue_families.begin(), queue_families.end() );
 
 	//Images
-	{
-		//Base
-		vk::ImageCreateInfo img_inf(
-				{},
-				vk::ImageType::e2D,
-				vk::Format::eB8G8R8A8Srgb,
-				{ device_surface->swapchains[0].size.width, device_surface->swapchains[0].size.height, 1 },
-				1, 1,
-				vk::SampleCountFlagBits::e1,
-				vk::ImageTiling::eOptimal,
-				vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferSrc,
-				vk::SharingMode::eExclusive,
-				queue_families_v,
-				vk::ImageLayout::eUndefined
-			);
+	vk::ImageCreateInfo img_inf(
+			{},
+			vk::ImageType::e2D,
+			vk::Format::eB8G8R8A8Srgb,
+			{ device_surface->swapchains[0].size.width, device_surface->swapchains[0].size.height, 1 },
+			1, 1,
+			vk::SampleCountFlagBits::e1,
+			vk::ImageTiling::eOptimal,
+			vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferSrc,
+			vk::SharingMode::eExclusive,
+			queue_families_v,
+			vk::ImageLayout::eUndefined
+		);
 
-		for( auto& r: render_targets ){
-			r.color_depth[0] = device_surface->device->createImageUnique( img_inf );
-			r.size = device_surface->swapchains[0].size;
-		}
-
-		img_inf.format = vk::Format::eD32Sfloat;
-		img_inf.usage = vk::ImageUsageFlagBits::eDepthStencilAttachment;
-
-		for( auto& r: render_targets ){
-			r.color_depth[1] = device_surface->device->createImageUnique( img_inf );
-		}
-
-		//Memory
-		for( auto& r: render_targets ){
-			auto mem_reqs = device_surface->device->getImageMemoryRequirements( *r.color_depth[0] );
-			vk::MemoryAllocateInfo mem_inf(
-					mem_reqs.size,
-					device_surface->find_memory_type(
-						mem_reqs.memoryTypeBits,
-						vk::MemoryPropertyFlagBits::eDeviceLocal )
-				);
-
-			r.color_depth_mem[0] = device_surface->device->allocateMemoryUnique( mem_inf );
-			device_surface->device->bindImageMemory( *r.color_depth[0], *r.color_depth_mem[0], 0 );
-
-			mem_reqs = device_surface->device->getImageMemoryRequirements( *r.color_depth[1] );
-			mem_inf = vk::MemoryAllocateInfo(
-					mem_reqs.size,
-					device_surface->find_memory_type(
-						mem_reqs.memoryTypeBits,
-						vk::MemoryPropertyFlagBits::eDeviceLocal )
-				);
-
-			r.color_depth_mem[1] = device_surface->device->allocateMemoryUnique( mem_inf );
-			device_surface->device->bindImageMemory( *r.color_depth[1], *r.color_depth_mem[1], 0 );
-		}
-
-		//Views
-		vk::ImageViewCreateInfo img_view_inf(
-				{},
-				{}, //Set in loop
-				vk::ImageViewType::e2D,
-				{}, //Set in loop
-				vk::ComponentMapping(),
-				vk::ImageSubresourceRange(
-					{}, //Set in loop
-					0, 1,
-					0, 1 )
-			);
-
-		for( auto& r: render_targets ){
-			img_view_inf.image = *r.color_depth[0];
-			img_view_inf.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
-			img_view_inf.format = vk::Format::eB8G8R8A8Srgb;
-
-			r.color_depth_view[0] = device_surface->device->createImageViewUnique( img_view_inf );
-
-			img_view_inf.image = *r.color_depth[1];
-			img_view_inf.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eDepth;
-			img_view_inf.format = vk::Format::eD32Sfloat;
-
-			r.color_depth_view[1] = device_surface->device->createImageViewUnique( img_view_inf );
-		}
+	for( auto& r: render_targets ){
+		r.color_depth[0] = device_surface->device->createImageUnique( img_inf );
+		r.size = device_surface->swapchains[0].size;
 	}
+
+	img_inf.format = vk::Format::eD32Sfloat;
+	img_inf.usage = vk::ImageUsageFlagBits::eDepthStencilAttachment;
+
+	for( auto& r: render_targets ){
+		r.color_depth[1] = device_surface->device->createImageUnique( img_inf );
+	}
+
+	//Memory
+	for( auto& r: render_targets ){
+		auto mem_reqs = device_surface->device->getImageMemoryRequirements( *r.color_depth[0] );
+		vk::MemoryAllocateInfo mem_inf(
+				mem_reqs.size,
+				device_surface->find_memory_type(
+					mem_reqs.memoryTypeBits,
+					vk::MemoryPropertyFlagBits::eDeviceLocal )
+			);
+
+		r.color_depth_mem[0] = device_surface->device->allocateMemoryUnique( mem_inf );
+		device_surface->device->bindImageMemory( *r.color_depth[0], *r.color_depth_mem[0], 0 );
+
+		mem_reqs = device_surface->device->getImageMemoryRequirements( *r.color_depth[1] );
+		mem_inf = vk::MemoryAllocateInfo(
+				mem_reqs.size,
+				device_surface->find_memory_type(
+					mem_reqs.memoryTypeBits,
+					vk::MemoryPropertyFlagBits::eDeviceLocal )
+			);
+
+		r.color_depth_mem[1] = device_surface->device->allocateMemoryUnique( mem_inf );
+		device_surface->device->bindImageMemory( *r.color_depth[1], *r.color_depth_mem[1], 0 );
+	}
+
+	//Views
+	vk::ImageViewCreateInfo img_view_inf(
+			{},
+			{}, //Set in loop
+			vk::ImageViewType::e2D,
+			{}, //Set in loop
+			vk::ComponentMapping(),
+			vk::ImageSubresourceRange(
+				{}, //Set in loop
+				0, 1,
+				0, 1 )
+		);
+
+	for( auto& r: render_targets ){
+		img_view_inf.image = *r.color_depth[0];
+		img_view_inf.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
+		img_view_inf.format = vk::Format::eB8G8R8A8Srgb;
+
+		r.color_depth_view[0] = device_surface->device->createImageViewUnique( img_view_inf );
+
+		img_view_inf.image = *r.color_depth[1];
+		img_view_inf.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eDepth;
+		img_view_inf.format = vk::Format::eD32Sfloat;
+
+		r.color_depth_view[1] = device_surface->device->createImageViewUnique( img_view_inf );
+	}
+}
+
+void KST_VK_CameraRenderer::onSizeChange( bool resetSync ){
+	PROFILE_FUNCTION();
+	device_surface->device->waitIdle();
+
+
+	device_surface->swapchains[ render_info.window_index ].create(
+			(*device_surface->windows)[ render_info.window_index ].surface,
+			*device_surface );
+
+
+	if( resetSync )
+		createSynchronization();
+	createImages();
+
+	++current_id;
 }
 
 void KST_VK_CameraRenderer::begin_scene( Camera& c, size_t window_index ){
@@ -273,11 +299,13 @@ void KST_VK_CameraRenderer::draw( Entity e ){
 }
 
 void KST_VK_CameraRenderer::endScene(){
+	PROFILE_FUNCTION();
+
 	render_info.cmd_buffer[0]->endRenderPass();
 	render_info.cmd_buffer[0]->end();
 
 
-//TODO check OutOfDate
+	//TODO check OutOfDate
 
 	std::vector<vk::CommandBuffer> buffers{ *render_info.cmd_buffer[0] };
 	std::vector signal_semas{ *render_info.target->render_done_sema };
@@ -295,7 +323,7 @@ void KST_VK_CameraRenderer::endScene(){
 		KST_CORE_VERIFY( false, "Could not reset fence" );
 	}
 
-	if( vk::Result::eSuccess != graphics_queue.submit( 1, &sub_inf, *render_info.target->render_done_fence )){
+	if( vk::Result::eSuccess != graphics_queue.submit( 1, &sub_inf )){
 		throw std::runtime_error( "Error during queue_submit" );
 	}
 
@@ -303,6 +331,11 @@ void KST_VK_CameraRenderer::endScene(){
 			*device_surface->swapchains[render_info.window_index].swapchain,
 			UINT64_MAX,
 			*sync.start_rendering );
+
+	if( img_res.result == vk::Result::eErrorOutOfDateKHR ){
+		onSizeChange( true );
+		return;
+	}
 
 	uint32_t img_index = img_res.value;
 	{
@@ -318,26 +351,6 @@ void KST_VK_CameraRenderer::endScene(){
 				vk::CommandBufferUsageFlagBits::eOneTimeSubmit, {}  );
 
 		transferbuffer[0]->begin( beg_inf );
-
-/*
-		vk::ImageMemoryBarrier img_barrier(
-				vk::AccessFlagBits::eColorAttachmentWrite,
-				vk::AccessFlagBits::eTransferRead,
-				vk::ImageLayout::eColorAttachmentOptimal,
-				vk::ImageLayout::eTransferSrcOptimal,
-				device_surface->queue_families.graphics.value(),
-				device_surface->queue_families.transfer.value(),
-				*render_info.target->color_depth[0],
-				vk::ImageSubresourceRange( vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1 ));
-
-		transferbuffer[0]->pipelineBarrier(
-				vk::PipelineStageFlagBits::eColorAttachmentOutput,
-				vk::PipelineStageFlagBits::eTransfer,
-				{},
-				0, nullptr,
-				0, nullptr,
-				1, &img_barrier );
-*/
 
 		vk::ImageMemoryBarrier swap_barrier1(
 				vk::AccessFlagBits::eMemoryRead,
@@ -421,33 +434,36 @@ void KST_VK_CameraRenderer::endScene(){
 				1, &*transferbuffer[0],
 				1, copy_done_semas.data() );
 
-		if( vk::Result::eSuccess != transfer_queue.submit( 1, &submit_inf )){
+		if( vk::Result::eSuccess != transfer_queue.submit( 1, &submit_inf, *render_info.target->render_done_fence )){
 			KST_CORE_ERROR( "Rendering failed" );
 			throw std::runtime_error( "Rendering failed" );
 		}
 
-		transfer_queue.waitIdle();
+		std::vector swapchains{ *device_surface->swapchains[render_info.window_index].swapchain };
+		std::vector indices{ img_index };
+		std::vector ready_semas{ *sync.image_presentable };
+		vk::PresentInfoKHR pres_inf(
+				ready_semas,
+				swapchains,
+				indices,
+				{} );
+
+		try {
+			switch( present_queue.presentKHR( pres_inf )){
+				case vk::Result::eErrorOutOfDateKHR:
+				case vk::Result::eSuboptimalKHR:
+					onSizeChange( false );
+					break;
+				default:
+					break;
+			}
+		} catch( vk::OutOfDateKHRError e ){
+			onSizeChange( false );
+		}
+
+		//TODO remove
+		present_queue.waitIdle();
 	}
-
-	std::vector swapchains{ *device_surface->swapchains[render_info.window_index].swapchain };
-	std::vector indices{ img_index };
-	std::vector ready_semas{ *sync.image_presentable };
-	vk::PresentInfoKHR pres_inf(
-			ready_semas,
-			swapchains,
-			indices,
-			{} );
-
-	switch( present_queue.presentKHR( pres_inf )){
-		case vk::Result::eErrorOutOfDateKHR:
-		case vk::Result::eSuboptimalKHR:
-			//TODO
-			break;
-		default:
-			break;
-	}
-
-	present_queue.waitIdle();
 }
 
 void KST_VK_CameraRenderer::bindMat( VK_Material_T& mat ){
@@ -482,9 +498,9 @@ void KST_VK_CameraRenderer::bindMat( VK_Material_T& mat ){
 
 	vk::Framebuffer buf;
 
-	if( !mat.framebuffers.contains( this )){
-		mat.framebuffers[ this ] = std::vector<vk::UniqueFramebuffer>();
-		auto& framebufs = mat.framebuffers[this];
+	// Creates if it does not exist and checks if up to date
+	if( !mat.framebuffers[ this ].dirty( current_id )){
+		std::vector<vk::UniqueFramebuffer>& framebufs = mat.framebuffers[this].buffer;
 
 		framebufs.resize( frames );
 
@@ -507,7 +523,7 @@ void KST_VK_CameraRenderer::bindMat( VK_Material_T& mat ){
 
 		buf = *framebufs[ render_targets.getIndex() ];
 	} else {
-		buf = *mat.framebuffers.at( this )[ render_targets.getIndex() ];
+		buf = *mat.framebuffers.at( this ).buffer[ render_targets.getIndex() ];
 	}
 
 

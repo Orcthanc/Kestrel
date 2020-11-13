@@ -104,7 +104,17 @@ namespace Kestrel {
 			virtual void endScene() override;
 
 		private:
+			void onSizeChange( bool resetSync );
+
+			void createBuffers();
+			void allocMemory();
+
+			void createSynchronization();
+			void createImages();
 			void bindMat( VK_Material_T& mat );
+
+
+
 			//TODO smart ptr
 			KST_VK_DeviceSurface* device_surface = nullptr;
 
@@ -132,6 +142,7 @@ namespace Kestrel {
 			static constexpr size_t frames = 2;
 
 			KST_VK_RenderChain<frames> render_targets;
+			size_t current_id = 0;
 	};
 
 
