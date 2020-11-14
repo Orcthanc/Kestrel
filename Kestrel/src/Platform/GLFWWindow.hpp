@@ -58,10 +58,10 @@ namespace Kestrel {
 			~KST_GLFW_VK_Window();
 
 			KST_GLFW_VK_Window( const KST_GLFW_VK_Window& ) = delete;
-			KST_GLFW_VK_Window( KST_GLFW_VK_Window&& );
+			KST_GLFW_VK_Window( KST_GLFW_VK_Window&& ) noexcept;
 
 			KST_GLFW_VK_Window& operator=( const KST_GLFW_VK_Window& ) = delete;
-			KST_GLFW_VK_Window& operator=( KST_GLFW_VK_Window&& );
+			KST_GLFW_VK_Window& operator=( KST_GLFW_VK_Window&& ) noexcept;
 
 			std::pair<unsigned int, unsigned int> getResolution() override;
 

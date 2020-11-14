@@ -103,7 +103,7 @@ KST_GLFW_VK_Window::~KST_GLFW_VK_Window(){
 	}
 }
 
-KST_GLFW_VK_Window::KST_GLFW_VK_Window( KST_GLFW_VK_Window&& w ){
+KST_GLFW_VK_Window::KST_GLFW_VK_Window( KST_GLFW_VK_Window&& w ) noexcept{
 	window = std::move( w.window );
 	surface = std::move( w.surface );
 	w_settings = std::move( w.w_settings );
@@ -114,7 +114,7 @@ KST_GLFW_VK_Window::KST_GLFW_VK_Window( KST_GLFW_VK_Window&& w ){
 	w.destroy = false;
 }
 
-KST_GLFW_VK_Window& KST_GLFW_VK_Window::operator=( KST_GLFW_VK_Window&& w ){
+KST_GLFW_VK_Window& KST_GLFW_VK_Window::operator=( KST_GLFW_VK_Window&& w ) noexcept{
 	if( &w == this ){
 		return *this;
 	}
