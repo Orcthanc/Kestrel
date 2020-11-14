@@ -334,8 +334,8 @@ void KST_VK_CameraRenderer::endScene(){
 			{} );
 
 	if( img_res.result == vk::Result::eErrorOutOfDateKHR ){
-		//onSizeChange( true );
-		//return;
+		onSizeChange( true );
+		return;
 	}
 
 	uint32_t img_index = img_res.value;
