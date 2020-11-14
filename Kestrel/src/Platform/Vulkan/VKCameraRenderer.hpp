@@ -5,7 +5,6 @@
 
 #include "Platform/Vulkan/VKContext.hpp"
 #include "Renderer/Material.hpp"
-#include "Platform/Vulkan/VKMaterial.hpp"
 #include "Platform/Vulkan/VKVertex.hpp"
 
 namespace Kestrel {
@@ -29,11 +28,11 @@ namespace Kestrel {
 		vk::UniqueFence render_done_fence;
 	};
 
-	template <size_t size>
+	template <size_t tsize>
 	struct KST_VK_RenderChain {
 		public:
 			KST_VK_RenderTarget& startPass(){
-				index = ( index + 1 ) % size;
+				index = ( index + 1 ) % tsize;
 				return targets[index];
 			}
 
@@ -73,8 +72,9 @@ namespace Kestrel {
 				return index;
 			}
 
+			static constexpr size_t size = tsize;
 		private:
-			std::array<KST_VK_RenderTarget, size> targets;
+			std::array<KST_VK_RenderTarget, tsize> targets;
 			size_t index = 0;
 	};
 
@@ -111,8 +111,6 @@ namespace Kestrel {
 
 			void createSynchronization();
 			void createImages();
-			void bindMat( VK_Material_T& mat );
-
 
 			//TODO smart ptr
 			KST_VK_DeviceSurface* device_surface = nullptr;
@@ -143,8 +141,4 @@ namespace Kestrel {
 			KST_VK_RenderChain<frames> render_targets;
 			size_t current_id = 0;
 	};
-
-
-
-
 }

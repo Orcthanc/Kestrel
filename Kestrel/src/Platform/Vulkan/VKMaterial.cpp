@@ -8,9 +8,9 @@
 
 using namespace Kestrel;
 
-KST_VK_Framebufferset::KST_VK_Framebufferset(): buffer(), lastUpdateID( -1 ){}
+KST_VK_Framebufferset::KST_VK_Framebufferset(): buffer(){}
 
-KST_VK_Framebufferset::KST_VK_Framebufferset( size_t size ): buffer( size ), lastUpdateID( - 1){}
+KST_VK_Framebufferset::KST_VK_Framebufferset( size_t size ): buffer( size ){}
 
 KST_VK_Framebufferset::operator std::vector<vk::UniqueFramebuffer>& (){
 	return buffer;
@@ -23,6 +23,24 @@ KST_VK_Framebufferset::operator const std::vector<vk::UniqueFramebuffer>& () con
 bool KST_VK_Framebufferset::dirty( size_t current_id ){
 	return current_id == lastUpdateID;
 }
+
+BindingInfo::BindingInfo(
+		KST_VK_DeviceSurface& device,
+		RendererID id,
+		size_t dirty_check_id,
+		std::vector<std::array<vk::ImageView, 2>>& imgs,
+		vk::Extent2D img_size,
+		size_t img_bind_index,
+		vk::CommandBuffer cmd_buffer,
+		vk::Buffer uniform_buffer ):
+	device( device ),
+	id( id ),
+	dirty_check_id( dirty_check_id ),
+	img_views( imgs ),
+	img_size( img_size ),
+	img_bind_index( img_bind_index ),
+	cmd_buffer( cmd_buffer ),
+	uniform_buffer( uniform_buffer ){}
 
 
 static std::vector<std::pair<ShaderType, const char*>> stages{
@@ -249,6 +267,99 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 	newMat.id = id;
 	materials.emplace( id, std::move( newMat ));
 	return id++;
+}
+
+void VK_Material_T::bind( const BindingInfo& bind_inf ){
+	PROFILE_FUNCTION();
+
+	vk::DescriptorSetAllocateInfo desc_set_alloc_inf(
+			*desc_pool,
+			1,
+			&*desc_layout );
+
+	if( !desc_sets.contains( bind_inf.id ))
+		desc_sets.emplace( bind_inf.id, bind_inf.device.device->allocateDescriptorSetsUnique( desc_set_alloc_inf ));
+
+	auto& desc_set = desc_sets.at( bind_inf.id );
+
+	std::array<vk::DescriptorBufferInfo, 1> desc_buf_info{
+		vk::DescriptorBufferInfo( bind_inf.uniform_buffer,
+			0,
+			sizeof( VK_ViewProj ))
+	};
+
+	vk::WriteDescriptorSet write_desc(
+			*desc_set[0],
+			0, 0,
+			vk::DescriptorType::eUniformBuffer,
+			{},
+			desc_buf_info,
+			{}
+		);
+
+	bind_inf.device.device->updateDescriptorSets( 1, &write_desc, 0, nullptr );
+
+	vk::Framebuffer buf;
+
+	// Creates if it does not exist and checks if up to date
+	if( !framebuffers[ bind_inf.id ].dirty( bind_inf.dirty_check_id )){
+		std::vector<vk::UniqueFramebuffer>& framebufs = framebuffers[ bind_inf.id ].buffer;
+
+		framebufs.resize( bind_inf.img_views.size() );
+
+		for( size_t i = 0; i < framebufs.size(); ++i ){
+
+			std::vector<vk::ImageView> attachments{
+				bind_inf.img_views[i][0],
+				bind_inf.img_views[i][1] };
+
+			vk::FramebufferCreateInfo framebuf_inf(
+					{},
+					*renderpass,
+					attachments,
+					bind_inf.img_size.width,
+					bind_inf.img_size.height,
+					1
+				);
+
+			framebufs[i] = bind_inf.device.device->createFramebufferUnique( framebuf_inf );
+
+		}
+
+		buf = *framebufs[ bind_inf.img_bind_index ];
+	} else {
+		buf = *framebuffers.at( bind_inf.id ).buffer[ bind_inf.img_bind_index ];
+	}
+
+	std::array<vk::ClearValue, 2> clear_values{
+		vk::ClearColorValue(std::array<float, 4>{ 0.0, 0.0, 0.0, 0.0 }),
+		vk::ClearDepthStencilValue( 1.0f, 0 )
+	};
+
+	vk::RenderPassBeginInfo beg_inf(
+			*renderpass,
+			buf,
+			{{ 0, 0 }, bind_inf.img_size },
+			clear_values
+		);
+
+	bind_inf.cmd_buffer.beginRenderPass( beg_inf, vk::SubpassContents::eInline );
+	bind_inf.cmd_buffer.bindPipeline( vk::PipelineBindPoint::eGraphics, *pipeline );
+
+	vk::Viewport viewport(
+			0, 0,
+			static_cast<float>( bind_inf.img_size.width ), static_cast<float>( bind_inf.img_size.height ),
+			0, 1 );
+
+	bind_inf.cmd_buffer.setViewport( 0, 1, &viewport );
+
+	vk::Rect2D scissor(
+			{ 0, 0 },
+			{ bind_inf.img_size.width, bind_inf.img_size.height });
+
+	bind_inf.cmd_buffer.setScissor( 0, 1, &scissor );
+
+	bind_inf.cmd_buffer.bindDescriptorSets( vk::PipelineBindPoint::eGraphics, *layout, 0, *desc_set[0], {} );
 }
 
 VK_Materials& VK_Materials::getInstance(){

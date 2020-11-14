@@ -20,15 +20,48 @@ namespace Kestrel {
 		size_t lastUpdateID = -1;
 	};
 
+	using RendererID = void*;
+
+	struct BindingInfo {
+		BindingInfo( 
+				KST_VK_DeviceSurface& device,
+				RendererID id,
+				size_t dirty_check_id,
+				std::vector<std::array<vk::ImageView, 2>>& imgs,
+				vk::Extent2D img_size,
+				size_t img_bind_index,
+				vk::CommandBuffer cmd_buffer,
+				vk::Buffer uniform_buffer );
+
+		KST_VK_DeviceSurface& device;
+		RendererID id;
+		size_t dirty_check_id;
+		std::vector<std::array<vk::ImageView, 2>> img_views;
+		vk::Extent2D img_size;
+		size_t img_bind_index;
+		vk::CommandBuffer cmd_buffer;
+		vk::Buffer uniform_buffer;
+	};
+
 	struct VK_Material_T {
+		VK_Material_T() = default;
+
+		VK_Material_T( const VK_Material_T& ) = delete;
+		VK_Material_T( VK_Material_T&& ) = default;
+
+		VK_Material_T& operator=( const VK_Material_T& ) = delete;
+		VK_Material_T& operator=( VK_Material_T&& ) = default;
+
+		void bind( const BindingInfo& );
+
 		Material id;
 		vk::UniquePipeline pipeline;
 		vk::UniquePipelineLayout layout;
 		vk::UniqueDescriptorSetLayout desc_layout;
 		vk::UniqueDescriptorPool desc_pool;
 		vk::UniqueRenderPass renderpass;
-		std::unordered_map<void*, KST_VK_Framebufferset> framebuffers;
-		std::unordered_map<void*, std::vector<vk::UniqueDescriptorSet>> desc_sets;
+		std::unordered_map<RendererID, KST_VK_Framebufferset> framebuffers;
+		std::unordered_map<RendererID, std::vector<vk::UniqueDescriptorSet>> desc_sets;
 	};
 
 	struct VK_Materials: public Materials {

@@ -280,7 +280,27 @@ void KST_VK_CameraRenderer::draw( Entity e ){
 		if( render_info.bound_mat != -1 ){
 			render_info.cmd_buffer[0]->endRenderPass();
 		}
-		bindMat( VK_Materials::getInstance()[ mat ]);
+		std::vector<std::array<vk::ImageView, 2>> views;
+
+		views.reserve( render_targets.size );
+
+		for( auto& t: render_targets ){
+			views.push_back(std::array<vk::ImageView, 2>{
+					*t.color_depth_view[0],
+					*t.color_depth_view[1] });
+		}
+
+		BindingInfo bind_inf(
+				*device_surface,
+				this,
+				current_id,
+				views,
+				render_targets.begin()->size,
+				render_targets.getIndex(),
+				*render_info.cmd_buffer[0],
+				*uniform_buffer.buffer );
+
+		VK_Materials::getInstance()[ mat ].bind( bind_inf );
 	}
 
 	auto verts = mesh.mesh->getVertices();
@@ -465,99 +485,4 @@ void KST_VK_CameraRenderer::endScene(){
 		//TODO remove
 		present_queue.waitIdle();
 	}
-}
-
-void KST_VK_CameraRenderer::bindMat( VK_Material_T& mat ){
-	PROFILE_FUNCTION();
-
-	vk::DescriptorSetAllocateInfo desc_set_alloc_inf(
-			*mat.desc_pool,
-			1,
-			&*mat.desc_layout );
-
-	if( !mat.desc_sets.contains( this ))
-		mat.desc_sets.emplace( this, device_surface->device->allocateDescriptorSetsUnique( desc_set_alloc_inf ));
-
-	auto& desc_sets = mat.desc_sets.at( this );
-
-	std::array<vk::DescriptorBufferInfo, 1> desc_buf_info{
-		vk::DescriptorBufferInfo( *uniform_buffer.buffer,
-			0,
-			sizeof( VK_ViewProj ))
-	};
-
-	vk::WriteDescriptorSet write_desc(
-			*desc_sets[0],
-			0, 0,
-			vk::DescriptorType::eUniformBuffer,
-			{},
-			desc_buf_info,
-			{}
-		);
-
-	device_surface->device->updateDescriptorSets( 1, &write_desc, 0, nullptr );
-
-	vk::Framebuffer buf;
-
-	// Creates if it does not exist and checks if up to date
-	if( !mat.framebuffers[ this ].dirty( current_id )){
-		std::vector<vk::UniqueFramebuffer>& framebufs = mat.framebuffers[this].buffer;
-
-		framebufs.resize( frames );
-
-		for( size_t i = 0; i < framebufs.size(); ++i ){
-
-			std::vector<vk::ImageView> attachments{
-				*render_targets[i].color_depth_view[0],
-				*render_targets[i].color_depth_view[1] };
-
-			vk::FramebufferCreateInfo framebuf_inf(
-					{},
-					*mat.renderpass,
-					attachments,
-					render_targets[i].size.width,
-					render_targets[i].size.height,
-					1
-				);
-
-			framebufs[i] = device_surface->device->createFramebufferUnique( framebuf_inf );
-
-		}
-
-		buf = *framebufs[ render_targets.getIndex() ];
-	} else {
-		buf = *mat.framebuffers.at( this ).buffer[ render_targets.getIndex() ];
-	}
-
-	std::array<vk::ClearValue, 2> clear_values{
-		vk::ClearColorValue(std::array<float, 4>{ 0.0, 0.0, 0.0, 0.0 }),
-		vk::ClearDepthStencilValue( 1.0f, 0 )
-	};
-
-	vk::RenderPassBeginInfo beg_inf(
-			*mat.renderpass,
-			buf,
-			{{ 0, 0 }, device_surface->swapchains[0].size }, //TODO
-			clear_values
-		);
-
-	render_info.cmd_buffer[0]->beginRenderPass( beg_inf, vk::SubpassContents::eInline );
-	render_info.cmd_buffer[0]->bindPipeline( vk::PipelineBindPoint::eGraphics, *mat.pipeline );
-
-	auto [x, y] = (*device_surface->windows)[render_info.window_index].getResolution();
-
-	vk::Viewport viewport(
-			0, 0,
-			static_cast<float>( x ), static_cast<float>( y ),
-			0, 1 );
-
-	render_info.cmd_buffer[0]->setViewport( 0, 1, &viewport );
-
-	vk::Rect2D scissor(
-			{ 0, 0 },
-			{ x, y });
-
-	render_info.cmd_buffer[0]->setScissor( 0, 1, &scissor );
-
-	render_info.cmd_buffer[0]->bindDescriptorSets( vk::PipelineBindPoint::eGraphics, *mat.layout, 0, *desc_sets[0], {} );
 }
