@@ -244,6 +244,8 @@ void KST_VK_Swapchain::Create( const KSTVKSwapchainDetails& capabilities, vk::Su
 		count = capabilities.capabilities.maxImageCount;
 	}
 
+	KST_CORE_INFO( "Resizing swapchain to size {} x {}", size.width, size.height );
+
 	//Create swapchain
 	vk::SwapchainCreateInfoKHR cr_inf(
 			{},
