@@ -43,7 +43,7 @@ void KST_VK_Context::Init( const ContextInformation& c_inf ){
 	const std::vector<const char*> wanted_layers = {
 		"VK_LAYER_KHRONOS_validation",
 //		"VK_LAYER_MANGOHUD_overlay",
-//		"VK_LAYER_LUNARG_api_dump",
+		"VK_LAYER_LUNARG_api_dump",
 	};
 
 	{

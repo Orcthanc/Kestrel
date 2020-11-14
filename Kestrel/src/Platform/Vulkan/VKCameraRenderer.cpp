@@ -323,14 +323,15 @@ void KST_VK_CameraRenderer::endScene(){
 		KST_CORE_VERIFY( false, "Could not reset fence" );
 	}
 
-	if( vk::Result::eSuccess != graphics_queue.submit( 1, &sub_inf )){
+	if (vk::Result::eSuccess != graphics_queue.submit(1, &sub_inf, {})) {
 		throw std::runtime_error( "Error during queue_submit" );
 	}
 
 	auto img_res = device_surface->device->acquireNextImageKHR(
 			*device_surface->swapchains[render_info.window_index].swapchain,
 			UINT64_MAX,
-			*sync.start_rendering );
+			*sync.start_rendering,
+			{} );
 
 	if( img_res.result == vk::Result::eErrorOutOfDateKHR ){
 		//onSizeChange( true );
@@ -530,7 +531,7 @@ void KST_VK_CameraRenderer::bindMat( VK_Material_T& mat ){
 
 	std::array<vk::ClearValue, 2> clear_values{
 		vk::ClearColorValue(std::array<float, 4>{ 0.0, 0.0, 0.0, 0.0 }),
-		vk::ClearDepthStencilValue( 1.0, 0.0 )
+		vk::ClearDepthStencilValue( 1.0f, 0 )
 	};
 
 	vk::RenderPassBeginInfo beg_inf(
@@ -547,7 +548,7 @@ void KST_VK_CameraRenderer::bindMat( VK_Material_T& mat ){
 
 	vk::Viewport viewport(
 			0, 0,
-			x, y,
+			static_cast<float>( x ), static_cast<float>( y ),
 			0, 1 );
 
 	render_info.cmd_buffer[0]->setViewport( 0, 1, &viewport );

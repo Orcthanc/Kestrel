@@ -13,8 +13,8 @@ namespace Kestrel {
 	struct KST_VK_Buffer {
 		vk::UniqueBuffer buffer;
 		vk::UniqueDeviceMemory memory;
-		void* data;
-		size_t current_offset;
+		void* data = nullptr;
+		size_t current_offset = 0;
 	};
 
 	struct KST_VK_RenderTarget {
@@ -75,13 +75,13 @@ namespace Kestrel {
 
 		private:
 			std::array<KST_VK_RenderTarget, size> targets;
-			size_t index;
+			size_t index = 0;
 	};
 
 	struct RenderInfo {
 		std::vector<vk::UniqueCommandBuffer> cmd_buffer;
-		Material bound_mat = -1;
-		size_t window_index = -1;
+		Material bound_mat = static_cast<Material>( -1 );
+		size_t window_index = static_cast<size_t>( -1 );
 		KST_VK_RenderTarget* target;
 	};
 

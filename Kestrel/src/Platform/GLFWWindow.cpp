@@ -262,7 +262,7 @@ void KST_VK_Swapchain::Create( const KSTVKSwapchainDetails& capabilities, vk::Su
 			vk::CompositeAlphaFlagBitsKHR::eOpaque,
 			present_mode,
 			true,
-			{} );
+			*swapchain );
 
 	swapchain = device.createSwapchainKHRUnique( cr_inf );
 

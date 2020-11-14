@@ -7,10 +7,10 @@
 
 using namespace Kestrel;
 
-NaiveCamera::NaiveCamera( float fov, float aspect, float near, float far ){
+NaiveCamera::NaiveCamera( float fov, float aspect, float near_plane, float far_plane ){
 	PROFILE_FUNCTION();
 
-	proj = glm::perspective( fov, aspect, near, far );
+	proj = glm::perspective( fov, aspect, near_plane, far_plane );
 	proj[1][1] *= -1;
 	view = glm::lookAt( glm::vec3( 2.0, 2.0, 2.0 ), glm::vec3{}, glm::vec3( 0.0, 0.0, 1.0 ));
 
