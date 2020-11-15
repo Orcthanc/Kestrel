@@ -4,8 +4,9 @@
 #include "Renderer/Camera.hpp"
 
 #include "Platform/Vulkan/VKContext.hpp"
-#include "Renderer/Material.hpp"
 #include "Platform/Vulkan/VKVertex.hpp"
+#include "Renderer/Material.hpp"
+#include "Renderer/CameraModes.hpp"
 
 namespace Kestrel {
 
@@ -83,6 +84,7 @@ namespace Kestrel {
 		Material bound_mat = static_cast<Material>( -1 );
 		size_t window_index = static_cast<size_t>( -1 );
 		KST_VK_RenderTarget* target;
+		RenderModeFlags render_mode;
 	};
 
 	struct PresentSynchronization {

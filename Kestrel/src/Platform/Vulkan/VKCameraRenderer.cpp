@@ -230,6 +230,8 @@ void KST_VK_CameraRenderer::begin_scene( Camera& c, size_t window_index ){
 
 	render_info.window_index = window_index;
 
+	render_info.render_mode = c.camera_render_mode;
+
 	vertex_buffer.current_offset = 0;
 	index_buffer.current_offset = 0;
 
@@ -298,7 +300,7 @@ void KST_VK_CameraRenderer::draw( Entity e ){
 				render_targets.getIndex(),
 				*render_info.cmd_buffer[0],
 				*uniform_buffer.buffer,
-				RenderModeFlags::eNone );
+				render_info.render_mode );
 
 		VK_Materials::getInstance()[ mat ].bind( bind_inf );
 	}

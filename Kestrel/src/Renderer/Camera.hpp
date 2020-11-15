@@ -4,6 +4,8 @@
 
 #include "Scene/Entity.hpp"
 
+#include "Renderer/CameraModes.hpp"
+
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/quaternion.hpp>
 
@@ -45,6 +47,8 @@ namespace Kestrel {
 
 			glm::mat4 view;
 			glm::mat4 proj;
+
+			RenderModeFlags camera_render_mode;
 
 		private:
 			std::unique_ptr<CameraRenderer> renderer;

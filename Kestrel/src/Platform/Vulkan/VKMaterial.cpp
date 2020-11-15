@@ -371,10 +371,8 @@ void VK_Material_T::bind( const BindingInfo& bind_inf ){
 	bind_inf.cmd_buffer.beginRenderPass( beg_inf, vk::SubpassContents::eInline );
 
 	if( bind_inf.render_mode == RenderModeFlags::eLogarithmic ){
-		KST_INFO( "Log" );
 		bind_inf.cmd_buffer.bindPipeline( vk::PipelineBindPoint::eGraphics, *log_pipeline );
 	} else {
-		KST_INFO( "No Log" );
 		bind_inf.cmd_buffer.bindPipeline( vk::PipelineBindPoint::eGraphics, *pipeline );
 	}
 
