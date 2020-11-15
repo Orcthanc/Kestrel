@@ -32,7 +32,8 @@ BindingInfo::BindingInfo(
 		vk::Extent2D img_size,
 		size_t img_bind_index,
 		vk::CommandBuffer cmd_buffer,
-		vk::Buffer uniform_buffer ):
+		vk::Buffer uniform_buffer,
+		RenderModeFlags render_mode ):
 	device( device ),
 	id( id ),
 	dirty_check_id( dirty_check_id ),
@@ -40,7 +41,8 @@ BindingInfo::BindingInfo(
 	img_size( img_size ),
 	img_bind_index( img_bind_index ),
 	cmd_buffer( cmd_buffer ),
-	uniform_buffer( uniform_buffer ){}
+	uniform_buffer( uniform_buffer ),
+	render_mode( render_mode ){}
 
 
 static std::vector<std::pair<ShaderType, const char*>> stages{
@@ -119,7 +121,7 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 	VK_Material_T newMat;
 
 	KST_CORE_INFO( "Loading material {}", shader_name );
-	std::vector<Shader> shaders;
+	std::vector<KST_VK_Shader> shaders;
 
 	for( auto& stage: stages ){
 		std::filesystem::path p{ shader_name + std::string( stage.second )};
@@ -130,9 +132,27 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 	}
 
 	std::vector<vk::PipelineShaderStageCreateInfo> stage_infos;
+	std::vector<vk::PipelineShaderStageCreateInfo> log_stage_infos;
+
+	uint8_t log_off = 0;
+	uint8_t log_on = 1;
+	vk::SpecializationMapEntry log_entry( 0, 0, 1 );
+	vk::SpecializationInfo spec_info(
+			1, &log_entry,
+			1, &log_off );
+
+	vk::SpecializationInfo spec_info_log(
+			1, &log_entry,
+			1, &log_on );
 
 	for( auto& s: shaders ){
-		stage_infos.push_back({ {}, flag_bits_from_stage( s.type ), *s.module, "main", {} });
+		if( s.type == ShaderType::Vertex || s.type == ShaderType::Fragment ){
+			stage_infos.push_back( vk::PipelineShaderStageCreateInfo( {}, flag_bits_from_stage( s.type ), *s.module, "main", &spec_info ));
+			log_stage_infos.push_back( vk::PipelineShaderStageCreateInfo( {}, flag_bits_from_stage( s.type ), *s.module, "main", &spec_info_log ));
+		} else {
+			stage_infos.push_back({ {}, flag_bits_from_stage( s.type ), *s.module, "main", {} });
+			log_stage_infos.push_back({ {}, flag_bits_from_stage( s.type ), *s.module, "main", {} });
+		}
 	}
 
 	auto attrib_desc = VK_Vertex::getAttributeDescription();
@@ -153,7 +173,7 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 			{},
 			VK_FALSE,
 			VK_FALSE,
-			vk::PolygonMode::eLine,
+			vk::PolygonMode::eFill,
 			vk::CullModeFlagBits::eBack,
 			vk::FrontFace::eClockwise,
 			VK_FALSE,
@@ -263,6 +283,11 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 
 	newMat.pipeline = device->device->createGraphicsPipelineUnique( {}, pipeline_info ).value;
 
+	pipeline_info.pStages = log_stage_infos.data();
+	pipeline_info.basePipelineHandle = *newMat.pipeline;
+
+	newMat.log_pipeline = device->device->createGraphicsPipelineUnique( {}, pipeline_info ).value;
+
 	static Material id = 1;
 	newMat.id = id;
 	materials.emplace( id, std::move( newMat ));
@@ -344,7 +369,14 @@ void VK_Material_T::bind( const BindingInfo& bind_inf ){
 		);
 
 	bind_inf.cmd_buffer.beginRenderPass( beg_inf, vk::SubpassContents::eInline );
-	bind_inf.cmd_buffer.bindPipeline( vk::PipelineBindPoint::eGraphics, *pipeline );
+
+	if( bind_inf.render_mode == RenderModeFlags::eLogarithmic ){
+		KST_INFO( "Log" );
+		bind_inf.cmd_buffer.bindPipeline( vk::PipelineBindPoint::eGraphics, *log_pipeline );
+	} else {
+		KST_INFO( "No Log" );
+		bind_inf.cmd_buffer.bindPipeline( vk::PipelineBindPoint::eGraphics, *pipeline );
+	}
 
 	vk::Viewport viewport(
 			0, 0,

@@ -65,11 +65,11 @@ vk::ShaderStageFlagBits Kestrel::flag_bits_from_stage( ShaderType t ){
 	return {};
 }
 
-Shader::Shader( vk::Device device, const std::string& path, ShaderType type ){
+KST_VK_Shader::KST_VK_Shader( vk::Device device, const std::string& path, ShaderType type ){
 	readShader( device, path, type );
 }
 
-void Shader::readShader( vk::Device device, const std::string &path, ShaderType type ){
+void KST_VK_Shader::readShader( vk::Device device, const std::string &path, ShaderType type ){
 	auto data = Filereader::read_uint8t( path );
 
 	vk::ShaderModuleCreateInfo cr_inf( {}, data.size(), reinterpret_cast<const uint32_t*>( data.data() ));

@@ -3,6 +3,7 @@
 #include "Scene/Components.hpp"
 #include "Platform/Vulkan/VKMaterial.hpp"
 #include "Platform/Vulkan/VKVertex.hpp"
+#include "Renderer/CameraModes.hpp"
 
 using namespace Kestrel;
 
@@ -13,8 +14,6 @@ KST_VK_CameraRenderer::KST_VK_CameraRenderer( KST_VK_DeviceSurface* surface ){
 
 void KST_VK_CameraRenderer::setDeviceSurface( KST_VK_DeviceSurface* surface ){
 	PROFILE_FUNCTION();
-
-	KST_INFO( "Created device surface" );
 
 	KST_CORE_ASSERT( !device_surface, "Can not assign device surface multiple times" );
 
@@ -298,7 +297,8 @@ void KST_VK_CameraRenderer::draw( Entity e ){
 				render_targets.begin()->size,
 				render_targets.getIndex(),
 				*render_info.cmd_buffer[0],
-				*uniform_buffer.buffer );
+				*uniform_buffer.buffer,
+				RenderModeFlags::eNone );
 
 		VK_Materials::getInstance()[ mat ].bind( bind_inf );
 	}

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Renderer/Material.hpp"
+#include "Renderer/CameraModes.hpp"
 #include <vulkan/vulkan.hpp>
 
 namespace Kestrel {
@@ -31,7 +32,8 @@ namespace Kestrel {
 				vk::Extent2D img_size,
 				size_t img_bind_index,
 				vk::CommandBuffer cmd_buffer,
-				vk::Buffer uniform_buffer );
+				vk::Buffer uniform_buffer,
+				RenderModeFlags render_mode );
 
 		KST_VK_DeviceSurface& device;
 		RendererID id;
@@ -41,6 +43,7 @@ namespace Kestrel {
 		size_t img_bind_index;
 		vk::CommandBuffer cmd_buffer;
 		vk::Buffer uniform_buffer;
+		RenderModeFlags render_mode;
 	};
 
 	struct VK_Material_T {
@@ -56,6 +59,7 @@ namespace Kestrel {
 
 		Material id;
 		vk::UniquePipeline pipeline;
+		vk::UniquePipeline log_pipeline;
 		vk::UniquePipelineLayout layout;
 		vk::UniqueDescriptorSetLayout desc_layout;
 		vk::UniqueDescriptorPool desc_pool;

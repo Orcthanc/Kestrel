@@ -37,14 +37,14 @@ SHADERTYPE( RayCallable )
 	extern ShaderType ShaderType_from_string( const std::string& s );
 	extern vk::ShaderStageFlagBits flag_bits_from_stage( ShaderType t );
 
-	struct Shader {
-		Shader() = default;
-		Shader( vk::Device device, const std::string& path, ShaderType type );
+	struct KST_VK_Shader {
+		KST_VK_Shader() = default;
+		KST_VK_Shader( vk::Device device, const std::string& path, ShaderType type );
 
-		Shader( const Shader& ) = delete;
-		Shader( Shader&& ) = default;
-		Shader& operator=( const Shader& ) = delete;
-		Shader& operator=( Shader&& ) = default;
+		KST_VK_Shader( const KST_VK_Shader& ) = delete;
+		KST_VK_Shader( KST_VK_Shader&& ) = default;
+		KST_VK_Shader& operator=( const KST_VK_Shader& ) = delete;
+		KST_VK_Shader& operator=( KST_VK_Shader&& ) = default;
 
 		void readShader( vk::Device device, const std::string& path, ShaderType type );
 
