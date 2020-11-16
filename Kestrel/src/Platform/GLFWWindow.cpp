@@ -32,6 +32,8 @@ KST_GLFW_VK_Window::KST_GLFW_VK_Window( WindowSettings s ): w_settings{ std::mov
 			WindowSettings* s = static_cast<WindowSettings*>( glfwGetWindowUserPointer( window ));
 			s->width = width;
 			s->height = height;
+			WindowResizeEvent e( width, height );
+			s->callback( e );
 		});
 
 	glfwSetWindowCloseCallback( window, []( GLFWwindow* window ){

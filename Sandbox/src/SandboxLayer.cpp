@@ -114,5 +114,16 @@ void SandboxLayer::onEvent( Kestrel::Event& e ){
 			KST_INFO( "Mouse scrolled {}, {}", e.x, e.y );
 			return true;
 		});
+
+	d.dispatch<Kestrel::WindowResizeEvent>( []( Kestrel::WindowResizeEvent& e ){
+			auto cams = Application::getInstance()->current_scene->getView<CameraComponent>();
+			for( auto& i: cams ){
+				auto cam = cams.get( i );
+
+				cam.camera->onSizeChange( e );
+			}
+
+			return false;
+		});
 }
 

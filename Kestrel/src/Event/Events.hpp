@@ -1,18 +1,3 @@
-/*
- * =====================================================================================
- *
- *       Filename:  Events.hpp
- *
- *    Description:  Some common Events
- *
- *        Version:  1.0
- *        Created:  08/26/2020 06:55:25 PM
- *       Revision:  none
- *
- *         Author:  Samuel Knoethig (), samuel@knoethig.net
- *
- * =====================================================================================
- */
 #pragma once
 
 #include "kstpch.hpp"
@@ -30,6 +15,23 @@ namespace Kestrel {
 
 			static constexpr EventType getStaticType(){
 				return EventType::eWindowClose;
+			}
+	};
+
+	class WindowResizeEvent: public Event {
+		public:
+			WindowResizeEvent() = default;
+			WindowResizeEvent( int width, int height );
+			virtual ~WindowResizeEvent() = default;
+
+			EventType getType() override;
+			EventDomain getDomain() override;
+			const char * getName() override;
+
+			int width, height;
+
+			static constexpr EventType getStaticType(){
+				return EventType::eWindowResize;
 			}
 	};
 

@@ -1,19 +1,3 @@
-/*
- * =====================================================================================
- *
- *       Filename:  Events.cpp
- *
- *    Description:
- *
- *        Version:  1.0
- *        Created:  08/26/2020 06:56:37 PM
- *       Revision:  none
- *
- *         Author:  Samuel Knoethig (), samuel@knoethig.net
- *
- * =====================================================================================
- */
-
 #include "Events.hpp"
 #include <GLFW/glfw3.h>
 
@@ -29,6 +13,21 @@ EventDomain WindowCloseEvent::getDomain(){
 
 const char* WindowCloseEvent::getName(){
 	return "WindowCloseEvent";
+}
+
+
+WindowResizeEvent::WindowResizeEvent( int width, int height ): width( width ), height( height ){}
+
+EventType WindowResizeEvent::getType(){
+	return EventType::eWindowResize;
+}
+
+EventDomain WindowResizeEvent::getDomain(){
+	return EventDomain::eApp;
+}
+
+const char* WindowResizeEvent::getName(){
+	return "WindowResizeEvent";
 }
 
 

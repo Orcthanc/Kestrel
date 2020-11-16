@@ -29,6 +29,11 @@ void Camera::recalc_view(){
 	view = glm::translate( glm::mat4_cast( rot ), -pos );
 }
 
+bool Camera::onSizeChange(Kestrel::WindowResizeEvent &e){
+	PROFILE_FUNCTION();
+	return false;
+}
+
 void Camera::set_renderer( std::unique_ptr<CameraRenderer>&& r ){
 	renderer = std::move( r );
 }

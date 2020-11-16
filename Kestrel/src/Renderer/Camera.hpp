@@ -5,6 +5,7 @@
 #include "Scene/Entity.hpp"
 
 #include "Renderer/CameraModes.hpp"
+#include "Event/Events.hpp"
 
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -31,6 +32,7 @@ namespace Kestrel {
 			void rotate( float x, float y, float z, float angle );
 			void rotate( const glm::quat& quaternion );
 			void recalc_view();
+			virtual bool onSizeChange( Kestrel::WindowResizeEvent& e );
 
 			void set_renderer( std::unique_ptr<CameraRenderer>&& );
 
