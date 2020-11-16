@@ -278,15 +278,49 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 			*newMat.layout,
 			*newMat.renderpass,
 			0,
-			vk::Pipeline{},
+			{},
 			-1 );
 
+	using flag_integral = std::underlying_type_t<RenderModeFlags>;
+
+	newMat.pipelines.reserve( static_cast<flag_integral>( RenderModeFlags::eAllFlags ));
+
+	for( flag_integral i = 0; i <= static_cast<flag_integral>( RenderModeFlags::eAllFlags ); ++i ){
+		if( any_flag( RenderModeFlags::eInverse & i )){
+			//TODO
+		} else {
+			//TODO
+		}
+
+		if( any_flag( RenderModeFlags::eLogarithmic & i )){
+			pipeline_info.pStages = log_stage_infos.data();
+		} else {
+			pipeline_info.pStages = stage_infos.data();
+		}
+
+		if( any_flag( RenderModeFlags::eIntegerDepth & i )){
+			//TODO
+		} else {
+			//TODO
+		}
+
+		if( any_flag( RenderModeFlags::eWireframe & i )){
+			rasterizer_info.polygonMode = vk::PolygonMode::eLine;
+		} else {
+			rasterizer_info.polygonMode = vk::PolygonMode::eFill;
+		}
+
+		newMat.pipelines.emplace_back( std::move( device->device->createGraphicsPipelineUnique( {}, pipeline_info ).value ));
+		pipeline_info.basePipelineHandle = *newMat.pipelines[0];
+	}
+/*
 	newMat.pipeline = device->device->createGraphicsPipelineUnique( {}, pipeline_info ).value;
 
 	pipeline_info.pStages = log_stage_infos.data();
 	pipeline_info.basePipelineHandle = *newMat.pipeline;
 
 	newMat.log_pipeline = device->device->createGraphicsPipelineUnique( {}, pipeline_info ).value;
+*/
 
 	static Material id = 1;
 	newMat.id = id;
@@ -370,11 +404,9 @@ void VK_Material_T::bind( const BindingInfo& bind_inf ){
 
 	bind_inf.cmd_buffer.beginRenderPass( beg_inf, vk::SubpassContents::eInline );
 
-	if( bind_inf.render_mode == RenderModeFlags::eLogarithmic ){
-		bind_inf.cmd_buffer.bindPipeline( vk::PipelineBindPoint::eGraphics, *log_pipeline );
-	} else {
-		bind_inf.cmd_buffer.bindPipeline( vk::PipelineBindPoint::eGraphics, *pipeline );
-	}
+	bind_inf.cmd_buffer.bindPipeline(
+			vk::PipelineBindPoint::eGraphics,
+			*pipelines[ static_cast<std::underlying_type_t<RenderModeFlags>>( bind_inf.render_mode )] );
 
 	vk::Viewport viewport(
 			0, 0,

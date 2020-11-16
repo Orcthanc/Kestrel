@@ -24,7 +24,7 @@ namespace Kestrel {
 	using RendererID = void*;
 
 	struct BindingInfo {
-		BindingInfo( 
+		BindingInfo(
 				KST_VK_DeviceSurface& device,
 				RendererID id,
 				size_t dirty_check_id,
@@ -58,8 +58,7 @@ namespace Kestrel {
 		void bind( const BindingInfo& );
 
 		Material id;
-		vk::UniquePipeline pipeline;
-		vk::UniquePipeline log_pipeline;
+		std::vector<vk::UniquePipeline> pipelines;
 		vk::UniquePipelineLayout layout;
 		vk::UniqueDescriptorSetLayout desc_layout;
 		vk::UniqueDescriptorPool desc_pool;

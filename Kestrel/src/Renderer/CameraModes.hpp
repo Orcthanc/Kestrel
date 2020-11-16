@@ -8,6 +8,7 @@ namespace Kestrel {
 		eInverse = 0x1,
 		eLogarithmic = 0x2,
 		eIntegerDepth = 0x4,
-		eAllFlags = 0x7,
+		eWireframe = 0x8,
+		eAllFlags = 0xF,
 	};
 };

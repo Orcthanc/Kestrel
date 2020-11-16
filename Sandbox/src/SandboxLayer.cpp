@@ -8,6 +8,7 @@
 
 #include "Scene/Components.hpp"
 #include "Renderer/NaiveCamera.hpp"
+#include "Renderer/CameraModes.hpp"
 
 #include "glm/gtc/quaternion.hpp"
 #include "imgui.h"
@@ -33,13 +34,41 @@ SandboxLayer::SandboxLayer( const std::string& s ): Layer{ s }{
 }
 
 void SandboxLayer::onUpdate(){
-	static int calls = 0;
-	if( calls ){
-		ImGui::ShowDemoWindow();
+
+	static bool firstFrame = true;
+	if( firstFrame ){
+		firstFrame = false;
+		return;
 	}
-	if( !( ++calls % 1000000 )){
-		KST_INFO( "{}", calls );
+
+	auto cams = Application::getInstance()->current_scene->getView<NameComponent, CameraComponent>();
+
+	ImGui::Begin( "Cameras" );
+	for( auto& comps: cams ){
+		auto [name, cam] = cams.get<NameComponent, CameraComponent>( comps );
+		if( ImGui::CollapsingHeader( name.name.c_str() )){
+
+			static bool inverse = false, logarithmic = false, interger = false, wireframe = false;
+			ImGui::Checkbox( "Inverse depth buffer (unimplemented)", &inverse );
+			ImGui::Checkbox( "Logarithmic depth buffer", &logarithmic );
+			ImGui::Checkbox( "Integer depth buffer (unimplemented)", &interger );
+			ImGui::Checkbox( "Wireframe", &wireframe );
+
+			RenderModeFlags res{ RenderModeFlags::eNone };
+			res |= inverse ? RenderModeFlags::eInverse : RenderModeFlags::eNone;
+			res |= logarithmic ? RenderModeFlags::eLogarithmic : RenderModeFlags::eNone;
+			res |= interger ? RenderModeFlags::eIntegerDepth : RenderModeFlags::eNone;
+			res |= wireframe ? RenderModeFlags::eWireframe : RenderModeFlags::eNone;
+
+			cam.camera->camera_render_mode = res;
+
+			ImGui::Separator();
+		}
 	}
+
+	ImGui::End();
+
+	ImGui::ShowDemoWindow();
 }
 
 

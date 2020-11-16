@@ -71,15 +71,46 @@ namespace Kestrel {
 	}
 
 	template<typename E, typename = std::enable_if_t<std::is_enum_v<E>>>
-	E& operator&=( const E& lhs, const E& rhs ){
+	E& operator&=( E& lhs, const E& rhs ){
 		return lhs = static_cast<E>( static_cast<std::underlying_type_t<E>>( lhs ) & static_cast<std::underlying_type_t<E>>( rhs ));
 	}
 	template<typename E, typename = std::enable_if_t<std::is_enum_v<E>>>
-	E& operator^=( const E& lhs, const E& rhs ){
+	E& operator^=( E& lhs, const E& rhs ){
 		return lhs = static_cast<E>( static_cast<std::underlying_type_t<E>>( lhs ) ^ static_cast<std::underlying_type_t<E>>( rhs ));
 	}
 	template<typename E, typename = std::enable_if_t<std::is_enum_v<E>>>
-	E& operator|=( const E& lhs, const E& rhs ){
+	E& operator|=( E& lhs, const E& rhs ){
 		return lhs = static_cast<E>( static_cast<std::underlying_type_t<E>>( lhs ) | static_cast<std::underlying_type_t<E>>( rhs ));
+	}
+
+	template<typename E, typename = std::enable_if_t<std::is_enum_v<E>>>
+	E operator&( const E& lhs, const std::underlying_type_t<E>& rhs ){
+		return static_cast<E>( static_cast<std::underlying_type_t<E>>( lhs ) & rhs);
+	}
+	template<typename E, typename = std::enable_if_t<std::is_enum_v<E>>>
+	E operator^( const E& lhs, const std::underlying_type_t<E>& rhs ){
+		return static_cast<E>( static_cast<std::underlying_type_t<E>>( lhs ) ^ rhs);
+	}
+	template<typename E, typename = std::enable_if_t<std::is_enum_v<E>>>
+	E operator|( const E& lhs, const std::underlying_type_t<E>& rhs ){
+		return static_cast<E>( static_cast<std::underlying_type_t<E>>( lhs ) | rhs);
+	}
+
+	template<typename E, typename = std::enable_if_t<std::is_enum_v<E>>>
+	E& operator&=( E& lhs, const std::underlying_type_t<E>& rhs ){
+		return lhs = static_cast<E>( static_cast<std::underlying_type_t<E>>( lhs ) & rhs);
+	}
+	template<typename E, typename = std::enable_if_t<std::is_enum_v<E>>>
+	E& operator^=( E& lhs, const std::underlying_type_t<E>& rhs ){
+		return lhs = static_cast<E>( static_cast<std::underlying_type_t<E>>( lhs ) ^ rhs);
+	}
+	template<typename E, typename = std::enable_if_t<std::is_enum_v<E>>>
+	E& operator|=( E& lhs, const std::underlying_type_t<E>& rhs ){
+		return lhs = static_cast<E>( static_cast<std::underlying_type_t<E>>( lhs ) | rhs);
+	}
+
+	template<typename E, typename = std::enable_if_t<std::is_enum_v<E>>>
+	bool any_flag( const E& val ){
+		return static_cast<std::underlying_type_t<E>>( val ) != 0;
 	}
 }
