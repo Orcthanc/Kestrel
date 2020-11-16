@@ -7,6 +7,7 @@
 #include "Platform/Vulkan/VKVertex.hpp"
 #include "Renderer/Material.hpp"
 #include "Renderer/CameraModes.hpp"
+#include "Platform/Vulkan/VKImgui.hpp"
 
 namespace Kestrel {
 
@@ -114,6 +115,8 @@ namespace Kestrel {
 			void createSynchronization();
 			void createImages();
 
+			void createImgui( vk::RenderPass );
+
 			//TODO smart ptr
 			KST_VK_DeviceSurface* device_surface = nullptr;
 
@@ -142,5 +145,8 @@ namespace Kestrel {
 
 			KST_VK_RenderChain<frames> render_targets;
 			size_t current_id = 0;
+
+			bool imgui_should_draw = false;
+			KST_VK_ImguiWindowData imgui;
 	};
 }

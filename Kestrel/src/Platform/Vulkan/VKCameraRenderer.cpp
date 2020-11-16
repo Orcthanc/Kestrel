@@ -4,11 +4,15 @@
 #include "Platform/Vulkan/VKMaterial.hpp"
 #include "Platform/Vulkan/VKVertex.hpp"
 #include "Renderer/CameraModes.hpp"
+#include "Core/Application.hpp"
+
+#include "imgui_impl_glfw.h"
 
 using namespace Kestrel;
 
 KST_VK_CameraRenderer::KST_VK_CameraRenderer( KST_VK_DeviceSurface* surface ){
 	PROFILE_FUNCTION();
+
 	setDeviceSurface( std::move( surface ));
 }
 
@@ -206,6 +210,14 @@ void KST_VK_CameraRenderer::createImages(){
 	}
 }
 
+void KST_VK_CameraRenderer::createImgui( vk::RenderPass render_pass ){
+	vk::CommandBufferAllocateInfo alloc_inf( *transfer_cmd_pool, vk::CommandBufferLevel::ePrimary, 1 );
+	auto temp = device_surface->device->allocateCommandBuffersUnique( alloc_inf );
+	imgui.init( static_cast<KST_VK_Context&>( *Application::getInstance()->graphics_context ), Imgui_InitInfo( transfer_queue, render_pass, frames, *temp[0] ));
+
+
+}
+
 void KST_VK_CameraRenderer::onSizeChange( bool resetSync ){
 	PROFILE_FUNCTION();
 	device_surface->device->waitIdle();
@@ -303,6 +315,9 @@ void KST_VK_CameraRenderer::draw( Entity e ){
 				render_info.render_mode );
 
 		VK_Materials::getInstance()[ mat ].bind( bind_inf );
+
+		if( !imgui_should_draw )			//TODO
+			createImgui( *VK_Materials::getInstance()[ mat ].renderpass );
 	}
 
 	auto verts = mesh.mesh->getVertices();
@@ -322,6 +337,11 @@ void KST_VK_CameraRenderer::draw( Entity e ){
 
 void KST_VK_CameraRenderer::endScene(){
 	PROFILE_FUNCTION();
+
+	if( imgui_should_draw ){		//TODO
+		ImGui::Render();
+		ImGui_ImplVulkan_RenderDrawData( ImGui::GetDrawData(), *render_info.cmd_buffer[0] );
+	}
 
 	render_info.cmd_buffer[0]->endRenderPass();
 	render_info.cmd_buffer[0]->end();
@@ -486,5 +506,8 @@ void KST_VK_CameraRenderer::endScene(){
 
 		//TODO remove
 		present_queue.waitIdle();
+
+		//TODO
+		imgui_should_draw = true;
 	}
 }

@@ -10,6 +10,7 @@
 #include "Renderer/NaiveCamera.hpp"
 
 #include "glm/gtc/quaternion.hpp"
+#include "imgui.h"
 
 using namespace Kestrel;
 
@@ -33,6 +34,9 @@ SandboxLayer::SandboxLayer( const std::string& s ): Layer{ s }{
 
 void SandboxLayer::onUpdate(){
 	static int calls = 0;
+	if( calls ){
+		ImGui::ShowDemoWindow();
+	}
 	if( !( ++calls % 1000000 )){
 		KST_INFO( "{}", calls );
 	}
