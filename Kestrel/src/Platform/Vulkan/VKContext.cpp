@@ -130,6 +130,7 @@ void KST_VK_DeviceSurface::create( KST_VK_Context& c ){
 
 	//TODO check if available
 	features.fillModeNonSolid = VK_TRUE;
+	features.tessellationShader = VK_TRUE;
 
 	vk::DeviceCreateInfo dev_cr_inf(
 			{},

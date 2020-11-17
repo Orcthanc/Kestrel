@@ -146,7 +146,7 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 			1, &log_on );
 
 	for( auto& s: shaders ){
-		if( s.type == ShaderType::Vertex || s.type == ShaderType::Fragment ){
+		if( s.type == ShaderType::Vertex || s.type == ShaderType::Fragment || s.type == ShaderType::TessEvaluation ){
 			stage_infos.push_back( vk::PipelineShaderStageCreateInfo( {}, flag_bits_from_stage( s.type ), *s.module, "main", &spec_info ));
 			log_stage_infos.push_back( vk::PipelineShaderStageCreateInfo( {}, flag_bits_from_stage( s.type ), *s.module, "main", &spec_info_log ));
 		} else {
@@ -164,7 +164,7 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 			attrib_desc );
 
 	vk::PipelineInputAssemblyStateCreateInfo assembly_info( {},
-			vk::PrimitiveTopology::eTriangleList,
+			vk::PrimitiveTopology::ePatchList,
 			VK_FALSE );
 
 	vk::PipelineViewportStateCreateInfo viewport_info( {}, 1, nullptr, 1, nullptr );
@@ -211,11 +211,11 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 			blend_constants);
 
 	std::vector<vk::PushConstantRange> push_constant_ranges{
-		{ vk::ShaderStageFlagBits::eVertex, 0, sizeof( glm::mat4 ) },
+		{ vk::ShaderStageFlagBits::eTessellationEvaluation, 0, sizeof( glm::mat4 ) },
 	};
 
 	std::vector<vk::DescriptorSetLayoutBinding> layout_binding{
-		vk::DescriptorSetLayoutBinding( 0, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eVertex, {} )
+		vk::DescriptorSetLayoutBinding( 0, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eTessellationEvaluation, {} )
 		};
 
 	vk::DescriptorSetLayoutCreateInfo layout_cr_inf(
@@ -263,12 +263,16 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 			0,									//Min depth
 			1 );								//Max depth
 
+	vk::PipelineTessellationStateCreateInfo tess_state_inf(
+			{},
+			3 );
+
 	vk::GraphicsPipelineCreateInfo pipeline_info(
 			{},
 			stage_infos,
 			&vertex_input_info,
 			&assembly_info,
-			nullptr, //TODO tesselation
+			&tess_state_inf,
 			&viewport_info,
 			&rasterizer_info,
 			&multisample_info,

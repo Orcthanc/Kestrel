@@ -21,6 +21,8 @@ endif( KST_PROFILING )
 compile_shaders(
 	"shader/basic.vert"
 	"shader/basic.frag"
+	"shader/basic.tesc"
+	"shader/basic.tese"
 	)
 
 copy_res_dir(
