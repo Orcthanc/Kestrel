@@ -30,7 +30,7 @@ void main() {
 			vec4(( indata[0].position * gl_TessCoord.x +
 			indata[1].position * gl_TessCoord.y +
 			indata[2].position * gl_TessCoord.z ), 1.0 );
-	
+
 	if( logarithmic ){
 		//gl_Position.z = log2(max(1e-6, 1.0 + gl_Position.w)) * Fcoef - 1.0;
 		gl_Position.z = log(C* gl_Position.w + 1) / log(C*Far + 1) * gl_Position.w;

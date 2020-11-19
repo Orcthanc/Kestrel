@@ -10,3 +10,6 @@
 [submodule "external/imgui/imgui"]
 	path = external/imgui/imgui
 	url = https://github.com/ocornut/imgui.git
+[submodule "external/parser/TokGen"]
+	path = external/parser/TokGen
+	url = https://github.com/Orcthanc/TokGen.git
