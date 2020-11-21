@@ -3,11 +3,11 @@
 using namespace Kestrel;
 
 void Mesh::unload(){
-	impl->unload();
+	impl = nullptr;
 }
 
 bool Mesh::loaded(){
-	return impl->loaded();
+	return ( bool )impl;
 }
 
 const BufferView<float> Mesh::getVertices(){

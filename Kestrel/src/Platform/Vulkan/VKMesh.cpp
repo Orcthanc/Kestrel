@@ -4,6 +4,24 @@
 
 using namespace Kestrel;
 
+std::map<const std::filesystem::path, std::shared_ptr<VK_Mesh>> VK_MeshRegistry::meshes;
+
+std::shared_ptr<MeshImpl> VK_Mesh::create( const std::filesystem::path& p ){
+	PROFILE_FUNCTION();
+
+	auto temp = std::make_shared<VK_Mesh>();
+	VK_MeshRegistry::register_mesh( p, temp );
+	temp->load_obj( p.c_str() );
+	return temp;
+}
+
+std::shared_ptr<MeshImpl> VK_Mesh::getMesh( const std::filesystem::path& p ){
+	PROFILE_FUNCTION();
+
+	//return std::static_pointer_cast<MeshImpl>( VK_MeshRegistry::getMesh( p ));
+	return VK_MeshRegistry::getMesh( p );
+}
+
 void VK_Mesh::load_obj( const char *path ){
 	PROFILE_FUNCTION();
 
@@ -42,11 +60,6 @@ void VK_Mesh::load_obj( const char *path ){
 			KST_CORE_INFO( "Ignoring normal" );
 			file.ignore( std::numeric_limits<std::streamsize>::max(), file.widen( '\n' ));
 		} else if( temp == "f" ){
-/*			file >> x >> y >> z;
-			indices.push_back( x );
-			indices.push_back( y );
-			indices.push_back( z );
-			*/
 			for( size_t i = 0; i < 3; ++i ){
 				file >> x;
 				indices.push_back( x - 1 );
@@ -89,19 +102,22 @@ void VK_Mesh::load_obj( const char *path ){
 */
 }
 
-void VK_Mesh::unload(){
-	verts.clear();
-	indices.clear();
-}
-
-bool VK_Mesh::loaded(){
-	return !indices.empty();
-}
-
 const BufferView<float> VK_Mesh::getVertices(){
+	PROFILE_FUNCTION();
 	return { reinterpret_cast<float*>( verts.data()), verts.size() * sizeof( verts[0] ), sizeof( verts[0] )}; //TODO hope padding doesn't eat this
 }
 
 const BufferView<uint32_t> VK_Mesh::getIndices(){
+	PROFILE_FUNCTION();
 	return { indices.data(), indices.size() * sizeof( indices[0] ), sizeof( indices[0] )};
+}
+
+std::shared_ptr<VK_Mesh> VK_MeshRegistry::getMesh( const std::filesystem::path& p ){
+	PROFILE_FUNCTION();
+	return meshes[p];
+}
+
+void VK_MeshRegistry::register_mesh( const std::filesystem::path& p, std::shared_ptr<VK_Mesh> mesh ){
+	PROFILE_FUNCTION();
+	meshes.emplace( p, std::move( mesh ));
 }
