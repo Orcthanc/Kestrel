@@ -17,8 +17,8 @@ namespace Kestrel {
 			Application( WindowSettings w = {} );
 			virtual ~Application();
 
-			void addLayer( Layer* l ){ stack.pushLayer( l ); };
-			void removeLayer( Layer* l ){ stack.PopLayer( l ); };
+			void addLayer( std::shared_ptr<Layer> l ){ stack.pushLayer( l ); };
+			void removeLayer( std::shared_ptr<Layer> l ){ stack.PopLayer( l ); };
 			void onEvent( Event& e );
 			bool onClose( WindowCloseEvent& e );
 

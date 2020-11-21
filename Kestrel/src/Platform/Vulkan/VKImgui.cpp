@@ -97,5 +97,6 @@ KST_VK_ImguiWindowData::~KST_VK_ImguiWindowData(){
 	if( initialized ){
 		ImGui_ImplVulkan_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
+		ImGui::DestroyContext();
 	}
 }

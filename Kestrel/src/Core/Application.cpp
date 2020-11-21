@@ -27,6 +27,7 @@ Kestrel::Application::Application( WindowSettings ws ): running( true ), stack()
 
 Kestrel::Application::~Application(){
 	KST_CORE_INFO( "Shut down" );
+
 	PROFILE_SESSION_END();
 }
 

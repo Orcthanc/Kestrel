@@ -3,9 +3,9 @@
 
 Sandbox::Sandbox(): Kestrel::Application(){
 	//TODO lifetime management
-	addLayer( new SandboxLayer( "Sandbox" ));
+	addLayer( std::make_shared<SandboxLayer>( "Sandbox" ));
 }
 
-Kestrel::Application* createApplication(){
-	return new Sandbox();
+std::unique_ptr<Kestrel::Application> createApplication(){
+	return std::make_unique<Sandbox>();
 }

@@ -91,7 +91,7 @@ namespace Kestrel {
 		#define PROFILE_FUNCTION() PROFILE_SCOPE( __func__ )
 	#endif
 #else
-	#define PROFILE_SESSION_START()
+	#define PROFILE_SESSION_START( filename )
 	#define PROFILE_SESSION_END()
 	#define PROFILE_SCOPE( name )
 	#define PROFILE_FUNCTION()

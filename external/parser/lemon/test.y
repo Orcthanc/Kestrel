@@ -1,3 +1,8 @@
+%include{
+#include <stdio.h>
+#include <assert.h>
+}
+
 %syntax_error{ fprintf( stderr, "Syntax error\n" ); }
 %left PLUS.
 %type expr { float }

@@ -18,7 +18,6 @@ std::shared_ptr<MeshImpl> VK_Mesh::create( const std::filesystem::path& p ){
 std::shared_ptr<MeshImpl> VK_Mesh::getMesh( const std::filesystem::path& p ){
 	PROFILE_FUNCTION();
 
-	//return std::static_pointer_cast<MeshImpl>( VK_MeshRegistry::getMesh( p ));
 	return VK_MeshRegistry::getMesh( p );
 }
 

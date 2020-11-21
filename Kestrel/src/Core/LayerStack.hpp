@@ -1,19 +1,3 @@
-/*
- * =====================================================================================
- *
- *       Filename:  LayerStack.hpp
- *
- *    Description:  LayerStack class
- *
- *        Version:  1.0
- *        Created:  08/25/2020 04:40:01 PM
- *       Revision:  none
- *
- *         Author:  Samuel Knoethig (), samuel@knoethig.net
- *
- * =====================================================================================
- */
-
 #pragma once
 
 #include "kstpch.hpp"
@@ -24,8 +8,8 @@ namespace Kestrel {
 		public:
 			~LayerStack();
 
-			void pushLayer( Layer* );
-			void PopLayer( Layer* );
+			void pushLayer( std::shared_ptr<Layer> );
+			void PopLayer( std::shared_ptr<Layer> );
 
 			auto begin(){ return layers.begin(); }
 			auto end(){ return layers.end(); }
@@ -39,6 +23,6 @@ namespace Kestrel {
 
 
 		private:
-			std::vector<Layer*> layers;
+			std::vector<std::shared_ptr<Layer>> layers;
 	};
 }

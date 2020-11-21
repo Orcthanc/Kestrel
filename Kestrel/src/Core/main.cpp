@@ -3,11 +3,11 @@
 #include "Log.hpp"
 #include <spdlog/sinks/stdout_color_sinks.h>
 
-extern Kestrel::Application* createApplication();
+extern std::unique_ptr<Kestrel::Application> createApplication();
 
 int main( int argc, char** argv ){
 	Kestrel::Logger::LogInit();
 
-	auto app = std::unique_ptr<Kestrel::Application>( createApplication() );
+	auto app = createApplication();
 	(*app)();
 }
