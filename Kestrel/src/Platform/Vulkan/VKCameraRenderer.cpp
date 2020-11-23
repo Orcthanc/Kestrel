@@ -285,8 +285,9 @@ void KST_VK_CameraRenderer::draw( Entity e ){
 	//Transform
 
 	auto model = glm::scale( glm::translate( glm::identity<glm::mat4>(), transform.loc ) * glm::mat4_cast( transform.rot ), transform.scale );
-
-	render_info.cmd_buffer[0]->pushConstants( *VK_Materials::getInstance()[ mat ].layout, vk::ShaderStageFlagBits::eTessellationEvaluation, 0, sizeof( model ), &model );
+	auto color = glm::vec3( 0.1, 0.7, 0.7 );
+	VK_UniformBufferObj mod_col{ model, color };
+	render_info.cmd_buffer[0]->pushConstants( *VK_Materials::getInstance()[ mat ].layout, vk::ShaderStageFlagBits::eTessellationEvaluation, 0, sizeof( mod_col ), &mod_col );
 
 	//Mat
 	if( mat.mat != render_info.bound_mat ){

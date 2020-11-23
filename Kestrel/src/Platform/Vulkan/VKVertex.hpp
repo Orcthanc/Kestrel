@@ -19,7 +19,12 @@ namespace Kestrel {
 		static const vk::VertexInputBindingDescription getBindingDescription();
 
 		glm::vec3 pos;
-		glm::vec3 col;
+		glm::vec3 normal;
 		glm::vec2 tex;
+	};
+
+	struct VK_UniformBufferObj {
+		glm::mat4 model;
+		glm::vec3 color;
 	};
 }

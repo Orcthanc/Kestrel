@@ -19,7 +19,7 @@ foreach( PARSER IN LISTS PARSER_SOURCES )
 		COMMAND "${CMAKE_CURRENT_BINARY_DIR}/lemon" "${PARSER}" "-d${CMAKE_CURRENT_BINARY_DIR}"
 		DEPENDS ${PARSER}
 		COMMENT "Compiling parser ${PARSER}" )
-	add_library( ${FILE_NAME}_PARSER STATIC "${CMAKE_CURRENT_BINARY_DIR}/${FILE_NAME}.c" )
-	target_include_directories( ${FILE_NAME}_PARSER PUBLIC "${CMAKE_CURRENT_BINARY_DIR}" )
+	add_library( ${FILE_NAME}_PARSER STATIC "${CMAKE_CURRENT_BINARY_DIR}/${FILE_NAME}.c" "${CMAKE_CURRENT_SOURCE_DIR}/SyntaxTree.c" )
+	target_include_directories( ${FILE_NAME}_PARSER PUBLIC "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}" )
 	add_dependencies( ${FILE_NAME}_PARSER lemon )
 endforeach()

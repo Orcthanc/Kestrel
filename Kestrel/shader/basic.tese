@@ -11,6 +11,7 @@ layout( location = 0 ) in VertData {
 
 layout( push_constant ) uniform push_constants {
 	mat4 model;
+	vec3 color;
 } u_push_constants;
 
 layout( binding = 0 ) uniform vp {
@@ -36,8 +37,10 @@ void main() {
 		gl_Position.z = log(C* gl_Position.w + 1) / log(C*Far + 1) * gl_Position.w;
 	}
 
-	color =
+/*	color =
 			indata[0].color * gl_TessCoord.x +
 			indata[1].color * gl_TessCoord.y +
 			indata[2].color * gl_TessCoord.z;
+*/
+	color = u_push_constants.color;
 }

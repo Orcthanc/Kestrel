@@ -68,6 +68,7 @@ static vk::UniqueRenderPass createRenderPass( KST_VK_DeviceSurface& device ){
 				vk::AttachmentStoreOp::eDontCare,
 				vk::ImageLayout::eUndefined,
 				vk::ImageLayout::eTransferSrcOptimal ),
+
 		vk::AttachmentDescription( 		//depthbuffer
 				{},
 				vk::Format::eD32Sfloat, //TODO
@@ -211,7 +212,7 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 			blend_constants);
 
 	std::vector<vk::PushConstantRange> push_constant_ranges{
-		{ vk::ShaderStageFlagBits::eTessellationEvaluation, 0, sizeof( glm::mat4 ) },
+		vk::PushConstantRange( vk::ShaderStageFlagBits::eTessellationEvaluation, 0, sizeof( VK_UniformBufferObj )),
 	};
 
 	std::vector<vk::DescriptorSetLayoutBinding> layout_binding{
@@ -226,7 +227,7 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 	vk::PipelineLayoutCreateInfo layout_info(
 			{},
 			1, &*newMat.desc_layout,
-			1, push_constant_ranges.data() );
+			static_cast<uint32_t>( push_constant_ranges.size()), push_constant_ranges.data() );
 
 	newMat.layout = device->device->createPipelineLayoutUnique( layout_info );
 
