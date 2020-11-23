@@ -17,9 +17,10 @@
 %token_type { const char* }
 %default_type { ast_node* }
 %default_destructor { ast_node_free( $$ ); }
+%extra_argument { ast_node** root }
 
 program(A) ::= decls(B) functions(C). {
-	A = malloc( sizeof( ast_node ));
+	*root = A = malloc( sizeof( ast_node ));
 	A->type = AST_NODE_program;
 	A->val.program.decls = B;
 	A->val.program.functions = C;

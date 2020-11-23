@@ -2,6 +2,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include <stdlib.h>
+#include <stdio.h>
+
 	typedef enum ast_node_type {
 		//Constants
 		AST_NODE_float1,
@@ -98,6 +102,13 @@ extern "C" {
 
 	extern void ast_node_free( ast_node* );
 	extern void ast_node_print_tree( ast_node* );
+
+
+	//Parser
+	extern void* ParseAlloc( void*( *memalloc )( size_t ));
+	extern void ParseFree( void* parser, void( *memfree )( void* ));
+	extern void Parse( void* parser, int token_code, const char* value, ast_node** tree );
+	extern void ParseTrace( FILE* file, char* prefix );
 
 #ifdef __cplusplus
 }
