@@ -25,6 +25,8 @@ void ast_node_free( ast_node* node ){
 			break;
 		}
 		case AST_NODE_arg_list:
+		case AST_NODE_function_list:
+		case AST_NODE_component_list:
 		case AST_NODE_statement_list:
 		case AST_NODE_declaration_list:
 		{
@@ -39,6 +41,7 @@ void ast_node_free( ast_node* node ){
 			break;
 		}
 		case AST_NODE_identifier:
+		case AST_NODE_component:
 		{
 			free( node->val.identifier.name );
 			break;
@@ -60,10 +63,6 @@ void ast_node_free( ast_node* node ){
 			ast_node_free( node->val.program.decls );
 			ast_node_free( node->val.program.functions );
 			break;
-		}
-		default:
-		{
-			printf( "Encountered invalid type during free" );
 		}
 	}
 
@@ -93,7 +92,6 @@ static const char* ast_node_type_string( ast_node_type t ){
 		case AST_NODE_function_list: return "AST_NODE_function_list";
 		case AST_NODE_function: return "AST_NODE_function";
 		case AST_NODE_program: return "AST_NODE_program";
-		default: return "ERROR";
 	}
 }
 
@@ -142,6 +140,7 @@ static void ast_node_print_tree_int( ast_node* node, uint32_t offset ){
 		case AST_NODE_identifier:
 		{
 			printf( "%s\n", node->val.identifier.name );
+			break;
 		}
 		case AST_NODE_component_list:
 		case AST_NODE_declaration_list:
@@ -155,21 +154,24 @@ static void ast_node_print_tree_int( ast_node* node, uint32_t offset ){
 				printf( "%*s", temp->val.list.next ? offset + 1 : 0, "" );
 				temp = temp->val.list.next;
 			} while( temp != NULL );
-			printf( "\n" );
+			break;
 		}
 		case AST_NODE_component:
 		{
 			printf( "%s\n", node->val.identifier.name );
+			break;
 		}
 		case AST_NODE_declaration:
 		{
 			ast_node_print_tree_int( node->val.decl.identifier, offset + 1 );
 			printf( "%*s", offset + 1, "" );
 			ast_node_print_tree_int( node->val.decl.components, offset + 1 );
+			break;
 		}
 		case AST_NODE_statement:
 		{
 			ast_node_print_tree_int( node->val.statement.statement, offset + 1 );
+			break;
 		}
 		case AST_NODE_function:
 		{
@@ -178,10 +180,14 @@ static void ast_node_print_tree_int( ast_node* node, uint32_t offset ){
 			ast_node_print_tree_int( node->val.function.args, offset + 1 );
 			printf( "%*s", offset + 1, "" );
 			ast_node_print_tree_int( node->val.function.statements, offset + 1 );
+			break;
 		}
 		case AST_NODE_program:
 		{
 			ast_node_print_tree_int( node->val.program.decls, offset + 1 );
+			printf( "%*s", offset + 1, "" );
+			ast_node_print_tree_int( node->val.program.functions, offset + 1 );
+			break;
 		}
 	}
 }

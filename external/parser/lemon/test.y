@@ -44,6 +44,13 @@ decl(A) ::= identifier(B) LEFT_SQUARE_BRACKET complist(C) RIGHT_SQUARE_BRACKET. 
 	A->val.decl.components = C;
 }
 
+decl(A) ::= identifier(B) LEFT_SQUARE_BRACKET RIGHT_SQUARE_BRACKET. {
+	A = malloc( sizeof( ast_node ));
+	A->type = AST_NODE_declaration;
+	A->val.decl.identifier = B;
+	A->val.decl.components = NULL;
+}
+
 identifier(A) ::= IDENTIFIER(B). {
 	A = malloc( sizeof( ast_node ));
 	A->type = AST_NODE_identifier;
@@ -58,8 +65,11 @@ complist(A) ::= complist(B) COMMA comp(C). {
 	A->val.list.val = C;
 }
 
-complist(A) ::= . {
-	A = NULL;
+complist(A) ::= comp(B). {
+	A = malloc( sizeof( ast_node ));
+	A->type = AST_NODE_component_list;
+	A->val.list.next = NULL;
+	A->val.list.val = B;
 }
 
 comp(A) ::= identifier(B). {
@@ -88,14 +98,21 @@ function(A) ::= VOID identifier(B) PARENTHESIS_LEFT PARENTHESIS_RIGHT CURLY_BRAC
 
 statements(A) ::= statements(B) statement(C). {
 	A = B;
-	ast_node* temp = B;
-	while( temp->val.list.next != NULL ){
-		temp = temp->val.list.next;
+	if( A == NULL ){
+		A = malloc( sizeof( ast_node ));
+		A->type = AST_NODE_statement_list;
+		A->val.list.next = NULL;
+		A->val.list.val = C;
+	} else {
+		ast_node* temp = B;
+		while( temp->val.list.next != NULL ){
+			temp = temp->val.list.next;
+		}
+		temp->val.list.next = malloc( sizeof( ast_node ));
+		temp->val.list.next->type = AST_NODE_statement_list;
+		temp->val.list.next->val.list.next = NULL;
+		temp->val.list.next->val.list.val = C;
 	}
-	temp->val.list.next = malloc( sizeof( ast_node ));
-	temp->val.list.next->type = AST_NODE_statement_list;
-	temp->val.list.next->val.list.next = NULL;
-	temp->val.list.next->val.list.val = C;
 }
 
 statements(A) ::= . {
