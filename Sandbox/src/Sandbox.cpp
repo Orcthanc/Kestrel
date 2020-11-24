@@ -12,7 +12,7 @@ plane1[Transform]
 plane2[Camera,Transform]
 
 void cam1(){
-	Transform + 1.0;
+	Transform + ( 1.0, 0.5, -1.0 );
 }
 	)asdf";
 
@@ -68,6 +68,8 @@ void cam1(){
 
 	ast_node_print_tree( tree );
 	ast_node_free( tree );
+
+	ParseFree( parser, free );
 }
 
 Sandbox::Sandbox(): Kestrel::Application(){

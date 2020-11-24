@@ -19,6 +19,7 @@ extern "C" {
 		AST_NODE_divide,
 		AST_NODE_modulo,
 		AST_NODE_assign,
+		AST_NODE_uminus,
 		//Identifier
 		AST_NODE_identifier,
 		AST_NODE_component_list,
@@ -46,6 +47,10 @@ extern "C" {
 		ast_node* lhs;
 		ast_node* rhs;
 	} ast_node_operator;
+
+	typedef struct ast_node_unary_operator {
+		ast_node* rhs;
+	} ast_node_unary_operator;
 
 	typedef struct ast_node_statement {
 		ast_node* statement;
@@ -92,6 +97,7 @@ extern "C" {
 			ast_node_function function;
 			ast_node_statement statement;
 			ast_node_prog program;
+			ast_node_unary_operator u_op;
 			float float1;
 			float2_s float2;
 			float3_s float3;

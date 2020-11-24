@@ -24,6 +24,11 @@ void ast_node_free( ast_node* node ){
 			ast_node_free( node->val.op.rhs );
 			break;
 		}
+		case AST_NODE_uminus:
+		{
+			ast_node_free( node->val.u_op.rhs );
+			break;
+		}
 		case AST_NODE_arg_list:
 		case AST_NODE_function_list:
 		case AST_NODE_component_list:
@@ -92,6 +97,7 @@ static const char* ast_node_type_string( ast_node_type t ){
 		case AST_NODE_function_list: return "AST_NODE_function_list";
 		case AST_NODE_function: return "AST_NODE_function";
 		case AST_NODE_program: return "AST_NODE_program";
+		case AST_NODE_uminus: return "AST_NODE_uminus";
 	}
 }
 
@@ -166,6 +172,11 @@ static void ast_node_print_tree_int( ast_node* node, uint32_t offset ){
 			ast_node_print_tree_int( node->val.decl.identifier, offset + 1 );
 			printf( "%*s", offset + 1, "" );
 			ast_node_print_tree_int( node->val.decl.components, offset + 1 );
+			break;
+		}
+		case AST_NODE_uminus:
+		{
+			ast_node_print_tree_int( node->val.u_op.rhs, offset + 1 );
 			break;
 		}
 		case AST_NODE_statement:

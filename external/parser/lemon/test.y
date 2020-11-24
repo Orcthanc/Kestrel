@@ -16,6 +16,7 @@
 
 %token_type { const char* }
 %default_type { ast_node* }
+%type floatl { float }
 %default_destructor { ast_node_free( $$ ); }
 %extra_argument { ast_node** root }
 
@@ -181,6 +182,44 @@ rvalue(A) ::= PARENTHESIS_LEFT rvalue(B) PARENTHESIS_RIGHT. {
 
 rvalue(A) ::= float1(B). {
 	A = B;
+}
+
+rvalue(A) ::= PARENTHESIS_LEFT floatl(B) COMMA floatl(C) PARENTHESIS_RIGHT. {
+	A = malloc( sizeof( ast_node ));
+	A->type = AST_NODE_float2;
+	A->val.float2.x = B;
+	A->val.float2.y = C;
+}
+
+rvalue(A) ::= PARENTHESIS_LEFT floatl(B) COMMA floatl(C) COMMA floatl(D) PARENTHESIS_RIGHT. {
+	A = malloc( sizeof( ast_node ));
+	A->type = AST_NODE_float3;
+	A->val.float3.x = B;
+	A->val.float3.y = C;
+	A->val.float3.z = D;
+}
+
+rvalue(A) ::= PARENTHESIS_LEFT floatl(B) COMMA floatl(C) COMMA floatl(D) COMMA floatl(E) PARENTHESIS_RIGHT. {
+	A = malloc( sizeof( ast_node ));
+	A->type = AST_NODE_float4;
+	A->val.float4.x = B;
+	A->val.float4.y = C;
+	A->val.float4.z = D;
+	A->val.float4.w = E;
+}
+
+floatl(A) ::= FLOAT(B). {
+	A = atof( B );
+}
+
+floatl(A) ::= MINUS floatl(B). [UMINUS] {
+	A = -B;
+}
+
+rvalue(A) ::= MINUS rvalue(B). [UMINUS] {
+	A = malloc( sizeof( ast_node ));
+	A->type = AST_NODE_uminus;
+	A->val.u_op.rhs = B;
 }
 
 float1(A) ::= FLOAT(B). {
