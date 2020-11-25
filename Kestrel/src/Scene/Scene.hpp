@@ -19,7 +19,7 @@ namespace Kestrel {
 			Scene& operator=( const Scene& ) = delete;
 			Scene& operator=( Scene&& ) = default;
 
-			void onUpdate();
+			virtual void onUpdate();
 
 			Entity createEntity();
 			Entity createEntity( const char* name );

@@ -74,8 +74,17 @@ complist(A) ::= comp(B). {
 }
 
 comp(A) ::= identifier(B). {
-	A = B;
+	A = malloc( sizeof( ast_node ));
 	A->type = AST_NODE_component;
+	A->val.comp.name = B;
+	A->val.comp.value = NULL;
+}
+
+comp(A) ::= identifier(B) ASSIGN rvalue(C). {
+	A = malloc( sizeof( ast_node ));
+	A->type = AST_NODE_component;
+	A->val.comp.name = B;
+	A->val.comp.value = C;
 }
 
 functions(A) ::= functions(B) function(C). {
@@ -172,12 +181,28 @@ lvalue(A) ::= identifier(B). {
 	A = B;
 }
 
+lvalue(A) ::= lvalue(B) DOT identifier (C) . {
+	A = malloc( sizeof( ast_node ));
+	A->type = AST_NODE_dot;
+	A->val.op.lhs = B;
+	A->val.op.rhs = C;
+}
+
 rvalue(A) ::= lvalue(B). {
 	A = B;
 }
 
 rvalue(A) ::= PARENTHESIS_LEFT rvalue(B) PARENTHESIS_RIGHT. {
 	A = B;
+}
+
+rvalue(A) ::= STRING(B). {
+	A = malloc( sizeof( ast_node ));
+	A->type = AST_NODE_string;
+	int temp = strlen( B );
+	A->val.identifier.name = malloc( temp - 1 );
+	strncpy( A->val.identifier.name, B + 1, temp - 2 );
+	A->val.identifier.name[temp - 1] = 0;
 }
 
 rvalue(A) ::= float1(B). {

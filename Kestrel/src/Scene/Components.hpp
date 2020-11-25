@@ -91,4 +91,20 @@ namespace Kestrel {
 
 		std::shared_ptr<Camera> camera;
 	};
+
+	struct ColorComponent {
+		ColorComponent() = default;
+		ColorComponent( const glm::vec3& rgb );
+		ColorComponent( glm::vec3&& rgb );
+
+		ColorComponent( const ColorComponent& ) = default;
+		ColorComponent( ColorComponent&& ) = default;
+
+		ColorComponent& operator=( const ColorComponent& ) = default;
+		ColorComponent& operator=( ColorComponent&& ) = default;
+
+		operator const glm::vec3&();
+
+		glm::vec3 color;
+	};
 }

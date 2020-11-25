@@ -285,7 +285,12 @@ void KST_VK_CameraRenderer::draw( Entity e ){
 	//Transform
 
 	auto model = glm::scale( glm::translate( glm::identity<glm::mat4>(), transform.loc ) * glm::mat4_cast( transform.rot ), transform.scale );
-	auto color = glm::vec3( 0.1, 0.7, 0.7 );
+	glm::vec3 color;
+	if( e.hasComponent<ColorComponent>()){
+		color = e.getComponent<ColorComponent>().color;
+	} else{
+		color = glm::vec3( 1.0, 1.0, 1.0 );
+	}
 	VK_UniformBufferObj mod_col{ model, color };
 	render_info.cmd_buffer[0]->pushConstants( *VK_Materials::getInstance()[ mat ].layout, vk::ShaderStageFlagBits::eTessellationEvaluation, 0, sizeof( mod_col ), &mod_col );
 
@@ -319,6 +324,8 @@ void KST_VK_CameraRenderer::draw( Entity e ){
 
 		if( !imgui_should_draw )			//TODO
 			createImgui( *VK_Materials::getInstance()[ mat ].renderpass );
+
+		render_info.bound_mat = mat.mat;
 	}
 
 	auto verts = mesh.mesh->getVertices();

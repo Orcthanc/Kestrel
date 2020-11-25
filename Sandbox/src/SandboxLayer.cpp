@@ -17,7 +17,7 @@ using namespace Kestrel;
 
 SandboxLayer::SandboxLayer( const std::string& s ): Layer{ s }{
 	//terrain = std::make_unique<VK_BasicTerrain>();
-
+/*
 	auto temp = Application::getInstance()->current_scene->createEntity( "TestName" );
 	auto mat = VK_Materials::getInstance().loadMaterial( "../res/Kestrel/shader/basic" );
 	auto mesh = std::make_shared<Mesh>();
@@ -26,7 +26,7 @@ SandboxLayer::SandboxLayer( const std::string& s ): Layer{ s }{
 	temp.addComponent<MeshComponent>( mesh );
 	temp.addComponent<MaterialComponent>( mat );
 	temp.addComponent<TransformComponent>( glm::vec3{ 0, 0, 0.0 }, glm::quat( glm::vec3{ 0.0f, 0.0f, 0.2f }), glm::vec3{ 0.9, 0.9, 1.0 });
-
+*/
 
 	auto cam = Application::getInstance()->current_scene->createEntity( "Camera" );
 	cam.addComponent<TransformComponent>();
@@ -35,40 +35,6 @@ SandboxLayer::SandboxLayer( const std::string& s ): Layer{ s }{
 
 void SandboxLayer::onUpdate(){
 
-	static bool firstFrame = true;
-	if( firstFrame ){
-		firstFrame = false;
-		return;
-	}
-
-	auto cams = Application::getInstance()->current_scene->getView<NameComponent, CameraComponent>();
-
-	ImGui::Begin( "Cameras" );
-	for( auto& comps: cams ){
-		auto [name, cam] = cams.get<NameComponent, CameraComponent>( comps );
-		if( ImGui::CollapsingHeader( name.name.c_str() )){
-
-			static bool inverse = false, logarithmic = false, interger = false, wireframe = false;
-			ImGui::Checkbox( "Inverse depth buffer (unimplemented)", &inverse );
-			ImGui::Checkbox( "Logarithmic depth buffer", &logarithmic );
-			ImGui::Checkbox( "Integer depth buffer (unimplemented)", &interger );
-			ImGui::Checkbox( "Wireframe", &wireframe );
-
-			RenderModeFlags res{ RenderModeFlags::eNone };
-			res |= inverse ? RenderModeFlags::eInverse : RenderModeFlags::eNone;
-			res |= logarithmic ? RenderModeFlags::eLogarithmic : RenderModeFlags::eNone;
-			res |= interger ? RenderModeFlags::eIntegerDepth : RenderModeFlags::eNone;
-			res |= wireframe ? RenderModeFlags::eWireframe : RenderModeFlags::eNone;
-
-			cam.camera->camera_render_mode = res;
-
-			ImGui::Separator();
-		}
-	}
-
-	ImGui::End();
-
-	ImGui::ShowDemoWindow();
 }
 
 

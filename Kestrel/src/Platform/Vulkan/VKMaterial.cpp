@@ -119,6 +119,11 @@ static vk::UniqueRenderPass createRenderPass( KST_VK_DeviceSurface& device ){
 
 Material VK_Materials::loadMaterial( const char* shader_name ){
 	PROFILE_FUNCTION();
+
+	if( material_names.contains( shader_name ))
+		return material_names.at( shader_name );
+
+
 	VK_Material_T newMat;
 
 	KST_CORE_INFO( "Loading material {}", shader_name );
@@ -318,18 +323,10 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 		newMat.pipelines.emplace_back( std::move( device->device->createGraphicsPipelineUnique( {}, pipeline_info ).value ));
 		pipeline_info.basePipelineHandle = *newMat.pipelines[0];
 	}
-/*
-	newMat.pipeline = device->device->createGraphicsPipelineUnique( {}, pipeline_info ).value;
-
-	pipeline_info.pStages = log_stage_infos.data();
-	pipeline_info.basePipelineHandle = *newMat.pipeline;
-
-	newMat.log_pipeline = device->device->createGraphicsPipelineUnique( {}, pipeline_info ).value;
-*/
-
 	static Material id = 1;
 	newMat.id = id;
 	materials.emplace( id, std::move( newMat ));
+	material_names[shader_name] = id;
 	return id++;
 }
 

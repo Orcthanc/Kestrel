@@ -4,6 +4,9 @@
 #include "Renderer/CameraModes.hpp"
 #include <vulkan/vulkan.hpp>
 
+#include <filesystem>
+#include <map>
+
 namespace Kestrel {
 	struct KST_VK_DeviceSurface;
 
@@ -80,6 +83,7 @@ namespace Kestrel {
 			std::vector<vk::UniqueFramebuffer> framebuffers;
 
 		private:
+			std::map<std::filesystem::path, Material> material_names;
 			std::unordered_map<Material, VK_Material_T> materials;
 			KST_VK_DeviceSurface* device;
 

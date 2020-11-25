@@ -12,6 +12,7 @@ extern "C" {
 		AST_NODE_float2,
 		AST_NODE_float3,
 		AST_NODE_float4,
+		AST_NODE_string,
 		//Operators
 		AST_NODE_plus,
 		AST_NODE_minus,
@@ -20,6 +21,7 @@ extern "C" {
 		AST_NODE_modulo,
 		AST_NODE_assign,
 		AST_NODE_uminus,
+		AST_NODE_dot,
 		//Identifier
 		AST_NODE_identifier,
 		AST_NODE_component_list,
@@ -67,6 +69,11 @@ extern "C" {
 		ast_node* statements;
 	} ast_node_function;
 
+	typedef struct ast_node_component {
+		ast_node* name;
+		ast_node* value;
+	} ast_node_component;
+
 	typedef struct ast_node_prog {
 		ast_node* decls;
 		ast_node* functions;
@@ -98,6 +105,7 @@ extern "C" {
 			ast_node_statement statement;
 			ast_node_prog program;
 			ast_node_unary_operator u_op;
+			ast_node_component comp;
 			float float1;
 			float2_s float2;
 			float3_s float3;

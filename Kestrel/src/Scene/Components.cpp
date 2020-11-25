@@ -47,3 +47,12 @@ CameraComponent::CameraComponent( std::shared_ptr<Camera>&& camera ): camera( st
 CameraComponent::operator const Kestrel::Camera&(){
 	return *camera;
 }
+
+
+ColorComponent::ColorComponent( const glm::vec3& rgb ): color( rgb ){}
+
+ColorComponent::ColorComponent( glm::vec3&& rgb ): color( std::move( rgb )){}
+
+ColorComponent::operator const glm::vec3&(){
+	return color;
+}
