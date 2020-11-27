@@ -81,7 +81,7 @@ void ast_node_free( ast_node* node ){
 	free( node );
 }
 
-static const char* ast_node_type_string( ast_node_type t ){
+const char* ast_node_to_string( ast_node_type t ){
 	switch( t ){
 		case AST_NODE_float1: return "AST_NODE_float1";
 		case AST_NODE_float2: return "AST_NODE_float2";
@@ -116,7 +116,7 @@ static void ast_node_print_tree_int( ast_node* node, uint32_t offset ){
 		printf( "NULL\n" );
 		return;
 	}
-	printf( "%s: {\n%*s", ast_node_type_string( node->type ), offset_amt * ( offset + 1 ), "" );
+	printf( "%s: {\n%*s", ast_node_to_string( node->type ), offset_amt * ( offset + 1 ), "" );
 	switch( node->type ){
 		case AST_NODE_float1:
 		{

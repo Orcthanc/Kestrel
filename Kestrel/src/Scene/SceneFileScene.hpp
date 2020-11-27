@@ -11,28 +11,13 @@
 #include "SyntaxTree.h"
 
 namespace Kestrel {
-	enum struct SceneVariableType {
-		eEntity,
-		eFloat,
-		eFloat2,
-		eFloat3,
-		eFloat4,
-	};
 
 	enum struct SceneComponentTypes {
-		eTransform,
-		eCamera,
-	};
-
-	struct SceneVariable {
-		SceneVariableType type;
-		union {
-			entt::entity entity;
-			float floating;
-			glm::vec2 vec2;
-			glm::vec3 vec3;
-			glm::vec4 vec4;
-		} val;
+		eTransform = 1 << 0,
+		eMesh = 1 << 1,
+		eMat = 1 << 2,
+		eColor = 1 << 3,
+		eCamera = 1 << 4,
 	};
 
 	struct SceneFileScene: public Scene {
@@ -45,8 +30,9 @@ namespace Kestrel {
 
 			virtual void onUpdate() override;
 		private:
+			void callFunctions();
 			ast_node* functions = nullptr;
 			std::unordered_map<std::string, entt::entity> entitys;
-			std::unordered_map<std::string, SceneVariableType> globals;
+			std::unordered_map<entt::entity, SceneComponentTypes> components;
 	};
 }

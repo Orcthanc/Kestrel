@@ -116,6 +116,7 @@ extern "C" {
 
 	extern void ast_node_free( ast_node* );
 	extern void ast_node_print_tree( ast_node* );
+	extern const char* ast_node_to_string( ast_node_type );
 
 
 	//Parser

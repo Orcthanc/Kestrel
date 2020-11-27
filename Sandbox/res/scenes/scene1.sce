@@ -11,19 +11,16 @@ plane2[
 	Color = ( 0.0, 1.0, 0.0 )]
 
 void cam1(){
-	Transform.pos = ( 0.0, 0.0, 0.0 );
-	Transform.rot = ( 0.0, 0.0, 0.0 );
+	Transform.loc = ( 0.0, 0.0, 0.0 );
 	Transform.scale = ( 1.0, 1.0, 1.0 );
 }
 
 void plane1(){
-	Transform.pos = ( 0.0, 0.0, 1.0 ) * frame;
-	Transform.rot = ( 0.0, 0.0, 0.0 );
+	Transform.loc = ( 0.0, 0.0, 1.0 ) * frame;
 	Transform.scale = ( 1000.0, 1000.0, 1.0 );
 }
 
 void plane2(){
-	Transform.pos = ( 0.0, 0.0, 1.01 ) * frame;
-	Transform.rot = ( 0.0, 0.0, 0.0 );
+	Transform.loc = ( 0.0, 0.0, 1.01 ) * frame;
 	Transform.scale = ( 1000.0, 1000.0, 1.0 );
 }

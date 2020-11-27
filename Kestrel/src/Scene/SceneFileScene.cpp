@@ -9,6 +9,8 @@
 #include "Lexer.hpp"
 #include "test.h"
 
+#include "VM/VM.hpp"
+
 #include "imgui.h"
 
 #include <fstream>
@@ -112,29 +114,33 @@ void SceneFileScene::load( const std::filesystem::path& path ){
 
 				if( comp == "Transform" ){
 					KST_CORE_INFO( "Adding TransformComponent" );
+					components[entity.entity] |= SceneComponentTypes::eTransform;
 					if( name == "plane1" )
 						entity.addComponent<TransformComponent>( glm::vec3( -0.2, -0.2, 0.2 )); //TODO args
 					else
 						entity.addComponent<TransformComponent>();
 				} else if( comp == "Color" ){
 					KST_CORE_ASSERT( temp2->val.list.val->val.comp.value->type == AST_NODE_float3, "FIXME:: Color component has to be a float3" );
+					components[entity.entity] |= SceneComponentTypes::eColor;
 					auto temp = temp2->val.list.val->val.comp.value->val.float3;
 					entity.addComponent<ColorComponent>(glm::vec3( temp.x, temp.y, temp.z ));
 					KST_CORE_INFO( "Adding color component: ({} {} {})", temp.x, temp.y, temp.z );
 				} else if( comp == "Mesh" ){
 					auto mesh = std::make_shared<Mesh>();
 					KST_CORE_ASSERT( temp2->val.list.val->val.comp.value->type == AST_NODE_string, "FIXME:: Mesh component has to be a string" );
+					components[entity.entity] |= SceneComponentTypes::eMesh;
 					const char* path = temp2->val.list.val->val.comp.value->val.identifier.name;
 					KST_CORE_INFO( "Adding mesh component: {}", path );
 					mesh->load_obj<VK_Mesh>( path );
 					entity.addComponent<MeshComponent>( mesh );
 				} else if( comp == "Mat" ){
 					KST_CORE_ASSERT( temp2->val.list.val->val.comp.value->type == AST_NODE_string, "FIXME:: Mat component has to be a string" );
+					components[entity.entity] |= SceneComponentTypes::eMat;
 					const char* path = temp2->val.list.val->val.comp.value->val.identifier.name;
 					KST_CORE_INFO( "Adding material component: {}", path );
 					auto mat = VK_Materials::getInstance().loadMaterial( path );
 					entity.addComponent<MaterialComponent>( mat );
-				}
+				} //TODO Camera
 
 				temp2 = temp2->val.list.next;
 			}
@@ -143,6 +149,9 @@ void SceneFileScene::load( const std::filesystem::path& path ){
 		}
 	}
 
+	functions = tree->val.program.functions;
+	tree->val.program.functions = nullptr;
+
 	ast_node_free( tree );
 }
 
@@ -150,7 +159,77 @@ SceneFileScene::~SceneFileScene(){
 	ast_node_free( functions );
 }
 
+void SceneFileScene::callFunctions(){
+	PROFILE_FUNCTION();
+
+	ast_node* func = functions;
+
+	static size_t frame = 0;
+	frame++;
+
+	while( func ){
+		//TODO
+		auto name = func->val.list.val->val.function.name->val.identifier.name;
+		auto entity = entitys.at( std::string( name ));
+		Entity s_ent = { this, entity };
+
+		KST_CORE_INFO( "Updating entity {}", name );
+
+		VM vm;
+		VariableRegistry reg;
+		VariableHeap heap;
+
+		auto& frame_var = reg.variable["frame"];
+		frame_var.type.type = VM_Type::float1;
+		frame_var.type.size = sizeof( float );
+		frame_var.offset = heap.alloc_size( sizeof( float ));
+		heap.accessVal<float>( frame_var ) = frame;
+
+		if( any_flag( components[entity] & SceneComponentTypes::eTransform )){
+			VariableRegistry& temp = *( reg.variable["Transform"].type.members = std::make_unique<VariableRegistry>());
+			auto& loc = temp.variable["loc"];
+			loc.type.type = VM_Type::float3;
+			loc.type.size = sizeof( glm::vec3 );
+			loc.offset = heap.alloc_size( sizeof( glm::vec3 ));
+			heap.accessVal<glm::vec3>( loc ) = s_ent.getComponent<TransformComponent>().loc;
+
+			auto& rot = temp.variable["rot"];
+			rot.type.type = VM_Type::float4;
+			rot.type.size = sizeof( glm::vec4 );
+			rot.offset = heap.alloc_size( sizeof( glm::vec4 ));
+			auto rot_val = s_ent.getComponent<TransformComponent>().rot;
+			heap.accessVal<glm::vec4>( rot ) = { rot_val.x, rot_val.y, rot_val.z, rot_val.w };
+
+			auto& scale = temp.variable["scale"];
+			scale.type.type = VM_Type::float3;
+			scale.type.size = sizeof( glm::vec3 );
+			scale.offset = heap.alloc_size( sizeof( glm::vec3 ));
+			heap.accessVal<glm::vec3>( scale ) = s_ent.getComponent<TransformComponent>().scale;
+		} else {
+			//TODO
+		}
+
+		vm.execute( func->val.list.val->val.function.statements, reg, heap );
+
+		if( any_flag( components[entity] & SceneComponentTypes::eTransform )){
+			VariableRegistry& temp = *reg.variable["Transform"].type.members;
+			s_ent.getComponent<TransformComponent>().loc = heap.accessVal<glm::vec3>( temp.variable["loc"] );
+			auto rot_val = heap.accessVal<glm::vec4>( temp.variable["rot"] );
+			s_ent.getComponent<TransformComponent>().rot = { rot_val.x, rot_val.y, rot_val.z, rot_val.w };
+			s_ent.getComponent<TransformComponent>().scale = heap.accessVal<glm::vec3>( temp.variable["scale"] );
+		} else {
+			//TODO
+		}
+
+
+		func = func->val.list.next;
+	}
+}
+
 void SceneFileScene::onUpdate(){
+	PROFILE_FUNCTION();
+
+	callFunctions();
 #ifndef NDEBUG
 	static bool firstFrame = true;
 	if( firstFrame ){
