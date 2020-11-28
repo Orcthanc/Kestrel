@@ -202,7 +202,7 @@ rvalue(A) ::= STRING(B). {
 	int temp = strlen( B );
 	A->val.identifier.name = malloc( temp - 1 );
 	strncpy( A->val.identifier.name, B + 1, temp - 2 );
-	A->val.identifier.name[temp - 1] = 0;
+	A->val.identifier.name[temp - 2] = 0;
 }
 
 rvalue(A) ::= float1(B). {

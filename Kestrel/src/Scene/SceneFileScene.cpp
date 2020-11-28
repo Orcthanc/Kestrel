@@ -32,8 +32,9 @@ void SceneFileScene::load( const std::filesystem::path& path ){
 		KST_CORE_ASSERT( istream.is_open(), "Could not open file {}", path.string());
 		auto size = istream.tellg();
 		istream.seekg( 0 );
-		file = (char*)malloc( size );
+		file = (char*)malloc( size.operator long() + 1 );
 		istream.read( file, size );
+		file[size] = 0;
 	}
 
 
@@ -115,10 +116,7 @@ void SceneFileScene::load( const std::filesystem::path& path ){
 				if( comp == "Transform" ){
 					KST_CORE_INFO( "Adding TransformComponent" );
 					components[entity.entity] |= SceneComponentTypes::eTransform;
-					if( name == "plane1" )
-						entity.addComponent<TransformComponent>( glm::vec3( -0.2, -0.2, 0.2 )); //TODO args
-					else
-						entity.addComponent<TransformComponent>();
+						entity.addComponent<TransformComponent>( glm::vec3{}, glm::quat{ glm::vec3{ 0, 3.14, 0 }}, glm::vec3{} ); //TODO args
 				} else if( comp == "Color" ){
 					KST_CORE_ASSERT( temp2->val.list.val->val.comp.value->type == AST_NODE_float3, "FIXME:: Color component has to be a float3" );
 					components[entity.entity] |= SceneComponentTypes::eColor;
@@ -192,14 +190,14 @@ void SceneFileScene::callFunctions(){
 			loc.type.size = sizeof( glm::vec3 );
 			loc.offset = heap.alloc_size( sizeof( glm::vec3 ));
 			heap.accessVal<glm::vec3>( loc ) = s_ent.getComponent<TransformComponent>().loc;
-
+/*
 			auto& rot = temp.variable["rot"];
 			rot.type.type = VM_Type::float4;
 			rot.type.size = sizeof( glm::vec4 );
 			rot.offset = heap.alloc_size( sizeof( glm::vec4 ));
 			auto rot_val = s_ent.getComponent<TransformComponent>().rot;
 			heap.accessVal<glm::vec4>( rot ) = { rot_val.x, rot_val.y, rot_val.z, rot_val.w };
-
+*/
 			auto& scale = temp.variable["scale"];
 			scale.type.type = VM_Type::float3;
 			scale.type.size = sizeof( glm::vec3 );
@@ -213,9 +211,16 @@ void SceneFileScene::callFunctions(){
 
 		if( any_flag( components[entity] & SceneComponentTypes::eTransform )){
 			VariableRegistry& temp = *reg.variable["Transform"].type.members;
+
+			KST_CORE_INFO( "{} {} {}", heap.accessVal<glm::vec3>( temp.variable["loc"] ).x, heap.accessVal<glm::vec3>( temp.variable["loc"] ).y, heap.accessVal<glm::vec3>( temp.variable["loc"] ).z );
+
 			s_ent.getComponent<TransformComponent>().loc = heap.accessVal<glm::vec3>( temp.variable["loc"] );
+			KST_CORE_INFO( "{} {} {}", s_ent.getComponent<TransformComponent>().loc.x, s_ent.getComponent<TransformComponent>().loc.y, s_ent.getComponent<TransformComponent>().loc.z );
+
+/*
 			auto rot_val = heap.accessVal<glm::vec4>( temp.variable["rot"] );
 			s_ent.getComponent<TransformComponent>().rot = { rot_val.x, rot_val.y, rot_val.z, rot_val.w };
+*/
 			s_ent.getComponent<TransformComponent>().scale = heap.accessVal<glm::vec3>( temp.variable["scale"] );
 		} else {
 			//TODO

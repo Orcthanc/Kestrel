@@ -16,11 +16,11 @@ void cam1(){
 }
 
 void plane1(){
-	Transform.loc = ( 0.0, 0.0, 1.0 ) * frame;
-	Transform.scale = ( 1000.0, 1000.0, 1.0 );
+	Transform.loc = ( 0.0, 0.0, 0.01 ) * frame;
+	Transform.scale = ( 1000.0, 1.0, 1.0 );
 }
 
 void plane2(){
-	Transform.loc = ( 0.0, 0.0, 1.01 ) * frame;
-	Transform.scale = ( 1000.0, 1000.0, 1.0 );
+	Transform.loc = ( 0.0, 0.0, 0.0101 ) * frame;
+	Transform.scale = ( 1.0, 1000.0, 1.0 );
 }

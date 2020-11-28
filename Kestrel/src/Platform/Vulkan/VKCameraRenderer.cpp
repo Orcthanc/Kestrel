@@ -280,7 +280,7 @@ void KST_VK_CameraRenderer::draw( Entity e ){
 	KST_CORE_ASSERT( e.hasComponent<MeshComponent>(), "Need a mesh component to draw {}", e.getComponent<NameComponent>().name );
 	KST_CORE_ASSERT( e.hasComponent<MaterialComponent>(), "Need a material component to draw {}", e.getComponent<NameComponent>().name );
 
-	auto [transform, mesh, mat] = e.getComponent<TransformComponent, MeshComponent, MaterialComponent>();
+	auto [transform, mesh, mat] = e.getComponents<TransformComponent, MeshComponent, MaterialComponent>();
 
 	//Transform
 

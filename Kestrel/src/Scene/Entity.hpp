@@ -35,8 +35,15 @@ namespace Kestrel {
 			return scene->entt_reg.has<T...>( entity );
 		}
 
+		template<typename T>
+		auto& getComponent(){
+			KST_CORE_ASSERT( scene->entt_reg.has<T>( entity ), "Object does not have components" );
+			return scene->entt_reg.get<T>( entity );
+		}
+
 		template<typename... T>
-		auto getComponent(){
+		auto getComponents(){
+			static_assert( sizeof...( T ) > 1, "getComponents requires at least 2 components" );
 			KST_CORE_ASSERT( scene->entt_reg.has<T...>( entity ), "Object does not have components" );
 			return scene->entt_reg.get<T...>( entity );
 		}

@@ -14,7 +14,7 @@ void VM::execute( ast_node* node, VariableRegistry& reg, VariableHeap& heap ){
 		case AST_NODE_statement:
 		{
 			execute( node->val.statement.statement, reg, heap );
-		}
+		} break;
 		case AST_NODE_assign:
 		{
 			Variable& temp = getLvalue( node->val.op.lhs, reg, heap );
@@ -30,6 +30,7 @@ void VM::execute( ast_node* node, VariableRegistry& reg, VariableHeap& heap ){
 				case VM_Type::float3:
 				{
 					heap.accessVal<glm::vec3>( temp ) = getRvalue( node->val.op.rhs, reg, heap ).val.float3;
+					//KST_CORE_INFO( "{} {} {}", heap.accessVal<glm::vec3>( temp ).x, heap.accessVal<glm::vec3>( temp ).y, heap.accessVal<glm::vec3>( temp ).z );
 				} break;
 				case VM_Type::float4:
 				{
@@ -40,11 +41,11 @@ void VM::execute( ast_node* node, VariableRegistry& reg, VariableHeap& heap ){
 					KST_CORE_VERIFY( false, "Can not assign value type {}", temp.type.type );
 				}
 			}
-		}
+		} break;
 		default:
 		{
 			KST_CORE_VERIFY( false, "Can not execute node type {}", ast_node_to_string( node->type ));
-		}
+		} break;
 	}
 }
 
@@ -105,23 +106,23 @@ VM_Value VM::getRvalue( ast_node* node, VariableRegistry& reg, VariableHeap& hea
 					ret.type = VM_Type::float2;
 					ret.val.float2 = heap.accessVal<glm::vec2>( lv );
 					return ret;
-				}
+				} break;
 				case VM_Type::float3:
 				{
 					ret.type = VM_Type::float3;
 					ret.val.float3 = heap.accessVal<glm::vec3>( lv );
 					return ret;
-				}
+				} break;
 				case VM_Type::float4:
 				{
 					ret.type = VM_Type::float4;
 					ret.val.float4 = heap.accessVal<glm::vec4>( lv );
 					return ret;
-				}
+				} break;
 				default:
 				{
 					KST_CORE_VERIFY( false, "Can not assign value type {}", lv.type.type );
-				}
+				} break;
 			}
 		} break;
 		case AST_NODE_plus:
@@ -150,7 +151,7 @@ VM_Value VM::getRvalue( ast_node* node, VariableRegistry& reg, VariableHeap& hea
 				default:
 				{
 					KST_CORE_VERIFY( false, "Invalid type {} in operator", ret.type );
-				}
+				} break;
 			}
 		} break;
 		case AST_NODE_minus:
@@ -179,14 +180,16 @@ VM_Value VM::getRvalue( ast_node* node, VariableRegistry& reg, VariableHeap& hea
 				default:
 				{
 					KST_CORE_VERIFY( false, "Invalid type {} in operator", ret.type );
-				}
+				} break;
 			}
 		} break;
 		case AST_NODE_times:
 		{
 			auto lhs = getRvalue( node->val.op.lhs, reg, heap );
 			auto rhs = getRvalue( node->val.op.rhs, reg, heap );
-			KST_CORE_ASSERT( lhs.type == rhs.type, "Can not mul two different types {} and {}", lhs.type, rhs.type );
+			if( rhs.type != VM_Type::float1 )
+				std::swap( lhs, rhs );
+			KST_CORE_ASSERT( rhs.type == VM_Type::float1, "Can not mul two different types {} and {}", lhs.type, rhs.type );
 			ret.type = lhs.type;
 			switch( ret.type ){
 				case VM_Type::float1:
@@ -195,27 +198,29 @@ VM_Value VM::getRvalue( ast_node* node, VariableRegistry& reg, VariableHeap& hea
 				} break;
 				case VM_Type::float2:
 				{
-					ret.val.float2 = lhs.val.float2 * rhs.val.float2;
+					ret.val.float2 = lhs.val.float2 * rhs.val.float1;
 				} break;
 				case VM_Type::float3:
 				{
-					ret.val.float3 = lhs.val.float3 * rhs.val.float3;
+					ret.val.float3 = lhs.val.float3 * rhs.val.float1;
 				} break;
 				case VM_Type::float4:
 				{
-					ret.val.float4 = lhs.val.float4 * rhs.val.float4;
+					ret.val.float4 = lhs.val.float4 * rhs.val.float1;
 				} break;
 				default:
 				{
 					KST_CORE_VERIFY( false, "Invalid type {} in operator", ret.type );
-				}
+				} break;
 			}
 		} break;
 		case AST_NODE_divide:
 		{
 			auto lhs = getRvalue( node->val.op.lhs, reg, heap );
 			auto rhs = getRvalue( node->val.op.rhs, reg, heap );
-			KST_CORE_ASSERT( lhs.type == rhs.type, "Can not div two different types {} and {}", lhs.type, rhs.type );
+			if( rhs.type != VM_Type::float1 )
+				std::swap( lhs, rhs );
+			KST_CORE_ASSERT( rhs.type == VM_Type::float1, "Can not divide two different types {} and {}", lhs.type, rhs.type );
 			ret.type = lhs.type;
 			switch( ret.type ){
 				case VM_Type::float1:
@@ -224,20 +229,20 @@ VM_Value VM::getRvalue( ast_node* node, VariableRegistry& reg, VariableHeap& hea
 				} break;
 				case VM_Type::float2:
 				{
-					ret.val.float2 = lhs.val.float2 / rhs.val.float2;
+					ret.val.float2 = lhs.val.float2 / rhs.val.float1;
 				} break;
 				case VM_Type::float3:
 				{
-					ret.val.float3 = lhs.val.float3 / rhs.val.float3;
+					ret.val.float3 = lhs.val.float3 / rhs.val.float1;
 				} break;
 				case VM_Type::float4:
 				{
-					ret.val.float4 = lhs.val.float4 / rhs.val.float4;
+					ret.val.float4 = lhs.val.float4 / rhs.val.float1;
 				} break;
 				default:
 				{
 					KST_CORE_VERIFY( false, "Invalid type {} in operator", ret.type );
-				}
+				} break;
 			}
 		} break;
 		case AST_NODE_modulo:
@@ -254,7 +259,7 @@ VM_Value VM::getRvalue( ast_node* node, VariableRegistry& reg, VariableHeap& hea
 				default:
 				{
 					KST_CORE_VERIFY( false, "Invalid type {} in operator", ret.type );
-				}
+				} break;
 			}
 		} break;
 		case AST_NODE_uminus:
@@ -319,7 +324,7 @@ VM_Value VM::getRvalue( ast_node* node, VariableRegistry& reg, VariableHeap& hea
 				default:
 				{
 					KST_CORE_VERIFY( false, "Can not assign value type {}", temp.type.type );
-				}
+				} break;
 			}
 		} break;
 		default:

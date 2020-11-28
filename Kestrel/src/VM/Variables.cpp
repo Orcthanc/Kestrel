@@ -5,8 +5,8 @@ using namespace Kestrel;
 VariableHeap::VariableHeap(): VariableHeap{ 8 }{}
 
 VariableHeap::VariableHeap( size_t initial_size ){
-	data = ( char* )malloc( size );
-	reserved = size;
+	data = ( char* )malloc( initial_size );
+	reserved = initial_size;
 }
 
 VariableHeap::VariableHeap( VariableHeap&& o ){
@@ -39,7 +39,7 @@ VariableHeap::~VariableHeap(){
 }
 
 size_t VariableHeap::alloc_size( size_t alloc_size ){
-	while( alloc_size + size < reserved ){
+	while( alloc_size + size > reserved ){
 		reserved *= 2;
 		data = ( char* )realloc( data, reserved * 2 );
 	}

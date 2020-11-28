@@ -11,7 +11,7 @@ NaiveCamera::NaiveCamera( float fov, float aspect, float near_plane, float far_p
 
 	proj = glm::perspectiveZO( fov, aspect, near_plane, far_plane );
 	proj[1][1] *= -1;
-	view = glm::lookAt( glm::vec3( 2.0, 2.0, 2.0 ), glm::vec3{}, glm::vec3( 0.0, 0.0, 1.0 ));
+	view = glm::lookAt( glm::vec3{}, glm::vec3( 0, 0, 1 ), glm::vec3( 0.0, 1.0, 0.0 ));
 
 	camera_render_mode = RenderModeFlags::eLogarithmic;
 
