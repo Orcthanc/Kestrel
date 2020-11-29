@@ -8,6 +8,7 @@ Sandbox::Sandbox(): Kestrel::Application(){
 	current_scene = std::make_shared<Kestrel::SceneFileScene>( "../res/Sandbox/res/scenes/scene1.sce" );
 
 	addLayer( std::make_shared<SandboxLayer>( "Sandbox" ));
+
 }
 
 std::unique_ptr<Kestrel::Application> createApplication(){

@@ -30,7 +30,7 @@ SandboxLayer::SandboxLayer( const std::string& s ): Layer{ s }{
 
 	auto cam = Application::getInstance()->current_scene->createEntity( "Camera" );
 	cam.addComponent<TransformComponent>();
-	cam.addComponent<CameraComponent>( std::make_shared<NaiveCamera>( 45.0, 960.0/1080.0, 0.1, 1000000.0 ));
+	cam.addComponent<CameraComponent>( std::make_shared<NaiveCamera>( 45.0, 960.0/1080.0, 0.1, 10000.0 ));
 }
 
 void SandboxLayer::onUpdate(){
