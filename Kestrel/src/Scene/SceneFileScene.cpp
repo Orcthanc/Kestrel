@@ -171,7 +171,7 @@ void SceneFileScene::callFunctions(){
 		auto entity = entitys.at( std::string( name ));
 		Entity s_ent = { this, entity };
 
-		KST_CORE_INFO( "Updating entity {}", name );
+		//KST_CORE_INFO( "Updating entity {}", name );
 
 		VM vm;
 		VariableRegistry reg;
@@ -212,10 +212,10 @@ void SceneFileScene::callFunctions(){
 		if( any_flag( components[entity] & SceneComponentTypes::eTransform )){
 			VariableRegistry& temp = *reg.variable["Transform"].type.members;
 
-			KST_CORE_INFO( "{} {} {}", heap.accessVal<glm::vec3>( temp.variable["loc"] ).x, heap.accessVal<glm::vec3>( temp.variable["loc"] ).y, heap.accessVal<glm::vec3>( temp.variable["loc"] ).z );
+			//KST_CORE_INFO( "{} {} {}", heap.accessVal<glm::vec3>( temp.variable["loc"] ).x, heap.accessVal<glm::vec3>( temp.variable["loc"] ).y, heap.accessVal<glm::vec3>( temp.variable["loc"] ).z );
 
 			s_ent.getComponent<TransformComponent>().loc = heap.accessVal<glm::vec3>( temp.variable["loc"] );
-			KST_CORE_INFO( "{} {} {}", s_ent.getComponent<TransformComponent>().loc.x, s_ent.getComponent<TransformComponent>().loc.y, s_ent.getComponent<TransformComponent>().loc.z );
+			//KST_CORE_INFO( "{} {} {}", s_ent.getComponent<TransformComponent>().loc.x, s_ent.getComponent<TransformComponent>().loc.y, s_ent.getComponent<TransformComponent>().loc.z );
 
 /*
 			auto rot_val = heap.accessVal<glm::vec4>( temp.variable["rot"] );

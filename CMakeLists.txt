@@ -8,6 +8,7 @@ project( Kestrel )
 
 option( COLOR_CONSOLE "Enables colored console output" OFF )
 option( KST_PROFILING "Enables performance measuring" OFF )
+option( KST_COLOR_STATS "Measure color value distribution of the resulting images" OFF )
 
 
 find_program(GLSLANG_VALIDATOR NAMES glslangValidator)

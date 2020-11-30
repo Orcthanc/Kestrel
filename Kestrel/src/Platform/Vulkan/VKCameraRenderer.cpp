@@ -8,6 +8,8 @@
 
 #include "imgui_impl_glfw.h"
 
+#include <future>
+
 using namespace Kestrel;
 
 KST_VK_CameraRenderer::KST_VK_CameraRenderer( KST_VK_DeviceSurface* surface ){
@@ -113,6 +115,13 @@ void KST_VK_CameraRenderer::createSynchronization(){
 
 	vk::FenceCreateInfo fence_cr_inf( vk::FenceCreateFlagBits::eSignaled );
 
+#ifdef KST_COLOR_STATS
+	sync.color_cpy_start = device_surface->device->createSemaphoreUnique( sem_inf );
+
+	vk::FenceCreateInfo fence_inf;
+	sync.color_cpy_done = device_surface->device->createFenceUnique( fence_inf );
+#endif
+
 	for( auto& r: render_targets ){
 		r.render_ready_sema = device_surface->device->createSemaphoreUnique( sem_inf );
 		r.render_done_sema = device_surface->device->createSemaphoreUnique( sem_inf );
@@ -208,6 +217,33 @@ void KST_VK_CameraRenderer::createImages(){
 
 		r.color_depth_view[1] = device_surface->device->createImageViewUnique( img_view_inf );
 	}
+
+#ifdef KST_COLOR_STATS
+	auto buf_size = device_surface->swapchains[0].size.width * device_surface->swapchains[0].size.height * 4;
+	vk::BufferCreateInfo buf_cr_inf(
+			{},
+			buf_size,
+			vk::BufferUsageFlagBits::eTransferDst,
+			vk::SharingMode::eExclusive,
+			{}
+		);
+
+	copy_buffer.buffer = device_surface->device->createBufferUnique( buf_cr_inf );
+
+
+	auto memory_reqs = device_surface->device->getBufferMemoryRequirements( *copy_buffer.buffer );
+	vk::MemoryAllocateInfo mem_inf(
+			memory_reqs.size,
+			device_surface->find_memory_type(
+				memory_reqs.memoryTypeBits,
+				vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent )
+		);
+
+	copy_buffer.memory = device_surface->device->allocateMemoryUnique( mem_inf );
+	device_surface->device->bindBufferMemory( *copy_buffer.buffer, *copy_buffer.memory, 0 );
+	copy_buffer.data = device_surface->device->mapMemory( *copy_buffer.memory, 0, buf_size );
+
+#endif
 }
 
 void KST_VK_CameraRenderer::createImgui( vk::RenderPass render_pass ){
@@ -358,7 +394,12 @@ void KST_VK_CameraRenderer::endScene(){
 	//TODO check OutOfDate
 
 	std::vector<vk::CommandBuffer> buffers{ *render_info.cmd_buffer[0] };
-	std::vector signal_semas{ *render_info.target->render_done_sema };
+	std::vector signal_semas{
+		*render_info.target->render_done_sema,
+#ifdef KST_COLOR_STATS
+		*sync.color_cpy_start,
+#endif
+	};
 
 	vk::SubmitInfo sub_inf(
 			{},
@@ -376,6 +417,75 @@ void KST_VK_CameraRenderer::endScene(){
 	if (vk::Result::eSuccess != graphics_queue.submit(1, &sub_inf, {})) {
 		throw std::runtime_error( "Error during queue_submit" );
 	}
+
+
+#ifdef KST_COLOR_STATS
+
+		//Copy image to cpu
+		vk::CommandBufferAllocateInfo al_inf(
+				*transfer_cmd_pool,
+				vk::CommandBufferLevel::ePrimary,
+				1 );
+
+		auto transferbuffer2 = device_surface->device->allocateCommandBuffersUnique( al_inf );
+	{
+		vk::CommandBufferBeginInfo beg_inf(
+				vk::CommandBufferUsageFlagBits::eOneTimeSubmit, {});
+
+		transferbuffer2[0]->begin( beg_inf );
+
+		vk::BufferMemoryBarrier mem_bar(
+				vk::AccessFlagBits::eHostRead,
+				vk::AccessFlagBits::eTransferWrite,
+				device_surface->queue_families.transfer.value(),
+				device_surface->queue_families.transfer.value(),
+				*copy_buffer.buffer,
+				0,
+				VK_WHOLE_SIZE );
+
+		transferbuffer2[0]->pipelineBarrier(
+				vk::PipelineStageFlagBits::eHost,
+				vk::PipelineStageFlagBits::eTransfer,
+				{},
+				0, nullptr,
+				1, &mem_bar,
+				0, nullptr );
+
+		vk::BufferImageCopy img_cpy(
+				0,
+				0,
+				0,
+				{ vk::ImageAspectFlagBits::eColor, 0, 0, 1 },
+				{ 0, 0, 0 },
+				{
+					render_targets[ render_targets.getIndex() ].size.width,
+					render_targets[ render_targets.getIndex() ].size.height,
+					1
+				}
+			);
+
+		transferbuffer2[0]->copyImageToBuffer(
+				*render_info.target->color_depth[0],
+				vk::ImageLayout::eTransferSrcOptimal,
+				*copy_buffer.buffer,
+				1, &img_cpy );
+
+		transferbuffer2[0]->end();
+
+		std::array wait_sema{ *sync.color_cpy_start };
+		std::array<vk::PipelineStageFlags, 1> wait_stages{ vk::PipelineStageFlagBits::eTransfer };
+
+		vk::SubmitInfo sub_inf2(
+				wait_sema,
+				wait_stages,
+				*transferbuffer2[0],
+				{} );
+
+		KST_CORE_VERIFY( vk::Result::eSuccess == transfer_queue.submit( 1, &sub_inf2, *sync.color_cpy_done ), "Queue submit failed in line {}", __LINE__ );
+	}
+#endif
+
+
 
 	auto img_res = device_surface->device->acquireNextImageKHR(
 			*device_surface->swapchains[render_info.window_index].swapchain,
@@ -399,7 +509,7 @@ void KST_VK_CameraRenderer::endScene(){
 		auto transferbuffer = device_surface->device->allocateCommandBuffersUnique( al_inf );
 
 		vk::CommandBufferBeginInfo beg_inf(
-				vk::CommandBufferUsageFlagBits::eOneTimeSubmit, {}  );
+				vk::CommandBufferUsageFlagBits::eOneTimeSubmit, {});
 
 		transferbuffer[0]->begin( beg_inf );
 
@@ -511,6 +621,49 @@ void KST_VK_CameraRenderer::endScene(){
 		} catch( vk::OutOfDateKHRError e ){
 			onSizeChange( false );
 		}
+
+#ifdef KST_COLOR_STATS
+		KST_CORE_VERIFY( vk::Result::eSuccess == device_surface->device->waitForFences( 1, &*sync.color_cpy_done, VK_TRUE, UINT64_MAX ), "Wait for fence failed in line {}", __LINE__ );
+
+		KST_CORE_VERIFY( vk::Result::eSuccess == device_surface->device->resetFences( 1, &*sync.color_cpy_done ), "Wait for fence failed in line {}", __LINE__ );
+
+/*
+		std::stringstream sstream;
+		sstream << std::hex << reinterpret_cast<uint32_t*>( copy_buffer.data )[0] << " "
+			<< reinterpret_cast<uint32_t*>( copy_buffer.data )[1] << " "
+			<< reinterpret_cast<uint32_t*>( copy_buffer.data )[2] << " ";
+
+		KST_CORE_INFO( "{}", sstream.str() );
+*/
+
+		std::unordered_map<uint32_t, uint32_t> colors;
+		std::vector<std::future<std::unordered_map<uint32_t, uint32_t>>> futures;
+
+		size_t max_size = render_info.target->size.width * render_info.target->size.height;
+		size_t step = max_size / 8;
+
+		for( size_t i = 0; i < 8; ++i ){
+			futures.emplace_back( std::async( [max_size, step]( size_t id, void* data ){
+					std::unordered_map<uint32_t, uint32_t> colors2;
+					for( size_t i = id * step; i < ( id == 7 ? max_size : ( id + 1 ) * step ); ++i ){
+						++colors2[ reinterpret_cast<uint32_t*>( data )[i]];
+					}
+					return colors2;
+				}, i, copy_buffer.data ));
+			std::unordered_map<uint32_t, uint32_t> colors2;
+		}
+
+		for( auto& f: futures ){
+			for( auto& [key, value]: f.get()){
+				colors[key] += value;
+			}
+		}
+
+		for( auto& [key, value]: colors ){
+			color_stat_file << std::hex << key << ':' << std::dec << value << " ";
+		}
+		color_stat_file << "\n";
+#endif
 
 		//TODO remove
 		present_queue.waitIdle();

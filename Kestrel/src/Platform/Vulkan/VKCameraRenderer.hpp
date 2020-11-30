@@ -91,6 +91,10 @@ namespace Kestrel {
 	struct PresentSynchronization {
 		vk::UniqueSemaphore start_rendering;
 		vk::UniqueSemaphore image_presentable;
+#ifdef KST_COLOR_STATS
+		vk::UniqueSemaphore color_cpy_start;
+		vk::UniqueFence color_cpy_done;
+#endif
 	};
 
 	struct KST_VK_CameraRenderer: public CameraRenderer {
@@ -123,8 +127,8 @@ namespace Kestrel {
 			vk::UniqueCommandPool render_cmd_pool;
 			vk::UniqueCommandPool transfer_cmd_pool;
 
-			KST_VK_Buffer vertex_buffer;
-			KST_VK_Buffer index_buffer;
+			KST_VK_Buffer vertex_buffer; 		//TODO move to mesh
+			KST_VK_Buffer index_buffer; 		//TODO move to mesh
 			KST_VK_Buffer uniform_buffer;
 
 			vk::Queue graphics_queue;
@@ -148,5 +152,10 @@ namespace Kestrel {
 
 			bool imgui_should_draw = false;
 			KST_VK_ImguiWindowData imgui;
+
+#ifdef KST_COLOR_STATS
+			std::ofstream color_stat_file{ "color_stats.txt" };
+			KST_VK_Buffer copy_buffer;
+#endif
 	};
 }
