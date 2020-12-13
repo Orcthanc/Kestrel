@@ -11,4 +11,6 @@ namespace Kestrel {
 		eWireframe = 0x8,
 		eAllFlags = 0xF,
 	};
+
+	std::string to_string( RenderModeFlags );
 };

@@ -157,6 +157,9 @@ SceneFileScene::~SceneFileScene(){
 	ast_node_free( functions );
 }
 
+//TODO remove
+extern int run;
+
 void SceneFileScene::callFunctions(){
 	PROFILE_FUNCTION();
 
@@ -183,6 +186,27 @@ void SceneFileScene::callFunctions(){
 		frame_var.offset = heap.alloc_size( sizeof( float ));
 		heap.accessVal<float>( frame_var ) = frame;
 
+#if 1
+		float distances[100] = { 0.001, 0.007999999999999997, 0.026999999999999986, 0.06399999999999996, 0.12499999999999992, 0.21599999999999983, 0.3429999999999997, 0.5119999999999996, 0.7289999999999993, 0.999999999999999, 1.3309999999999986, 1.7279999999999982, 2.1969999999999974, 2.7439999999999967, 3.374999999999996, 4.095999999999995, 4.912999999999994, 5.831999999999993, 6.858999999999991, 7.999999999999989, 9.260999999999987, 10.647999999999985, 12.166999999999984, 13.82399999999998, 15.624999999999979, 17.575999999999976, 19.68299999999997, 21.951999999999966, 24.388999999999964, 26.99999999999996, 29.790999999999958, 32.76799999999995, 35.93699999999994, 39.303999999999945, 42.874999999999936, 46.65599999999993, 50.65299999999992, 54.871999999999915, 59.3189999999999, 63.9999999999999, 68.92099999999988, 74.08799999999988, 79.50699999999986, 85.18399999999986, 91.12499999999984, 97.33599999999984, 103.82299999999982, 110.59199999999981, 117.6489999999998, 124.99999999999979, 132.65099999999975, 140.60799999999978, 148.87699999999973, 157.46399999999971, 166.37499999999972, 175.61599999999967, 185.19299999999967, 195.11199999999965, 205.37899999999962, 215.99999999999963, 226.9809999999996, 238.32799999999958, 250.04699999999954, 262.1439999999995, 274.6249999999995, 287.49599999999947, 300.7629999999994, 314.4319999999994, 328.50899999999933, 342.9999999999994, 357.9109999999993, 373.2479999999993, 389.01699999999926, 405.22399999999925, 421.8749999999992, 438.97599999999915, 456.5329999999991, 474.55199999999905, 493.0389999999991, 511.99999999999903, 531.440999999999, 551.3679999999989, 571.7869999999988, 592.7039999999988, 614.1249999999989, 636.0559999999987, 658.5029999999987, 681.4719999999986, 704.9689999999986, 728.9999999999985, 753.5709999999984, 778.6879999999985, 804.3569999999984, 830.5839999999984, 857.3749999999983, 884.7359999999983, 912.6729999999982, 941.1919999999982, 970.298999999998, 999.999999999998 };
+
+		auto& distance_var = reg.variable["distance"];
+		distance_var.type.type = VM_Type::float3;
+		distance_var.type.size = sizeof( glm::vec3 );
+		distance_var.offset = heap.alloc_size( sizeof( glm::vec3 ));
+		heap.accessVal<glm::vec3>( distance_var ) = glm::vec3( 0, 0, distances[run] );
+
+		auto& step_var = reg.variable["step"];
+		step_var.type.type = VM_Type::float1;
+		step_var.type.size = sizeof( float );
+		step_var.offset = heap.alloc_size( sizeof( float ));
+		float step;
+		heap.accessVal<float>( step_var ) = step = 1 * std::sqrt( distances[run] );
+		//400000
+		//
+
+		if( !(frame % 100 ))
+			KST_CORE_INFO( "CamDistance: {:.3f}; Distance: {}; Frame: {}", step * frame * 1, distances[run], frame );
+#endif
 		if( any_flag( components[entity] & SceneComponentTypes::eTransform )){
 			VariableRegistry& temp = *( reg.variable["Transform"].type.members = std::make_unique<VariableRegistry>());
 			auto& loc = temp.variable["loc"];
@@ -250,7 +274,7 @@ void SceneFileScene::onUpdate(){
 		if( ImGui::CollapsingHeader( name.name.c_str() )){
 
 			static bool inverse = false, logarithmic = false, interger = false, wireframe = false;
-			ImGui::Checkbox( "Inverse depth buffer (unimplemented)", &inverse );
+			ImGui::Checkbox( "Inverse depth buffer", &inverse );
 			ImGui::Checkbox( "Logarithmic depth buffer", &logarithmic );
 			ImGui::Checkbox( "Integer depth buffer (unimplemented)", &interger );
 			ImGui::Checkbox( "Wireframe", &wireframe );
@@ -261,7 +285,7 @@ void SceneFileScene::onUpdate(){
 			res |= interger ? RenderModeFlags::eIntegerDepth : RenderModeFlags::eNone;
 			res |= wireframe ? RenderModeFlags::eWireframe : RenderModeFlags::eNone;
 
-			cam.camera->camera_render_mode = res;
+			cam.camera->updateRenderMode( res );
 
 			ImGui::Separator();
 		}

@@ -33,6 +33,7 @@ namespace Kestrel {
 			void rotate( const glm::quat& quaternion );
 			void recalc_view();
 			virtual bool onSizeChange( Kestrel::WindowResizeEvent& e );
+			virtual void updateRenderMode( RenderModeFlags new_mode );
 
 			void set_renderer( std::unique_ptr<CameraRenderer>&& );
 
@@ -47,10 +48,10 @@ namespace Kestrel {
 			void draw( Entity e );
 			void endScene();
 
-			glm::mat4 view;
-			glm::mat4 proj;
+			glm::mat4 view{};
+			glm::mat4 proj{};
 
-			RenderModeFlags camera_render_mode{ RenderModeFlags::eNone };
+			RenderModeFlags camera_render_mode{ RenderModeFlags::eInverse };
 
 		private:
 			std::unique_ptr<CameraRenderer> renderer;

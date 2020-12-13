@@ -23,7 +23,7 @@ layout( binding = 0 ) uniform vp {
 layout( location = 0 ) out vec3 color;
 
 const float C = 1;
-const float Far = 10000;
+const float Far = 100000000;
 
 void main() {
 	gl_Position =

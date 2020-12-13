@@ -159,7 +159,7 @@ void KST_VK_CameraRenderer::createImages(){
 		r.size = device_surface->swapchains[0].size;
 	}
 
-	img_inf.format = vk::Format::eD32Sfloat;
+	img_inf.format = vk::Format::eD24UnormS8Uint;
 	img_inf.usage = vk::ImageUsageFlagBits::eDepthStencilAttachment;
 
 	for( auto& r: render_targets ){
@@ -213,7 +213,7 @@ void KST_VK_CameraRenderer::createImages(){
 
 		img_view_inf.image = *r.color_depth[1];
 		img_view_inf.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eDepth;
-		img_view_inf.format = vk::Format::eD32Sfloat;
+		img_view_inf.format = vk::Format::eD24UnormS8Uint;
 
 		r.color_depth_view[1] = device_surface->device->createImageViewUnique( img_view_inf );
 	}
@@ -421,13 +421,13 @@ void KST_VK_CameraRenderer::endScene(){
 
 #ifdef KST_COLOR_STATS
 
-		//Copy image to cpu
-		vk::CommandBufferAllocateInfo al_inf(
-				*transfer_cmd_pool,
-				vk::CommandBufferLevel::ePrimary,
-				1 );
+	//Copy image to cpu
+	vk::CommandBufferAllocateInfo al_inf(
+			*transfer_cmd_pool,
+			vk::CommandBufferLevel::ePrimary,
+			1 );
 
-		auto transferbuffer2 = device_surface->device->allocateCommandBuffersUnique( al_inf );
+	auto transferbuffer2 = device_surface->device->allocateCommandBuffersUnique( al_inf );
 	{
 		vk::CommandBufferBeginInfo beg_inf(
 				vk::CommandBufferUsageFlagBits::eOneTimeSubmit, {});
@@ -640,12 +640,13 @@ void KST_VK_CameraRenderer::endScene(){
 		std::vector<std::future<std::unordered_map<uint32_t, uint32_t>>> futures;
 
 		size_t max_size = render_info.target->size.width * render_info.target->size.height;
-		size_t step = max_size / 8;
+		constexpr size_t threads = 8;
+		size_t step = max_size / threads;
 
-		for( size_t i = 0; i < 8; ++i ){
+		for( size_t i = 0; i < threads; ++i ){
 			futures.emplace_back( std::async( [max_size, step]( size_t id, void* data ){
 					std::unordered_map<uint32_t, uint32_t> colors2;
-					for( size_t i = id * step; i < ( id == 7 ? max_size : ( id + 1 ) * step ); ++i ){
+					for( size_t i = id * step; i < ( id == threads - 1 ? max_size : ( id + 1 ) * step ); ++i ){
 						++colors2[ reinterpret_cast<uint32_t*>( data )[i]];
 					}
 					return colors2;
@@ -658,6 +659,17 @@ void KST_VK_CameraRenderer::endScene(){
 				colors[key] += value;
 			}
 		}
+
+		static bool past_crit = false;
+		static size_t counter = 0;
+		if( colors.contains( 0xff00ff00 ) || colors.contains( 0xff000000 ) || colors.contains( 0x00000000 )){
+			if( past_crit )
+				++counter;
+		} else
+			past_crit = true;
+
+		if( counter >= 100 )
+			Application::getInstance()->running = false;
 
 		for( auto& [key, value]: colors ){
 			color_stat_file << std::hex << key << ':' << std::dec << value << " ";

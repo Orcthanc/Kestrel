@@ -5,7 +5,7 @@
 
 Sandbox::Sandbox(): Kestrel::Application(){
 	//TODO lifetime management
-	current_scene = std::make_shared<Kestrel::SceneFileScene>( "../res/Sandbox/res/scenes/scene1.sce" );
+	current_scene = std::make_shared<Kestrel::SceneFileScene>( "../res/Sandbox/res/scenes/scene2.sce" );
 
 	addLayer( std::make_shared<SandboxLayer>( "Sandbox" ));
 

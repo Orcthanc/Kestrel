@@ -1,2 +1,2 @@
 #!/bin/bash
-cd build/Sandbox && ./Sandbox
+cd build/Sandbox && ./Sandbox $1

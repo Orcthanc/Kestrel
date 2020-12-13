@@ -64,14 +64,14 @@ static vk::UniqueRenderPass createRenderPass( KST_VK_DeviceSurface& device ){
 				vk::SampleCountFlagBits::e1,
 				vk::AttachmentLoadOp::eLoad,
 				vk::AttachmentStoreOp::eStore,
-				vk::AttachmentLoadOp::eDontCare, //TODO add stencil
+				vk::AttachmentLoadOp::eDontCare,
 				vk::AttachmentStoreOp::eDontCare,
 				vk::ImageLayout::eUndefined,
 				vk::ImageLayout::eTransferSrcOptimal ),
 
 		vk::AttachmentDescription( 		//depthbuffer
 				{},
-				vk::Format::eD32Sfloat, //TODO
+				vk::Format::eD24UnormS8Uint, //TODO
 				vk::SampleCountFlagBits::e1,
 				vk::AttachmentLoadOp::eClear,
 				vk::AttachmentStoreOp::eDontCare, //TODO maybe store for analysis
@@ -297,9 +297,9 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 
 	for( flag_integral i = 0; i <= static_cast<flag_integral>( RenderModeFlags::eAllFlags ); ++i ){
 		if( any_flag( RenderModeFlags::eInverse & i )){
-			//TODO
+			depth_info.depthCompareOp = vk::CompareOp::eGreaterOrEqual;
 		} else {
-			//TODO
+			depth_info.depthCompareOp = vk::CompareOp::eLessOrEqual;
 		}
 
 		if( any_flag( RenderModeFlags::eLogarithmic & i )){
@@ -396,6 +396,10 @@ void VK_Material_T::bind( const BindingInfo& bind_inf ){
 		vk::ClearColorValue(std::array<float, 4>{ 0.0, 0.0, 0.0, 0.0 }),
 		vk::ClearDepthStencilValue( 1.0f, 0 )
 	};
+
+	if( any_flag( bind_inf.render_mode & RenderModeFlags::eInverse )){
+		clear_values[1] = vk::ClearDepthStencilValue( 0.0f, 0 );
+	}
 
 	vk::RenderPassBeginInfo beg_inf(
 			*renderpass,

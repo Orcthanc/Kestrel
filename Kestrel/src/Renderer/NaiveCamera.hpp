@@ -9,9 +9,11 @@ namespace Kestrel {
 		virtual ~NaiveCamera() = default;
 
 		void recalc_aspect_ratio( float aspect );
+		virtual void updateRenderMode(RenderModeFlags new_mode) override;
+		void recalc_proj();
 		virtual bool onSizeChange( WindowResizeEvent& e ) override;
 
 		private:
-			float fov, near_plane, far_plane;
+			float fov, near_plane, far_plane, aspect;
 	};
 }

@@ -49,3 +49,7 @@ void Camera::draw( Entity e ){
 void Camera::endScene(){
 	renderer->endScene();
 }
+
+void Camera::updateRenderMode(RenderModeFlags new_mode){
+	camera_render_mode = new_mode;
+}
