@@ -39,7 +39,7 @@ namespace Kestrel {
 		void create( const KST_VK_BufferCreateInfo& );
 
 		void* map();
-		void* map( vk::DeviceSize offset, vk::DeviceSize size );
+		void* map( vk::DeviceSize offset, vk::DeviceSize size = VK_WHOLE_SIZE );
 		void unmap();
 
 		KST_VK_DeviceSurface* device;

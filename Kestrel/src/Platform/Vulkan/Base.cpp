@@ -55,7 +55,7 @@ void* KST_VK_Buffer::map(){
 void* KST_VK_Buffer::map( vk::DeviceSize offset, vk::DeviceSize size ){
 	PROFILE_FUNCTION();
 
-	KST_CORE_ASSERT( offset + size < this->size, "Error trying to map memory range {} - {} which is exceeding the buffer size {}", offset, offset + size, this->size );
+	KST_CORE_ASSERT( size == VK_WHOLE_SIZE || offset + size < this->size, "Error trying to map memory range {} - {} which is exceeding the buffer size {}", offset, offset + size, this->size );
 	return data = device->device->mapMemory( *memory, offset, size );
 }
 

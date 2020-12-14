@@ -50,28 +50,6 @@ void KST_VK_CameraRenderer::setDeviceSurface( KST_VK_DeviceSurface* surface ){
 void KST_VK_CameraRenderer::createBuffers(){
 	PROFILE_FUNCTION();
 
-	/*
-	vk::BufferCreateInfo buf_cr_inf(
-			{},
-			vert_buf_size,
-			vk::BufferUsageFlagBits::eVertexBuffer,
-			vk::SharingMode::eExclusive,
-			{}
-		);
-
-	vertex_buffer.buffer = device_surface->device->createBufferUnique( buf_cr_inf );
-
-	buf_cr_inf.size = index_buf_size;
-	buf_cr_inf.usage = vk::BufferUsageFlagBits::eIndexBuffer;
-
-	index_buffer.buffer = device_surface->device->createBufferUnique( buf_cr_inf );
-
-	buf_cr_inf.size = sizeof( VK_ViewProj );
-	buf_cr_inf.usage = vk::BufferUsageFlagBits::eUniformBuffer;
-
-	uniform_buffer.buffer = device_surface->device->createBufferUnique( buf_cr_inf );
-	*/
-
 	KST_VK_BufferCreateInfo buf_cr_inf(
 			device_surface,
 			sizeof( VK_ViewProj ),
@@ -79,44 +57,9 @@ void KST_VK_CameraRenderer::createBuffers(){
 			vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent );
 
 	uniform_buffer.create( buf_cr_inf );
+	uniform_buffer.map();
 }
-/*
-void KST_VK_CameraRenderer::allocMemory(){
-	PROFILE_FUNCTION();
 
-	auto memory_reqs = device_surface->device->getBufferMemoryRequirements( *vertex_buffer.buffer );
-	vk::MemoryAllocateInfo mem_inf(
-			memory_reqs.size,
-			device_surface->find_memory_type(
-				memory_reqs.memoryTypeBits,
-				vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent )
-		);
-
-	vertex_buffer.memory = device_surface->device->allocateMemoryUnique( mem_inf );
-	device_surface->device->bindBufferMemory( *vertex_buffer.buffer, *vertex_buffer.memory, 0 );
-	vertex_buffer.data = device_surface->device->mapMemory( *vertex_buffer.memory, 0, vert_buf_size );
-
-	memory_reqs = device_surface->device->getBufferMemoryRequirements( *index_buffer.buffer );
-	mem_inf.allocationSize = memory_reqs.size;
-	mem_inf.memoryTypeIndex = device_surface->find_memory_type(
-			memory_reqs.memoryTypeBits,
-			vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent );
-
-	index_buffer.memory = device_surface->device->allocateMemoryUnique( mem_inf );
-	device_surface->device->bindBufferMemory( *index_buffer.buffer, *index_buffer.memory, 0 );
-	index_buffer.data = device_surface->device->mapMemory( *index_buffer.memory, 0, index_buf_size );
-
-	memory_reqs = device_surface->device->getBufferMemoryRequirements( *uniform_buffer.buffer );
-	mem_inf.allocationSize = memory_reqs.size;
-	mem_inf.memoryTypeIndex = device_surface->find_memory_type(
-			memory_reqs.memoryTypeBits,
-			vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent );
-
-	uniform_buffer.memory = device_surface->device->allocateMemoryUnique( mem_inf );
-	device_surface->device->bindBufferMemory( *uniform_buffer.buffer, *uniform_buffer.memory, 0 );
-	uniform_buffer.data = device_surface->device->mapMemory( *uniform_buffer.memory, 0, sizeof( VK_ViewProj ));
-}
-*/
 void KST_VK_CameraRenderer::createSynchronization(){
 	PROFILE_FUNCTION();
 

@@ -50,5 +50,6 @@ namespace Kestrel {
 			} copy_inf;
 
 			friend struct VK_Mesh;
+			friend struct KST_VK_DeviceSurface;
 	};
 }

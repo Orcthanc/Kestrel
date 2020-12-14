@@ -19,6 +19,11 @@ KST_VK_DeviceSurface::~KST_VK_DeviceSurface(){
 		view.get<CameraComponent>( cam ).camera->set_renderer( nullptr );
 	}
 
+	//Meshes
+	VK_MeshRegistry::mesh_data = {};
+	VK_MeshRegistry::copy_inf = {};
+	VK_MeshRegistry::meshes.clear();
+	VK_MeshRegistry::mesh_impls.clear();
 }
 
 const std::vector<const char*> KST_VK_DeviceSurface::dev_exts = {
@@ -167,7 +172,7 @@ void KST_VK_DeviceSurface::init_meshes(){
 
 	VK_MeshRegistry::initialize(
 			this,
-			device->getQueue( queue_families.transfer.value(), 1),
+			device->getQueue( queue_families.transfer.value(), 0 ),
 			device->createCommandPoolUnique( pool_cr_inf ));
 }
 

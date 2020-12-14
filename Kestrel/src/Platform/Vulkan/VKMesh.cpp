@@ -171,14 +171,14 @@ void VK_MeshRegistry::initialize(
 	KST_VK_BufferCreateInfo buf_cr_inf(
 			device,
 			vertex_hint,
-			vk::BufferUsageFlagBits::eVertexBuffer,
+			vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst,
 			vk::MemoryPropertyFlagBits::eDeviceLocal );
 
 
 	mesh_data.vertex_buffer.create( buf_cr_inf );
 
 	buf_cr_inf.size = index_hint;
-	buf_cr_inf.usage = vk::BufferUsageFlagBits::eIndexBuffer;
+	buf_cr_inf.usage = vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst;
 
 	mesh_data.index_buffer.create( buf_cr_inf );
 

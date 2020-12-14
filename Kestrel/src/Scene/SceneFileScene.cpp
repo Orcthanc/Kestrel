@@ -95,7 +95,7 @@ void SceneFileScene::load( const std::filesystem::path& path ){
 
 	free( file );
 
-	ast_node_print_tree( tree );
+	//ast_node_print_tree( tree );
 
 	ParseFree( parser, free );
 
