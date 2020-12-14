@@ -36,4 +36,5 @@
 #include <string>
 
 #include "Core/Util.hpp"
+#include "Core/Platform.hpp"
 #include "Debug/Profiler.hpp"

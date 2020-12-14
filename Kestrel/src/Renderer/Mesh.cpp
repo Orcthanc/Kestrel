@@ -1,19 +1,20 @@
 #include "Mesh.hpp"
 
+#include "Platform/Vulkan/VKMesh.hpp"
+
 using namespace Kestrel;
 
-void Mesh::unload(){
-	impl = nullptr;
-}
+Mesh Mesh::createMesh( const std::filesystem::path &p ){
+	switch( render_path ){
+		case RenderPath::Vulkan:
+		{
+			return VK_MeshRegistry::requestOrLoadMesh( p );
+		}
+		case RenderPath::None:
+		{
+			return Mesh::null;
+		}
+	}
 
-bool Mesh::loaded(){
-	return ( bool )impl;
-}
-
-const BufferView<float> Mesh::getVertices(){
-	return impl->getVertices();
-}
-
-const BufferView<uint32_t> Mesh::getIndices(){
-	return impl->getIndices();
+	KST_CORE_VERIFY( false, "Found invalid render_path {}", render_path );
 }

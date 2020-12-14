@@ -41,7 +41,8 @@ endfunction()
 
 function( copy_res_dir dir )
 	file( GLOB_RECURSE files "${CMAKE_CURRENT_SOURCE_DIR}/${dir}/*" )
-	file( GLOB_RECURSE res_files "${CMAKE_BINARY_DIR}/res/${PROJECT_NAME}/${dir}/*" )
+	#file( GLOB_RECURSE res_files "${CMAKE_BINARY_DIR}/res/${PROJECT_NAME}/${dir}/*" )
+	string( REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/" "${CMAKE_BINARY_DIR}/res/${PROJECT_NAME}/" res_files ${files} )
 	add_custom_command(
 		OUTPUT ${res_files}
 		COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/${dir}" "${CMAKE_BINARY_DIR}/res/${PROJECT_NAME}/${dir}"
@@ -49,7 +50,6 @@ function( copy_res_dir dir )
 		COMMENT "Copying directory ${dir}"
 	)
 	string( REGEX REPLACE "/" "_slash_" dir_name ${dir} )
-	message( ${files} )
 	add_custom_target( ${dir_name} ALL DEPENDS ${res_files} )
 	add_dependencies( ${PROJECT_NAME} ${dir_name} )
 endfunction( copy_res_dir )

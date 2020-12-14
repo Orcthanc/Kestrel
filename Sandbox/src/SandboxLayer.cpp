@@ -2,7 +2,6 @@
 
 #include "Renderer/Context.hpp"
 
-#include "Platform/Vulkan/VK_Basic_Terrain.hpp"
 #include "Platform/Vulkan/VKMaterial.hpp"
 #include "Platform/Vulkan/VKMesh.hpp"
 

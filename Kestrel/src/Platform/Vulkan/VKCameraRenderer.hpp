@@ -8,15 +8,9 @@
 #include "Renderer/Material.hpp"
 #include "Renderer/CameraModes.hpp"
 #include "Platform/Vulkan/VKImgui.hpp"
+#include "Platform/Vulkan/Base.hpp"
 
 namespace Kestrel {
-
-	struct KST_VK_Buffer {
-		vk::UniqueBuffer buffer;
-		vk::UniqueDeviceMemory memory;
-		void* data = nullptr;
-		size_t current_offset = 0;
-	};
 
 	struct KST_VK_RenderTarget {
 		std::array<vk::UniqueImage, 2> color_depth;
@@ -114,7 +108,6 @@ namespace Kestrel {
 			void onSizeChange( bool resetSync );
 
 			void createBuffers();
-			void allocMemory();
 
 			void createSynchronization();
 			void createImages();
@@ -127,8 +120,6 @@ namespace Kestrel {
 			vk::UniqueCommandPool render_cmd_pool;
 			vk::UniqueCommandPool transfer_cmd_pool;
 
-			KST_VK_Buffer vertex_buffer; 		//TODO move to mesh
-			KST_VK_Buffer index_buffer; 		//TODO move to mesh
 			KST_VK_Buffer uniform_buffer;
 
 			vk::Queue graphics_queue;
@@ -137,13 +128,6 @@ namespace Kestrel {
 
 			RenderInfo render_info;
 			PresentSynchronization sync;
-
-			static constexpr size_t vertex_size = sizeof( VK_Vertex );
-			static constexpr size_t max_vertices = 10000; //TODO performance measuring
-			static constexpr size_t vert_buf_size = vertex_size * max_vertices;
-
-			static constexpr size_t max_draw_triangles = 10000;
-			static constexpr size_t index_buf_size = 3 * sizeof( uint32_t ) * max_draw_triangles;
 
 			static constexpr size_t frames = 2;
 

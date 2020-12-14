@@ -24,12 +24,10 @@ NameComponent::operator const std::string&() const {
 	return name;
 }
 
-MeshComponent::MeshComponent( const std::shared_ptr<Mesh>& mesh ): mesh( mesh ){}
-
-MeshComponent::MeshComponent( std::shared_ptr<Mesh>&& mesh ): mesh( std::move( mesh )){}
+MeshComponent::MeshComponent( Mesh mesh ): mesh( mesh ){}
 
 MeshComponent::operator const Kestrel::Mesh& (){
-	return *mesh;
+	return mesh;
 }
 
 MaterialComponent::MaterialComponent( const Material& mat ): mat( mat ){}

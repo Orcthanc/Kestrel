@@ -5,6 +5,7 @@
 #include "Platform/Vulkan/VKVertex.hpp"
 #include "Renderer/CameraModes.hpp"
 #include "Core/Application.hpp"
+#include "Platform/Vulkan/VKMesh.hpp"
 
 #include "imgui_impl_glfw.h"
 
@@ -41,7 +42,7 @@ void KST_VK_CameraRenderer::setDeviceSurface( KST_VK_DeviceSurface* surface ){
 	transfer_queue = device_surface->device->getQueue( device_surface->queue_families.transfer.value(), 0 );
 
 	createBuffers();
-	allocMemory();
+	//allocMemory();
 	createSynchronization();
 	createImages();
 }
@@ -49,6 +50,7 @@ void KST_VK_CameraRenderer::setDeviceSurface( KST_VK_DeviceSurface* surface ){
 void KST_VK_CameraRenderer::createBuffers(){
 	PROFILE_FUNCTION();
 
+	/*
 	vk::BufferCreateInfo buf_cr_inf(
 			{},
 			vert_buf_size,
@@ -68,8 +70,17 @@ void KST_VK_CameraRenderer::createBuffers(){
 	buf_cr_inf.usage = vk::BufferUsageFlagBits::eUniformBuffer;
 
 	uniform_buffer.buffer = device_surface->device->createBufferUnique( buf_cr_inf );
-}
+	*/
 
+	KST_VK_BufferCreateInfo buf_cr_inf(
+			device_surface,
+			sizeof( VK_ViewProj ),
+			vk::BufferUsageFlagBits::eUniformBuffer,
+			vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent );
+
+	uniform_buffer.create( buf_cr_inf );
+}
+/*
 void KST_VK_CameraRenderer::allocMemory(){
 	PROFILE_FUNCTION();
 
@@ -105,7 +116,7 @@ void KST_VK_CameraRenderer::allocMemory(){
 	device_surface->device->bindBufferMemory( *uniform_buffer.buffer, *uniform_buffer.memory, 0 );
 	uniform_buffer.data = device_surface->device->mapMemory( *uniform_buffer.memory, 0, sizeof( VK_ViewProj ));
 }
-
+*/
 void KST_VK_CameraRenderer::createSynchronization(){
 	PROFILE_FUNCTION();
 
@@ -159,7 +170,7 @@ void KST_VK_CameraRenderer::createImages(){
 		r.size = device_surface->swapchains[0].size;
 	}
 
-	img_inf.format = vk::Format::eD24UnormS8Uint;
+	img_inf.format = vk::Format::eD32Sfloat;
 	img_inf.usage = vk::ImageUsageFlagBits::eDepthStencilAttachment;
 
 	for( auto& r: render_targets ){
@@ -213,7 +224,7 @@ void KST_VK_CameraRenderer::createImages(){
 
 		img_view_inf.image = *r.color_depth[1];
 		img_view_inf.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eDepth;
-		img_view_inf.format = vk::Format::eD24UnormS8Uint;
+		img_view_inf.format = vk::Format::eD32Sfloat;
 
 		r.color_depth_view[1] = device_surface->device->createImageViewUnique( img_view_inf );
 	}
@@ -280,9 +291,6 @@ void KST_VK_CameraRenderer::begin_scene( Camera& c, size_t window_index ){
 
 	render_info.render_mode = c.camera_render_mode;
 
-	vertex_buffer.current_offset = 0;
-	index_buffer.current_offset = 0;
-
 	vk::CommandBufferAllocateInfo alloc_inf(
 			*render_cmd_pool,
 			vk::CommandBufferLevel::ePrimary,
@@ -295,8 +303,8 @@ void KST_VK_CameraRenderer::begin_scene( Camera& c, size_t window_index ){
 	render_info.cmd_buffer[0]->begin( beg_inf );
 
 	vk::DeviceSize offset = 0;
-	render_info.cmd_buffer[0]->bindVertexBuffers( 0, 1, &vertex_buffer.buffer.get(), &offset );
-	render_info.cmd_buffer[0]->bindIndexBuffer( *index_buffer.buffer, 0, vk::IndexType::eUint32 );
+	render_info.cmd_buffer[0]->bindVertexBuffers( 0, 1, &VK_MeshRegistry::mesh_data.vertex_buffer.buffer.get(), &offset );
+	render_info.cmd_buffer[0]->bindIndexBuffer( *VK_MeshRegistry::mesh_data.index_buffer.buffer, 0, vk::IndexType::eUint32 );
 
 	VK_ViewProj viewproj;
 
@@ -364,19 +372,10 @@ void KST_VK_CameraRenderer::draw( Entity e ){
 		render_info.bound_mat = mat.mat;
 	}
 
-	auto verts = mesh.mesh->getVertices();
-	auto indices = mesh.mesh->getIndices();
-
-	//TODO what if buffers overflow
-	memcpy( reinterpret_cast<uint8_t*>( vertex_buffer.data ) + vertex_buffer.current_offset, verts.data, verts.size );
-
-	memcpy( reinterpret_cast<uint8_t*>( index_buffer.data ) + index_buffer.current_offset, indices.data, indices.size );
+	auto mimp = VK_MeshRegistry::getMeshImpl( mesh );
 
 	// TODO clean up (maybe amount instead of size)
-	render_info.cmd_buffer[0]->drawIndexed( indices.size / indices.elem_size, 1, index_buffer.current_offset / indices.elem_size, vertex_buffer.current_offset / verts.elem_size, 0 );
-
-	vertex_buffer.current_offset += verts.size;
-	index_buffer.current_offset += indices.size;
+	render_info.cmd_buffer[0]->drawIndexed( mimp->index_amount, 1, mimp->index_offset, mimp->vertex_offset, 0 );
 }
 
 void KST_VK_CameraRenderer::endScene(){

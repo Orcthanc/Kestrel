@@ -3,6 +3,8 @@
 #include "Core/Application.hpp"
 #include "Platform/GLFWWindow.hpp"
 #include "Platform/Vulkan/VKMaterial.hpp"
+#include "Platform/Vulkan/VKMesh.hpp"
+#include "Platform/Vulkan/Base.hpp"
 
 #include "Scene/Components.hpp"
 
@@ -153,6 +155,20 @@ void KST_VK_DeviceSurface::create( KST_VK_Context& c ){
 
 	//TODO
 	VK_Materials::getInstance().device = this;
+
+	init_meshes();
+}
+
+void KST_VK_DeviceSurface::init_meshes(){
+
+	vk::CommandPoolCreateInfo pool_cr_inf(
+			vk::CommandPoolCreateFlagBits::eTransient,
+			queue_families.transfer.value() );
+
+	VK_MeshRegistry::initialize(
+			this,
+			device->getQueue( queue_families.transfer.value(), 1),
+			device->createCommandPoolUnique( pool_cr_inf ));
 }
 
 uint32_t KST_VK_DeviceSurface::find_memory_type( uint32_t filter, vk::MemoryPropertyFlags flags ){

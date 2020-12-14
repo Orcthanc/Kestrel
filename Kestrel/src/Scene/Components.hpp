@@ -46,8 +46,7 @@ namespace Kestrel {
 
 	struct MeshComponent {
 		MeshComponent() = default;
-		MeshComponent( const std::shared_ptr<Mesh>& );
-		MeshComponent( std::shared_ptr<Mesh>&& );
+		MeshComponent( Mesh );
 
 		MeshComponent( const MeshComponent& ) = default;
 		MeshComponent( MeshComponent&& ) = default;
@@ -57,7 +56,7 @@ namespace Kestrel {
 
 		operator const Mesh&();
 
-		std::shared_ptr<Mesh> mesh;
+		Mesh mesh;
 	};
 
 	struct MaterialComponent {

@@ -2,8 +2,8 @@
 
 #include "Scene/Components.hpp"
 
-#include "Platform/Vulkan/VKMesh.hpp" //TODO
 #include "Platform/Vulkan/VKMaterial.hpp" //TODO
+#include "Renderer/Mesh.hpp"
 
 #include "SyntaxTree.h"
 #include "Lexer.hpp"
@@ -124,13 +124,11 @@ void SceneFileScene::load( const std::filesystem::path& path ){
 					entity.addComponent<ColorComponent>(glm::vec3( temp.x, temp.y, temp.z ));
 					KST_CORE_INFO( "Adding color component: ({} {} {})", temp.x, temp.y, temp.z );
 				} else if( comp == "Mesh" ){
-					auto mesh = std::make_shared<Mesh>();
 					KST_CORE_ASSERT( temp2->val.list.val->val.comp.value->type == AST_NODE_string, "FIXME:: Mesh component has to be a string" );
 					components[entity.entity] |= SceneComponentTypes::eMesh;
 					const char* path = temp2->val.list.val->val.comp.value->val.identifier.name;
 					KST_CORE_INFO( "Adding mesh component: {}", path );
-					mesh->load_obj<VK_Mesh>( path );
-					entity.addComponent<MeshComponent>( mesh );
+					entity.addComponent<MeshComponent>( Mesh::createMesh( std::filesystem::path( path )));
 				} else if( comp == "Mat" ){
 					KST_CORE_ASSERT( temp2->val.list.val->val.comp.value->type == AST_NODE_string, "FIXME:: Mat component has to be a string" );
 					components[entity.entity] |= SceneComponentTypes::eMat;

@@ -1,37 +1,29 @@
 #pragma once
 
 #include <kstpch.hpp>
+#include <filesystem>
 
 namespace Kestrel {
-
-	template <typename T>
-	struct BufferView {
-		T* data;
-		size_t size;
-		size_t elem_size;
-	};
-
-	struct MeshImpl {
-		virtual ~MeshImpl() = default;
-		virtual void load_obj( const char* path ) = 0;
-
-		virtual const BufferView<float> getVertices() = 0;
-		virtual const BufferView<uint32_t> getIndices() = 0;
-	};
-
 	struct Mesh {
-		template<typename T>
-		void load_obj( const char* path ){
-			impl = T::getMesh( path );
-			if( !impl )
-				impl = T::create( path );
+		Mesh( uint32_t id ): id( id ){}
+
+		inline Mesh operator++(){
+			++id;
+			return *this;
 		}
-		void unload();
-		bool loaded();
 
-		const BufferView<float> getVertices();
-		const BufferView<uint32_t> getIndices();
+		inline Mesh operator--(){
+			--id;
+			return *this;
+		}
 
-		std::shared_ptr<MeshImpl> impl;
+		static Mesh createMesh( const std::filesystem::path& p );
+
+
+		inline auto operator <=>( const Mesh& ) const = default;
+
+		uint32_t id;
+
+		static constexpr uint32_t null = 0;
 	};
 }

@@ -3,30 +3,52 @@
 #include "Renderer/Mesh.hpp"
 #include "Platform/Vulkan/VKVertex.hpp"
 
+#include "Platform/Vulkan/Base.hpp"
+
 #include <filesystem>
 #include <map>
 
 namespace Kestrel {
-	struct VK_Mesh: public MeshImpl {
+	struct VK_Mesh {
 		public:
 			virtual ~VK_Mesh() = default;
 
-			static std::shared_ptr<MeshImpl> getMesh( const std::filesystem::path& );
-			static std::shared_ptr<MeshImpl> create( const std::filesystem::path& );
+			void load_obj(const char *path);
 
-			virtual void load_obj(const char *path) override;
-			virtual const BufferView<float> getVertices() override;
-			virtual const BufferView<uint32_t> getIndices() override;
-
-			std::vector<VK_Vertex> verts;
-			std::vector<uint32_t> indices;
+			size_t vertex_offset, vertex_size;
+			size_t index_offset, index_amount;
 	};
 
-
 	struct VK_MeshRegistry {
-		static std::shared_ptr<VK_Mesh> getMesh( const std::filesystem::path& );
-		static void register_mesh( const std::filesystem::path& p, std::shared_ptr<VK_Mesh> );
+		public:
+			static Mesh requestMesh( const std::filesystem::path& );
+			static Mesh requestOrLoadMesh( const std::filesystem::path& );
+			static std::shared_ptr<VK_Mesh> getMeshImpl( Mesh );
 
-		static std::map<const std::filesystem::path, std::shared_ptr<VK_Mesh>> meshes;
+			static void initialize(
+					KST_VK_DeviceSurface*,
+					vk::Queue queue,
+					vk::UniqueCommandPool&& cmd_pool,
+					//Currently not hints but the maximum size TODO
+					size_t vertex_size_hint = 100000 * sizeof( VK_Vertex ),
+					size_t index_size_hint = 600000 * sizeof( uint32_t ));
+
+			static std::map<const std::filesystem::path, Mesh> meshes;
+			static std::map<Mesh, std::shared_ptr<VK_Mesh>> mesh_impls;
+
+			static struct MeshRegData {
+				bool initialized = false;
+				KST_VK_Buffer vertex_buffer; 		//TODO move to mesh
+				KST_VK_Buffer index_buffer; 		//TODO move to mesh
+			} mesh_data;
+		private:
+			static KST_VK_DeviceSurface* device;
+
+			static struct CopyInfo {
+				vk::Queue queue;
+				vk::UniqueCommandPool pool;
+			} copy_inf;
+
+			friend struct VK_Mesh;
 	};
 }

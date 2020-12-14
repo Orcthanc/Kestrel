@@ -38,6 +38,7 @@ namespace Kestrel {
 
 		private:
 			void choose_card( const std::vector<vk::ExtensionProperties>& requiredExtensions, vk::Instance instance );
+			void init_meshes();
 			KSTVKQueueFamilies find_queue_families( vk::PhysicalDevice dev, vk::SurfaceKHR surface );
 
 			const static std::vector<const char*> dev_exts;

@@ -71,7 +71,7 @@ static vk::UniqueRenderPass createRenderPass( KST_VK_DeviceSurface& device ){
 
 		vk::AttachmentDescription( 		//depthbuffer
 				{},
-				vk::Format::eD24UnormS8Uint, //TODO
+				vk::Format::eD32Sfloat, //TODO
 				vk::SampleCountFlagBits::e1,
 				vk::AttachmentLoadOp::eClear,
 				vk::AttachmentStoreOp::eDontCare, //TODO maybe store for analysis
