@@ -93,6 +93,8 @@ void KST_VK_CameraRenderer::createImages(){
 
 	std::vector<uint32_t> queue_families_v( queue_families.begin(), queue_families.end() );
 
+	//TODO replace with KST_VK_Image_DeviceLocal
+
 	//Images
 	vk::ImageCreateInfo img_inf(
 			{},
@@ -455,24 +457,14 @@ void KST_VK_CameraRenderer::endScene(){
 
 		transferbuffer[0]->begin( beg_inf );
 
-		vk::ImageMemoryBarrier swap_barrier1(
-				vk::AccessFlagBits::eMemoryRead,
-				vk::AccessFlagBits::eTransferWrite,
+		VK_Utils::changeImageLayout(
+				*transferbuffer[0],
+				device_surface->swapchains[render_info.window_index].images[img_index],
 				vk::ImageLayout::eUndefined,
 				vk::ImageLayout::eTransferDstOptimal,
-				device_surface->queue_families.present.value(),
-				device_surface->queue_families.transfer.value(),
-				device_surface->swapchains[render_info.window_index].images[img_index],
-				vk::ImageSubresourceRange( vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1 )
-			);
-
-		transferbuffer[0]->pipelineBarrier(
+				vk::ImageSubresourceRange( vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1 ),
 				vk::PipelineStageFlagBits::eTopOfPipe,
-				vk::PipelineStageFlagBits::eTransfer,
-				{},
-				0, nullptr,
-				0, nullptr,
-				1, &swap_barrier1 );
+				vk::PipelineStageFlagBits::eTransfer );
 
 		vk::ImageCopy img_copy(
 				vk::ImageSubresourceLayers(
@@ -496,24 +488,14 @@ void KST_VK_CameraRenderer::endScene(){
 				vk::ImageLayout::eTransferDstOptimal,
 				1, &img_copy );
 
-		vk::ImageMemoryBarrier swap_barrier2(
-				vk::AccessFlagBits::eTransferWrite,
-				vk::AccessFlagBits::eMemoryRead,
+		VK_Utils::changeImageLayout(
+				*transferbuffer[0],
+				device_surface->swapchains[render_info.window_index].images[img_index],
 				vk::ImageLayout::eTransferDstOptimal,
 				vk::ImageLayout::ePresentSrcKHR,
-				device_surface->queue_families.transfer.value(),
-				device_surface->queue_families.present.value(),
-				device_surface->swapchains[render_info.window_index].images[img_index],
-				vk::ImageSubresourceRange( vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1 )
-			);
-
-		transferbuffer[0]->pipelineBarrier(
+				vk::ImageSubresourceRange( vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1 ),
 				vk::PipelineStageFlagBits::eTransfer,
-				vk::PipelineStageFlagBits::eBottomOfPipe,
-				{},
-				0, nullptr,
-				0, nullptr,
-				1, & swap_barrier2 );
+				vk::PipelineStageFlagBits::eBottomOfPipe );
 
 		transferbuffer[0]->end();
 
