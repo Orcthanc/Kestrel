@@ -36,12 +36,16 @@ namespace Kestrel {
 			std::vector<KST_VK_Swapchain> swapchains;
 			std::vector<KST_GLFW_VK_Window>* windows = nullptr; // Managed by context
 
+			vk::UniqueRenderPass renderpass;
+
 		private:
 			void choose_card( const std::vector<vk::ExtensionProperties>& requiredExtensions, vk::Instance instance );
-			void init_meshes();
+			void init_meshes( vk::UniqueCommandPool&& transfer_pool );
+			void create_render_pass();
 			KSTVKQueueFamilies find_queue_families( vk::PhysicalDevice dev, vk::SurfaceKHR surface );
 
 			const static std::vector<const char*> dev_exts;
+
 	};
 
 	struct KST_VK_Context: public Context {
@@ -54,5 +58,11 @@ namespace Kestrel {
 			vk::UniqueInstance instance;
 			std::vector<KST_GLFW_VK_Window> windows;
 			KST_VK_DeviceSurface device;
+
+			static KST_VK_Context& get(){
+				return *curr_context;
+			}
+		private:
+			static KST_VK_Context* curr_context;
 	};
 }

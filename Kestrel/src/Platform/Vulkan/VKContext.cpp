@@ -10,6 +10,8 @@
 
 using namespace Kestrel;
 
+KST_VK_Context* KST_VK_Context::curr_context;
+
 KST_VK_DeviceSurface::~KST_VK_DeviceSurface(){
 	VK_Materials::getInstance().materials.clear();
 
@@ -36,6 +38,8 @@ bool KSTVKQueueFamilies::complete(){
 
 void KST_VK_Context::Init( const ContextInformation& c_inf ){
 	PROFILE_FUNCTION();
+
+	curr_context = this;
 
 	vk::ApplicationInfo appinfo(
 			c_inf.name.c_str(),
@@ -161,19 +165,82 @@ void KST_VK_DeviceSurface::create( KST_VK_Context& c ){
 	//TODO
 	VK_Materials::getInstance().device = this;
 
-	init_meshes();
-}
-
-void KST_VK_DeviceSurface::init_meshes(){
-
 	vk::CommandPoolCreateInfo pool_cr_inf(
 			vk::CommandPoolCreateFlagBits::eTransient,
 			queue_families.transfer.value() );
 
+	auto temp = device->createCommandPoolUnique( pool_cr_inf );
+
+	create_render_pass();
+	init_meshes( std::move( temp ));
+}
+
+void KST_VK_DeviceSurface::create_render_pass(){
+	PROFILE_FUNCTION();
+
+	std::array<vk::AttachmentDescription, 2> attachment_descriptions {
+		vk::AttachmentDescription(		//image
+				{},
+				swapchains[0].format.format, //TODO
+				vk::SampleCountFlagBits::e1,
+				vk::AttachmentLoadOp::eLoad,
+				vk::AttachmentStoreOp::eStore,
+				vk::AttachmentLoadOp::eDontCare,
+				vk::AttachmentStoreOp::eDontCare,
+				vk::ImageLayout::eUndefined,
+				vk::ImageLayout::eTransferSrcOptimal ),
+
+		vk::AttachmentDescription( 		//depthbuffer
+				{},
+				vk::Format::eD32Sfloat, //TODO
+				vk::SampleCountFlagBits::e1,
+				vk::AttachmentLoadOp::eClear,
+				vk::AttachmentStoreOp::eDontCare, //TODO maybe store for analysis
+				vk::AttachmentLoadOp::eDontCare,
+				vk::AttachmentStoreOp::eDontCare,
+				vk::ImageLayout::eUndefined,
+				vk::ImageLayout::eDepthStencilAttachmentOptimal )
+	};
+
+	std::array<vk::AttachmentReference, 1> attachment_references{
+		vk::AttachmentReference( 0, vk::ImageLayout::eColorAttachmentOptimal ),
+	};
+
+	vk::AttachmentReference depth_attachment_reference {
+		vk::AttachmentReference( 1, vk::ImageLayout::eDepthStencilAttachmentOptimal )
+	};
+
+	vk::SubpassDescription subpass_description(
+			{},
+			vk::PipelineBindPoint::eGraphics,
+			{},
+			attachment_references,				//Color attachments
+			{},									//Resolve attachments
+			&depth_attachment_reference,		//Depth attachment
+			{} );
+
+	vk::SubpassDependency sub_dependency(
+			VK_SUBPASS_EXTERNAL,
+			0,
+			vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests,
+			vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests,
+			{}, vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eDepthStencilAttachmentWrite,
+			{} );
+
+	vk::RenderPassCreateInfo render_pass_info(
+			{},
+			2, attachment_descriptions.data(),
+			1, &subpass_description,
+			1, &sub_dependency );
+
+	renderpass = device->createRenderPassUnique( render_pass_info );
+}
+
+void KST_VK_DeviceSurface::init_meshes( vk::UniqueCommandPool&& pool ){
 	VK_MeshRegistry::initialize(
 			this,
 			device->getQueue( queue_families.transfer.value(), 0 ),
-			device->createCommandPoolUnique( pool_cr_inf ));
+			std::move( pool ));
 }
 
 uint32_t KST_VK_DeviceSurface::find_memory_type( uint32_t filter, vk::MemoryPropertyFlags flags ){

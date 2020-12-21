@@ -65,7 +65,7 @@ namespace Kestrel {
 		vk::UniquePipelineLayout layout;
 		vk::UniqueDescriptorSetLayout desc_layout;
 		vk::UniqueDescriptorPool desc_pool;
-		vk::UniqueRenderPass renderpass;
+		vk::RenderPass renderpass;
 		std::unordered_map<RendererID, KST_VK_Framebufferset> framebuffers;
 		std::unordered_map<RendererID, std::vector<vk::UniqueDescriptorSet>> desc_sets;
 	};

@@ -258,12 +258,6 @@ void SceneFileScene::onUpdate(){
 
 	callFunctions();
 #ifndef NDEBUG
-	static bool firstFrame = true;
-	if( firstFrame ){
-		firstFrame = false;
-		return;
-	}
-
 	auto cams = getView<NameComponent, CameraComponent>();
 
 	ImGui::Begin( "Cameras" );

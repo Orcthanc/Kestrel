@@ -53,70 +53,6 @@ static std::vector<std::pair<ShaderType, const char*>> stages{
 	{ ShaderType::Fragment, ".frag.spv" },
 };
 
-static vk::UniqueRenderPass createRenderPass( KST_VK_DeviceSurface& device ){
-	PROFILE_FUNCTION();
-	vk::UniqueRenderPass renderpass;
-
-	std::array<vk::AttachmentDescription, 2> attachment_descriptions {
-		vk::AttachmentDescription(		//image
-				{},
-				device.swapchains[0].format.format, //TODO
-				vk::SampleCountFlagBits::e1,
-				vk::AttachmentLoadOp::eLoad,
-				vk::AttachmentStoreOp::eStore,
-				vk::AttachmentLoadOp::eDontCare,
-				vk::AttachmentStoreOp::eDontCare,
-				vk::ImageLayout::eUndefined,
-				vk::ImageLayout::eTransferSrcOptimal ),
-
-		vk::AttachmentDescription( 		//depthbuffer
-				{},
-				vk::Format::eD32Sfloat, //TODO
-				vk::SampleCountFlagBits::e1,
-				vk::AttachmentLoadOp::eClear,
-				vk::AttachmentStoreOp::eDontCare, //TODO maybe store for analysis
-				vk::AttachmentLoadOp::eDontCare,
-				vk::AttachmentStoreOp::eDontCare,
-				vk::ImageLayout::eUndefined,
-				vk::ImageLayout::eDepthStencilAttachmentOptimal )
-	};
-
-	std::array<vk::AttachmentReference, 1> attachment_references{
-		vk::AttachmentReference( 0, vk::ImageLayout::eColorAttachmentOptimal ),
-	};
-
-	vk::AttachmentReference depth_attachment_reference {
-		vk::AttachmentReference( 1, vk::ImageLayout::eDepthStencilAttachmentOptimal )
-	};
-
-	vk::SubpassDescription subpass_description(
-			{},
-			vk::PipelineBindPoint::eGraphics,
-			{},
-			attachment_references,				//Color attachments
-			{},									//Resolve attachments
-			&depth_attachment_reference,		//Depth attachment
-			{} );
-
-	vk::SubpassDependency sub_dependency(
-			VK_SUBPASS_EXTERNAL,
-			0,
-			vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests,
-			vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests,
-			{}, vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eDepthStencilAttachmentWrite,
-			{} );
-
-	vk::RenderPassCreateInfo render_pass_info(
-			{},
-			2, attachment_descriptions.data(),
-			1, &subpass_description,
-			1, &sub_dependency );
-
-	renderpass = device.device->createRenderPassUnique( render_pass_info );
-
-	return renderpass;
-}
-
 Material VK_Materials::loadMaterial( const char* shader_name ){
 	PROFILE_FUNCTION();
 
@@ -255,7 +191,7 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 			{},
 			dynamic_states );
 
-	newMat.renderpass = createRenderPass( *device );
+	newMat.renderpass = *KST_VK_Context::get().device.renderpass;
 
 	vk::PipelineDepthStencilStateCreateInfo depth_info (
 			{},
@@ -286,7 +222,7 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 			&blend_state_info,
 			&dynamic_state_info,
 			*newMat.layout,
-			*newMat.renderpass,
+			newMat.renderpass,
 			0,
 			{},
 			-1 );
@@ -376,7 +312,7 @@ void VK_Material_T::bind( const BindingInfo& bind_inf ){
 
 			vk::FramebufferCreateInfo framebuf_inf(
 					{},
-					*renderpass,
+					renderpass,
 					attachments,
 					bind_inf.img_size.width,
 					bind_inf.img_size.height,
@@ -402,7 +338,7 @@ void VK_Material_T::bind( const BindingInfo& bind_inf ){
 	}
 
 	vk::RenderPassBeginInfo beg_inf(
-			*renderpass,
+			renderpass,
 			buf,
 			{{ 0, 0 }, bind_inf.img_size },
 			clear_values

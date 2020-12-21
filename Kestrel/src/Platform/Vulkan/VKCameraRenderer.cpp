@@ -45,6 +45,7 @@ void KST_VK_CameraRenderer::setDeviceSurface( KST_VK_DeviceSurface* surface ){
 	//allocMemory();
 	createSynchronization();
 	createImages();
+	createImgui( *KST_VK_Context::get().device.renderpass );
 }
 
 void KST_VK_CameraRenderer::createBuffers(){
@@ -311,9 +312,6 @@ void KST_VK_CameraRenderer::draw( Entity e ){
 
 		VK_Materials::getInstance()[ mat ].bind( bind_inf );
 
-		if( !imgui_should_draw )			//TODO
-			createImgui( *VK_Materials::getInstance()[ mat ].renderpass );
-
 		render_info.bound_mat = mat.mat;
 	}
 
@@ -326,10 +324,8 @@ void KST_VK_CameraRenderer::draw( Entity e ){
 void KST_VK_CameraRenderer::endScene(){
 	PROFILE_FUNCTION();
 
-	if( imgui_should_draw ){		//TODO
-		ImGui::Render();
-		ImGui_ImplVulkan_RenderDrawData( ImGui::GetDrawData(), *render_info.cmd_buffer[0] );
-	}
+	ImGui::Render();
+	ImGui_ImplVulkan_RenderDrawData( ImGui::GetDrawData(), *render_info.cmd_buffer[0] );
 
 	render_info.cmd_buffer[0]->endRenderPass();
 	render_info.cmd_buffer[0]->end();
@@ -551,15 +547,6 @@ void KST_VK_CameraRenderer::endScene(){
 
 		KST_CORE_VERIFY( vk::Result::eSuccess == device_surface->device->resetFences( 1, &*sync.color_cpy_done ), "Wait for fence failed in line {}", __LINE__ );
 
-/*
-		std::stringstream sstream;
-		sstream << std::hex << reinterpret_cast<uint32_t*>( copy_buffer.data )[0] << " "
-			<< reinterpret_cast<uint32_t*>( copy_buffer.data )[1] << " "
-			<< reinterpret_cast<uint32_t*>( copy_buffer.data )[2] << " ";
-
-		KST_CORE_INFO( "{}", sstream.str() );
-*/
-
 		std::unordered_map<uint32_t, uint32_t> colors;
 		std::vector<std::future<std::unordered_map<uint32_t, uint32_t>>> futures;
 
@@ -603,8 +590,5 @@ void KST_VK_CameraRenderer::endScene(){
 
 		//TODO remove
 		present_queue.waitIdle();
-
-		//TODO
-		imgui_should_draw = true;
 	}
 }

@@ -43,14 +43,9 @@ void Kestrel::Application::onEvent( Event& e ){
 void Kestrel::Application::operator()(){
 	while( running ){
 
-		static bool firstrun = true;
-		if( firstrun ){
-			firstrun = false;
-		} else {
-			ImGui_ImplVulkan_NewFrame();
-			ImGui_ImplGlfw_NewFrame();
-			ImGui::NewFrame();
-		}
+		ImGui_ImplVulkan_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
 
 		current_scene->onUpdate();
 

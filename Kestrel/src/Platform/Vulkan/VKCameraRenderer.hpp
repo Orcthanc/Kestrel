@@ -134,7 +134,6 @@ namespace Kestrel {
 			KST_VK_RenderChain<frames> render_targets;
 			size_t current_id = 0;
 
-			bool imgui_should_draw = false;
 			KST_VK_ImguiWindowData imgui;
 
 #ifdef KST_COLOR_STATS
