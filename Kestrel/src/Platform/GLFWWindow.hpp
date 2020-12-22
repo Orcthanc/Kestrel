@@ -67,8 +67,9 @@ namespace Kestrel {
 
 			void onUpdate() override;
 
-			void setCallback(const EventCallback &e) override;
-			void setCursor(const CursorMode &cm) override;
+			virtual void setCallback( const EventCallback &e ) override;
+			virtual void setCursor( const CursorMode &cm ) override;
+			virtual int getKeyState( int key ) override;
 
 			GLFWwindow* window;
 			KST_VK_Surface surface;

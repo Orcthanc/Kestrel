@@ -11,9 +11,8 @@ using namespace Kestrel;
 
 NaiveCamera::NaiveCamera( float fov, float aspect, float near_plane, float far_plane ): fov( fov ), near_plane( near_plane ), far_plane( far_plane ), aspect( aspect ){
 	PROFILE_FUNCTION();
-	
-	view = glm::lookAt( glm::vec3( 0, 0.2, 0 ), glm::vec3( 0, 0, 1 ), glm::vec3( 0.0, 1.0, 0.0 ));
 
+	recalc_view();
 	recalc_proj();
 
 	KST_CORE_INFO("New CameraMode: {}", to_string( camera_render_mode ));

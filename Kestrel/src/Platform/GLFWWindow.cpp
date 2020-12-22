@@ -144,6 +144,10 @@ void KST_GLFW_VK_Window::setCallback( const EventCallback& e ){
 	w_settings.callback = e;
 }
 
+int KST_GLFW_VK_Window::getKeyState( int key ){
+	return glfwGetKey( window, key );
+}
+
 void KST_GLFW_VK_Window::setCursor( const CursorMode& cm ){
 	switch( cm ){
 		case CursorMode::Normal:

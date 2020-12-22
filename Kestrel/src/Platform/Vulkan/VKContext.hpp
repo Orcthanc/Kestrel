@@ -55,6 +55,9 @@ namespace Kestrel {
 			virtual void Init( const ContextInformation& ) override;
 			virtual void onUpdate() override;
 			virtual void registerWindow( Window&& w ) override;
+			virtual void setCursorMode( CursorMode mode ) override;
+			virtual int getKeyState( int key ) override;
+
 			vk::UniqueInstance instance;
 			std::vector<KST_GLFW_VK_Window> windows;
 			KST_VK_DeviceSurface device;

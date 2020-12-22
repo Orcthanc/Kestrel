@@ -1,22 +1,9 @@
-/*
- * =====================================================================================
- *
- *       Filename:  Window.hpp
- *
- *    Description:  A standard window
- *
- *        Version:  1.0
- *        Created:  08/26/2020 02:26:32 PM
- *       Revision:  none
- *
- *         Author:  Samuel Knoethig (), samuel@knoethig.net
- *
- * =====================================================================================
- */
 #pragma once
 
 #include "kstpch.hpp"
 #include "Event/Event.hpp"
+
+#include "Core/Input.hpp"
 
 namespace Kestrel {
 	struct WindowSettings {
@@ -43,12 +30,6 @@ namespace Kestrel {
 		WindowSettings& operator=( WindowSettings&& ws ) = default;
 	};
 
-	enum class CursorMode {
-		Normal,
-		Hidden,
-		Disabled,
-	};
-
 	class Window {
 		public:
 			using EventCallback = std::function<void(Event&)>;
@@ -60,5 +41,6 @@ namespace Kestrel {
 
 			virtual void setCallback( const EventCallback& e ) = 0;
 			virtual void setCursor( const CursorMode& cm ) = 0;
+			virtual int getKeyState( int key ) = 0;
 	};
 }

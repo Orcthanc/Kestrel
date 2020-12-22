@@ -9,6 +9,8 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_vulkan.h"
 
+using namespace Kestrel;
+
 Kestrel::Application::Application( WindowSettings ws ): running( true ), stack(){
 	PROFILE_SESSION_START( "startup.json" );
 	PROFILE_FUNCTION();
@@ -83,6 +85,14 @@ void Kestrel::Application::operator()(){
 bool Kestrel::Application::onClose( WindowCloseEvent& e ){
 	running = false;
 	return true;
+}
+
+void Application::setCursorMode( CursorMode mode ){
+	graphics_context->setCursorMode( mode );
+}
+
+int Application::getKeyState( int key ){
+	return graphics_context->getKeyState( key );
 }
 
 Kestrel::Application* Kestrel::Application::instance = nullptr;

@@ -25,12 +25,13 @@ namespace Kestrel {
 		public:
 			virtual ~Camera() = default;
 
-			glm::vec3 pos;
-			glm::quat rot;
+			glm::vec3 pos{};
+			glm::quat rot{ 1, 0, 0, 0 };
 
 			void move( float x, float y, float z );
 			void rotate( float x, float y, float z, float angle );
 			void rotate( const glm::quat& quaternion );
+			void rotate_global( const glm::quat& quaternion );
 			void recalc_view();
 			virtual bool onSizeChange( Kestrel::WindowResizeEvent& e );
 			virtual void updateRenderMode( RenderModeFlags new_mode );

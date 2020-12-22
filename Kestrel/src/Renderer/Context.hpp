@@ -18,5 +18,7 @@ namespace Kestrel {
 		virtual void Init( const ContextInformation& ) = 0;
 		virtual void onUpdate() = 0;
 		virtual void registerWindow( Window&& w ) = 0;
+		virtual void setCursorMode( CursorMode mode ) = 0;
+		virtual int getKeyState( int key ) = 0;
 	};
 }

@@ -33,7 +33,30 @@ SandboxLayer::SandboxLayer( const std::string& s ): Layer{ s }{
 }
 
 void SandboxLayer::onUpdate(){
+	float x = 0, y = 0, z = 0;
+	Application& temp = *Application::getInstance();
 
+	//TODO move to onEvent
+	if( temp.getKeyState( GLFW_KEY_W ) == GLFW_PRESS ){
+		z -= 0.1;
+	}
+	if( temp.getKeyState( GLFW_KEY_S ) == GLFW_PRESS ){
+		z += 0.1;
+	}
+	if( temp.getKeyState( GLFW_KEY_A ) == GLFW_PRESS ){
+		x -= 0.1;
+	}
+	if( temp.getKeyState( GLFW_KEY_D ) == GLFW_PRESS ){
+		x += 0.1;
+	}
+	if( temp.getKeyState( GLFW_KEY_LEFT_SHIFT ) == GLFW_PRESS ){
+		y -= 0.1;
+	}
+	if( temp.getKeyState( GLFW_KEY_SPACE ) == GLFW_PRESS ){
+		y += 0.1;
+	}
+	if( x || y || z )
+		camera->move( x, y, z );
 }
 
 
@@ -43,15 +66,16 @@ void SandboxLayer::onEvent( Kestrel::Event& e ){
 	d.dispatch<Kestrel::KeyPushEvent>( []( Kestrel::KeyPushEvent& e ){
 			KST_INFO( "Key {} pushed", e.getKeyName() );
 			KST_INFO( "{}", e.scancode );
-/*			// F1
+			// F1
+			static bool cursor_visible = true;
 			if( e.scancode == 67 ){
-				Kestrel::Application::getInstance()->window[0]->setCursor( Kestrel::CursorMode::Normal );
-			} else if( e.scancode == 68 ){
-				Kestrel::Application::getInstance()->window[0]->setCursor( Kestrel::CursorMode::Hidden );
-			} else if( e.scancode == 69 ){
-				Kestrel::Application::getInstance()->window[0]->setCursor( Kestrel::CursorMode::Disabled );
+				if( cursor_visible )
+					Kestrel::Application::getInstance()->setCursorMode( Kestrel::CursorMode::Disabled );
+				else
+					Kestrel::Application::getInstance()->setCursorMode( Kestrel::CursorMode::Normal );
+				cursor_visible = !cursor_visible;
 			}
-			*/
+			
 			return true;
 		});
 
@@ -70,8 +94,15 @@ void SandboxLayer::onEvent( Kestrel::Event& e ){
 			return true;
 		});
 
-	d.dispatch<Kestrel::MouseMovedEvent>( []( Kestrel::MouseMovedEvent& e ){
+	d.dispatch<Kestrel::MouseMovedEvent>( [&]( Kestrel::MouseMovedEvent& e ){
 			//KST_INFO( "Mouse moved to {}, {}", e.x, e.y );
+			const double rot_speed = 0.01;
+			static double last_x = e.x;
+			static double last_y = e.y;
+			camera->rotate_global( glm::quat( glm::vec3{ 0, ( e.x - last_x ) * rot_speed, 0 }));
+			camera->rotate( glm::quat( glm::vec3{ ( e.y - last_y ) * rot_speed, 0, 0 }));
+			last_x = e.x;
+			last_y = e.y;
 			return true;
 		});
 

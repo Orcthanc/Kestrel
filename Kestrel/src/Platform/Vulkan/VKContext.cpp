@@ -105,6 +105,8 @@ void KST_VK_Context::Init( const ContextInformation& c_inf ){
 }
 
 void KST_VK_Context::onUpdate(){
+	PROFILE_FUNCTION();
+
 	for( auto& w: windows ){
 		w.onUpdate();
 	}
@@ -115,6 +117,18 @@ void KST_VK_Context::registerWindow( Window &&w ){
 
 	windows.emplace_back( std::move( static_cast<KST_GLFW_VK_Window&&>( w )));
 	device.windows = &windows;
+}
+
+void KST_VK_Context::setCursorMode( CursorMode mode ){
+	PROFILE_FUNCTION();
+
+	for( auto& w: windows ){
+		w.setCursor( mode );
+	}
+}
+
+int KST_VK_Context::getKeyState( int key ){
+	return windows[0].getKeyState( key );
 }
 
 void KST_VK_DeviceSurface::create( KST_VK_Context& c ){
