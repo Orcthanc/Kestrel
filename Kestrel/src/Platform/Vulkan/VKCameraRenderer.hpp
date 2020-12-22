@@ -9,6 +9,7 @@
 #include "Renderer/CameraModes.hpp"
 #include "Platform/Vulkan/VKImgui.hpp"
 #include "Platform/Vulkan/Base.hpp"
+#include "Scene/Components.hpp"
 
 namespace Kestrel {
 
@@ -102,6 +103,7 @@ namespace Kestrel {
 
 			virtual void begin_scene( Camera &, size_t window_index ) override;
 			virtual void draw( Entity e ) override;
+			void drawMesh( Entity e, const TransformComponent& t, const Mesh& m, const Material& mat, float tesselation = 1 );
 			virtual void endScene() override;
 
 		private:

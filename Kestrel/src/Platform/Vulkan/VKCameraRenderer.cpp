@@ -1,15 +1,21 @@
 #include "Platform/Vulkan/VKCameraRenderer.hpp"
 
+#include "Core/Application.hpp"
+
+#include "Renderer/CameraModes.hpp"
+
 #include "Scene/Components.hpp"
+
 #include "Platform/Vulkan/VKMaterial.hpp"
 #include "Platform/Vulkan/VKVertex.hpp"
-#include "Renderer/CameraModes.hpp"
-#include "Core/Application.hpp"
 #include "Platform/Vulkan/VKMesh.hpp"
+#include "Platform/Vulkan/VKTerrainRenderer.hpp"
 
 #include "imgui_impl_glfw.h"
 
+#ifdef KST_COLOR_STATS
 #include <future>
+#endif
 
 using namespace Kestrel;
 
@@ -46,6 +52,8 @@ void KST_VK_CameraRenderer::setDeviceSurface( KST_VK_DeviceSurface* surface ){
 	createSynchronization();
 	createImages();
 	createImgui( *KST_VK_Context::get().device.renderpass );
+
+	KST_VK_TerrainRenderer::init();
 }
 
 void KST_VK_CameraRenderer::createBuffers(){
@@ -264,16 +272,21 @@ void KST_VK_CameraRenderer::begin_scene( Camera& c, size_t window_index ){
 }
 
 void KST_VK_CameraRenderer::draw( Entity e ){
+	if( e.hasComponent<MeshComponent>()){
+		auto [transform, mesh, mat] = e.getComponents<TransformComponent, MeshComponent, MaterialComponent>();
+		drawMesh( e, transform, mesh, mat );
+	}
+	if( e.hasComponent<TerrainComponent>()){
+		auto [transform, terrain] = e.getComponents<TransformComponent, TerrainComponent>();
+		KST_VK_TerrainRenderer::get().drawTerrain( e, this, transform, terrain );
+	}
+}
+
+//TODO remove e
+void KST_VK_CameraRenderer::drawMesh( Entity e, const TransformComponent& transform, const Mesh& mesh, const Material& mat, float tessellation ){
 	PROFILE_FUNCTION();
 
-	KST_CORE_ASSERT( e.hasComponent<TransformComponent>(), "Need a transform component to draw {}", e.getComponent<NameComponent>().name );
-	KST_CORE_ASSERT( e.hasComponent<MeshComponent>(), "Need a mesh component to draw {}", e.getComponent<NameComponent>().name );
-	KST_CORE_ASSERT( e.hasComponent<MaterialComponent>(), "Need a material component to draw {}", e.getComponent<NameComponent>().name );
-
-	auto [transform, mesh, mat] = e.getComponents<TransformComponent, MeshComponent, MaterialComponent>();
-
 	//Transform
-
 	auto model = glm::scale( glm::translate( glm::identity<glm::mat4>(), transform.loc ) * glm::mat4_cast( transform.rot ), transform.scale );
 	glm::vec3 color;
 	if( e.hasComponent<ColorComponent>()){
@@ -281,11 +294,13 @@ void KST_VK_CameraRenderer::draw( Entity e ){
 	} else{
 		color = glm::vec3( 1.0, 1.0, 1.0 );
 	}
+
 	VK_UniformBufferObj mod_col{ model, color };
-	render_info.cmd_buffer[0]->pushConstants( *VK_Materials::getInstance()[ mat ].layout, vk::ShaderStageFlagBits::eTessellationEvaluation, 0, sizeof( mod_col ), &mod_col );
+	render_info.cmd_buffer[0]->pushConstants( *VK_Materials::getInstance()[ mat ].layout, vk::ShaderStageFlagBits::eTessellationEvaluation, 16, sizeof( mod_col ), &mod_col );
+	render_info.cmd_buffer[0]->pushConstants( *VK_Materials::getInstance()[ mat ].layout, vk::ShaderStageFlagBits::eTessellationControl, 0, sizeof( float ), &tessellation );
 
 	//Mat
-	if( mat.mat != render_info.bound_mat ){
+	if( mat != render_info.bound_mat ){
 		if( render_info.bound_mat != -1 ){
 			render_info.cmd_buffer[0]->endRenderPass();
 		}
@@ -312,7 +327,7 @@ void KST_VK_CameraRenderer::draw( Entity e ){
 
 		VK_Materials::getInstance()[ mat ].bind( bind_inf );
 
-		render_info.bound_mat = mat.mat;
+		render_info.bound_mat = mat;
 	}
 
 	auto mimp = VK_MeshRegistry::getMeshImpl( mesh );
@@ -324,14 +339,18 @@ void KST_VK_CameraRenderer::draw( Entity e ){
 void KST_VK_CameraRenderer::endScene(){
 	PROFILE_FUNCTION();
 
+	if( render_info.bound_mat == -1 ){
+		KST_CORE_ERROR( "Can not draw scene with no valid objects" );
+		render_info.cmd_buffer[0]->end();
+		ImGui::EndFrame();
+		return;
+	}
+
 	ImGui::Render();
 	ImGui_ImplVulkan_RenderDrawData( ImGui::GetDrawData(), *render_info.cmd_buffer[0] );
 
 	render_info.cmd_buffer[0]->endRenderPass();
 	render_info.cmd_buffer[0]->end();
-
-
-	//TODO check OutOfDate
 
 	std::vector<vk::CommandBuffer> buffers{ *render_info.cmd_buffer[0] };
 	std::vector signal_semas{

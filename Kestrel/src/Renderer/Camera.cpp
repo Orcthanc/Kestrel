@@ -5,7 +5,7 @@ using namespace Kestrel;
 void Camera::move( float x, float y, float z ){
 	PROFILE_FUNCTION();
 
-	pos += glm::vec3{ x, y, z };
+	pos += glm::vec3{ -x, -y, -z };
 	recalc_view();
 }
 
@@ -22,6 +22,8 @@ void Camera::rotate( const glm::quat& quaternion ){
 	rot *= quaternion;
 	recalc_view();
 }
+
+void Camera::onImgui(){}
 
 void Camera::recalc_view(){
 	PROFILE_FUNCTION();

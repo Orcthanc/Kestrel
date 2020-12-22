@@ -12,6 +12,7 @@ namespace Kestrel {
 		virtual void updateRenderMode(RenderModeFlags new_mode) override;
 		void recalc_proj();
 		virtual bool onSizeChange( WindowResizeEvent& e ) override;
+		virtual void onImgui() override;
 
 		private:
 			float fov, near_plane, far_plane, aspect;

@@ -34,6 +34,7 @@ namespace Kestrel {
 			void recalc_view();
 			virtual bool onSizeChange( Kestrel::WindowResizeEvent& e );
 			virtual void updateRenderMode( RenderModeFlags new_mode );
+			virtual void onImgui();
 
 			void set_renderer( std::unique_ptr<CameraRenderer>&& );
 

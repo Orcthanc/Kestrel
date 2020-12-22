@@ -10,7 +10,7 @@ layout( location = 0 ) in VertData {
 } indata[];
 
 layout( push_constant ) uniform push_constants {
-	mat4 model;
+	layout( offset = 16 )mat4 model;
 	vec3 color;
 } u_push_constants;
 

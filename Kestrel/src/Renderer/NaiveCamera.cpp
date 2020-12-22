@@ -12,7 +12,7 @@ using namespace Kestrel;
 NaiveCamera::NaiveCamera( float fov, float aspect, float near_plane, float far_plane ): fov( fov ), near_plane( near_plane ), far_plane( far_plane ), aspect( aspect ){
 	PROFILE_FUNCTION();
 	
-	view = glm::lookAt( glm::vec3{}, glm::vec3( 0, 0, 1 ), glm::vec3( 0.0, 1.0, 0.0 ));
+	view = glm::lookAt( glm::vec3( 0, 0.2, 0 ), glm::vec3( 0, 0, 1 ), glm::vec3( 0.0, 1.0, 0.0 ));
 
 	recalc_proj();
 
@@ -53,17 +53,6 @@ void NaiveCamera::recalc_proj(){
 			0, -temp, 0, 0,
 			0, 0, A, -1,
 			0, 0, B, 0 );
-
-	/*
-	KST_CORE_INFO( "{} {}", near_plane, far_plane );
-	KST_CORE_INFO( "{}", glm::to_string( proj * glm::vec4( 0, 0, -near_plane, 1 )));
-	KST_CORE_INFO( "{}", glm::to_string( proj * glm::vec4( 0, 0, -far_plane, 1 )));
-
-	auto asdf = proj * glm::vec4( 0, 0, -near_plane, 1 );
-	KST_CORE_INFO( "{}", glm::to_string( glm::vec3( asdf ) / asdf.w ));
-	asdf = proj * glm::vec4( 0, 0, -far_plane, 1 );
-	KST_CORE_INFO( "{}", glm::to_string( glm::vec3( asdf ) / asdf.w ));
-	*/
 }
 
 void NaiveCamera::updateRenderMode(RenderModeFlags new_mode){
@@ -76,4 +65,25 @@ void NaiveCamera::updateRenderMode(RenderModeFlags new_mode){
 	}
 
 	camera_render_mode = new_mode;
+}
+
+void NaiveCamera::onImgui(){
+	bool inverse     = any_flag( camera_render_mode & RenderModeFlags::eInverse );
+	bool logarithmic = any_flag( camera_render_mode & RenderModeFlags::eLogarithmic );
+	bool integer     = any_flag( camera_render_mode & RenderModeFlags::eIntegerDepth );
+	bool wireframe   = any_flag( camera_render_mode & RenderModeFlags::eWireframe );
+
+	ImGui::Checkbox( "Inverse depth buffer", &inverse );
+	ImGui::Checkbox( "Logarithmic depth buffer", &logarithmic );
+	ImGui::Checkbox( "Integer depth buffer (unimplemented)", &integer );
+	ImGui::Checkbox( "Wireframe", &wireframe );
+
+	RenderModeFlags res{ RenderModeFlags::eNone };
+
+	res |= inverse     ? RenderModeFlags::eInverse      : RenderModeFlags::eNone;
+	res |= logarithmic ? RenderModeFlags::eLogarithmic  : RenderModeFlags::eNone;
+	res |= integer     ? RenderModeFlags::eIntegerDepth : RenderModeFlags::eNone;
+	res |= wireframe   ? RenderModeFlags::eWireframe    : RenderModeFlags::eNone;
+
+	updateRenderMode( res );
 }

@@ -6,7 +6,6 @@
 #include "Platform/Vulkan/VKMesh.hpp"
 
 #include "Scene/Components.hpp"
-#include "Renderer/NaiveCamera.hpp"
 #include "Renderer/CameraModes.hpp"
 
 #include "glm/gtc/quaternion.hpp"
@@ -29,7 +28,8 @@ SandboxLayer::SandboxLayer( const std::string& s ): Layer{ s }{
 
 	auto cam = Application::getInstance()->current_scene->createEntity( "Camera" );
 	cam.addComponent<TransformComponent>();
-	cam.addComponent<CameraComponent>( std::make_shared<NaiveCamera>( 45.0, 960.0/1080.0, 0.1, 100000000.0 ));
+	camera = std::make_shared<NaiveCamera>( 45.0, 960.0/1080.0, 0.1, 100000000.0 );
+	cam.addComponent<CameraComponent>( camera );
 }
 
 void SandboxLayer::onUpdate(){

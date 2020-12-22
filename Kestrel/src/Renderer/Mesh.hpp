@@ -5,6 +5,7 @@
 
 namespace Kestrel {
 	struct Mesh {
+		Mesh(): id( null ){}
 		Mesh( uint32_t id ): id( id ){}
 
 		inline Mesh operator++(){

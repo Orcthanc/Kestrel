@@ -9,6 +9,8 @@
 
 #include "Renderer/Camera.hpp"
 
+#include "Renderer/Terrain.hpp"
+
 namespace Kestrel {
 	struct TransformComponent {
 		TransformComponent( glm::vec3 loc, glm::vec3 scale );
@@ -54,7 +56,7 @@ namespace Kestrel {
 		MeshComponent& operator=( const MeshComponent& ) = default;
 		MeshComponent& operator=( MeshComponent&& ) = default;
 
-		operator const Mesh&();
+		operator const Mesh&() const;
 
 		Mesh mesh;
 	};
@@ -86,7 +88,7 @@ namespace Kestrel {
 		CameraComponent& operator=( const CameraComponent& ) = default;
 		CameraComponent& operator=( CameraComponent&& ) = default;
 
-		operator const Camera&();
+		operator const Camera&() const;
 
 		std::shared_ptr<Camera> camera;
 	};
@@ -102,8 +104,24 @@ namespace Kestrel {
 		ColorComponent& operator=( const ColorComponent& ) = default;
 		ColorComponent& operator=( ColorComponent&& ) = default;
 
-		operator const glm::vec3&();
+		operator const glm::vec3&() const;
 
 		glm::vec3 color;
+	};
+
+	struct TerrainComponent {
+		TerrainComponent() = default;
+		TerrainComponent( const Terrain& terrain );
+		TerrainComponent( Terrain&& terrain );
+
+		TerrainComponent( const TerrainComponent& ) = default;
+		TerrainComponent( TerrainComponent&& ) = default;
+
+		TerrainComponent& operator=( const TerrainComponent& ) = default;
+		TerrainComponent& operator=( TerrainComponent&& ) = default;
+
+		operator const Terrain&() const;
+
+		Terrain terrain;
 	};
 }

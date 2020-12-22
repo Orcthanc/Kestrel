@@ -26,7 +26,7 @@ NameComponent::operator const std::string&() const {
 
 MeshComponent::MeshComponent( Mesh mesh ): mesh( mesh ){}
 
-MeshComponent::operator const Kestrel::Mesh& (){
+MeshComponent::operator const Kestrel::Mesh& () const {
 	return mesh;
 }
 
@@ -42,7 +42,7 @@ CameraComponent::CameraComponent( const std::shared_ptr<Camera>& camera ): camer
 
 CameraComponent::CameraComponent( std::shared_ptr<Camera>&& camera ): camera( std::move( camera )){}
 
-CameraComponent::operator const Kestrel::Camera&(){
+CameraComponent::operator const Kestrel::Camera&() const {
 	return *camera;
 }
 
@@ -51,6 +51,14 @@ ColorComponent::ColorComponent( const glm::vec3& rgb ): color( rgb ){}
 
 ColorComponent::ColorComponent( glm::vec3&& rgb ): color( std::move( rgb )){}
 
-ColorComponent::operator const glm::vec3&(){
+ColorComponent::operator const glm::vec3&() const {
 	return color;
+}
+
+TerrainComponent::TerrainComponent( const Terrain& terrain ): terrain( terrain ){}
+
+TerrainComponent::TerrainComponent( Terrain&& terrain ): terrain( std::move( terrain )){}
+
+TerrainComponent::operator const Kestrel::Terrain&() const {
+	return terrain;
 }

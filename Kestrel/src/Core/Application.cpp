@@ -30,6 +30,8 @@ Kestrel::Application::~Application(){
 }
 
 void Kestrel::Application::onEvent( Event& e ){
+	PROFILE_FUNCTION();
+
 	EventDispatcher ed( e );
 	ed.dispatch<WindowCloseEvent>( std::bind( &Application::onClose, this, std::placeholders::_1 ));
 
@@ -41,6 +43,8 @@ void Kestrel::Application::onEvent( Event& e ){
 }
 
 void Kestrel::Application::operator()(){
+	PROFILE_FUNCTION();
+
 	while( running ){
 
 		ImGui_ImplVulkan_NewFrame();
@@ -59,7 +63,10 @@ void Kestrel::Application::operator()(){
 			for( auto& c: view ){
 				auto& cam = view.get( c ).camera;
 				cam->begin_scene( 0 );
+				//TODO
 				for( auto& e: current_scene->getView<MeshComponent>() )
+					cam->draw( current_scene->toEntity( e ));
+				for( auto& e: current_scene->getView<TerrainComponent>() )
 					cam->draw( current_scene->toEntity( e ));
 				cam->endScene();
 			}

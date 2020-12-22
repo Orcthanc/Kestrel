@@ -23,11 +23,7 @@ Entity Scene::createEntity(){
 
 Entity Scene::createEntity( const char *name ){
 	Entity ret = { this, entt_reg.create() };
-#ifndef NDEBUG
 	ret.addComponent<NameComponent>( name );
-#else
-	KST_CORE_WARN( "Not adding name in other configurations than debug" );
-#endif
 	return ret;
 }
 
