@@ -103,7 +103,7 @@ namespace Kestrel {
 
 			virtual void begin_scene( Camera &, size_t window_index ) override;
 			virtual void draw( Entity e ) override;
-			void drawMesh( Entity e, const TransformComponent& t, const Mesh& m, const Material& mat, float tesselation = 1 );
+			void drawMesh( const TransformComponent& t, const Mesh& m, const Material& mat, float tesselation = 1, const glm::vec3& color = { 1, 1, 1 });
 			virtual void endScene() override;
 
 		private:

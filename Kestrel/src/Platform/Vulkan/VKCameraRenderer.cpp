@@ -274,26 +274,23 @@ void KST_VK_CameraRenderer::begin_scene( Camera& c, size_t window_index ){
 void KST_VK_CameraRenderer::draw( Entity e ){
 	if( e.hasComponent<MeshComponent>()){
 		auto [transform, mesh, mat] = e.getComponents<TransformComponent, MeshComponent, MaterialComponent>();
-		drawMesh( e, transform, mesh, mat );
+		glm::vec3 color{ 1, 1, 1 };
+		if( e.hasComponent<ColorComponent>())
+			color = e.getComponent<ColorComponent>();
+		drawMesh( transform, mesh, mat, 1, color );
 	}
 	if( e.hasComponent<TerrainComponent>()){
 		auto [transform, terrain] = e.getComponents<TransformComponent, TerrainComponent>();
-		KST_VK_TerrainRenderer::get().drawTerrain( e, this, transform, terrain );
+		KST_VK_TerrainRenderer::get().drawTerrain( this, transform, terrain );
 	}
 }
 
 //TODO remove e
-void KST_VK_CameraRenderer::drawMesh( Entity e, const TransformComponent& transform, const Mesh& mesh, const Material& mat, float tessellation ){
+void KST_VK_CameraRenderer::drawMesh( const TransformComponent& transform, const Mesh& mesh, const Material& mat, float tessellation, const glm::vec3& color ){
 	PROFILE_FUNCTION();
 
 	//Transform
 	auto model = glm::scale( glm::translate( glm::identity<glm::mat4>(), transform.loc ) * glm::mat4_cast( transform.rot ), transform.scale );
-	glm::vec3 color;
-	if( e.hasComponent<ColorComponent>()){
-		color = e.getComponent<ColorComponent>().color;
-	} else{
-		color = glm::vec3( 1.0, 1.0, 1.0 );
-	}
 
 	VK_UniformBufferObj mod_col{ model, color };
 	render_info.cmd_buffer[0]->pushConstants( *VK_Materials::getInstance()[ mat ].layout, vk::ShaderStageFlagBits::eTessellationEvaluation, 16, sizeof( mod_col ), &mod_col );

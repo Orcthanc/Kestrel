@@ -15,11 +15,11 @@ void KST_VK_TerrainRenderer::init(){
 	instance.terrain_material = VK_Materials::getInstance().loadMaterial( "../res/Kestrel/shader/basic" );
 }
 
-void KST_VK_TerrainRenderer::drawTerrain( Entity e, KST_VK_CameraRenderer *renderer, const TransformComponent &transform, const Terrain &terrain ){
+void KST_VK_TerrainRenderer::drawTerrain( KST_VK_CameraRenderer *renderer, const TransformComponent &transform, const Terrain &terrain ){
 	PROFILE_FUNCTION();
 	//TODO Frustrum culling
-	
-	float tilesize = transform.scale.x;
+
+	float tilesize = transform.scale.x * 2;
 	//renderer->drawMesh( e, transform, terrain_mesh, terrain_material );
 
 	//High resolution
@@ -28,9 +28,7 @@ void KST_VK_TerrainRenderer::drawTerrain( Entity e, KST_VK_CameraRenderer *rende
 			TransformComponent new_tran = transform;
 			new_tran.loc.x += tilesize * x;
 			new_tran.loc.z += tilesize * z;
-			renderer->drawMesh( e, new_tran, terrain_mesh, terrain_material, terrain.high_res_res / 4 );
-			//TODO draw stuff
-			//KST_CORE_INFO( "High: {} {}", x, y );
+			renderer->drawMesh( new_tran, terrain_mesh, terrain_material, terrain.high_res_res / 4, glm::vec3( 1, 0, 0 ));
 		}
 	}
 
@@ -44,21 +42,27 @@ void KST_VK_TerrainRenderer::drawTerrain( Entity e, KST_VK_CameraRenderer *rende
 				x += 2 * terrain.high_res_tiles;
 				continue;
 			}
-			//KST_CORE_INFO( "Med: {} {}", x, y );
+			TransformComponent new_tran = transform;
+			new_tran.loc.x += tilesize * x;
+			new_tran.loc.z += tilesize * z;
+			renderer->drawMesh( new_tran, terrain_mesh, terrain_material, terrain.med_res_res / 4, glm::vec3( 0, 1, 0 ));
 		}
 	}
 
 	int low_size = med_size + terrain.low_res_tiles;
 
 	//Low resolution
-	for( int y = -low_size; y <= low_size; ++y ){
+	for( int z = -low_size; z <= low_size; ++z ){
 		for( int x = -low_size; x <= low_size; ++x ){
 			if( x >= -med_size && x <= med_size &&
-					y >= -med_size && y <= med_size ){
+					z >= -med_size && z <= med_size ){
 				x += 2 * med_size;
 				continue;
 			}
-			//KST_CORE_INFO( "Low: {} {}", x, y );
+			TransformComponent new_tran = transform;
+			new_tran.loc.x += tilesize * x;
+			new_tran.loc.z += tilesize * z;
+			renderer->drawMesh( new_tran, terrain_mesh, terrain_material, terrain.low_res_res / 4, glm::vec3( 0, 0, 1 ));
 		}
 	}
 }

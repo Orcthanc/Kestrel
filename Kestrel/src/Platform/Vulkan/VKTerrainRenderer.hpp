@@ -15,7 +15,7 @@ namespace Kestrel {
 	struct KST_VK_TerrainRenderer {
 		public:
 			static void init();
-			void drawTerrain( Entity e, KST_VK_CameraRenderer* renderer, const TransformComponent& transform, const Terrain& terrain );
+			void drawTerrain( KST_VK_CameraRenderer* renderer, const TransformComponent& transform, const Terrain& terrain );
 
 			static KST_VK_TerrainRenderer& get(){
 				return instance;

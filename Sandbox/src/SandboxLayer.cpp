@@ -36,24 +36,28 @@ void SandboxLayer::onUpdate(){
 	float x = 0, y = 0, z = 0;
 	Application& temp = *Application::getInstance();
 
+	float speed = 0.1;
+	if( temp.getKeyState( GLFW_KEY_LEFT_SHIFT ) == GLFW_PRESS ){
+		speed *= 50;
+	}
 	//TODO move to onEvent
 	if( temp.getKeyState( GLFW_KEY_W ) == GLFW_PRESS ){
-		z -= 0.1;
+		z -= speed;
 	}
 	if( temp.getKeyState( GLFW_KEY_S ) == GLFW_PRESS ){
-		z += 0.1;
+		z += speed;
 	}
 	if( temp.getKeyState( GLFW_KEY_A ) == GLFW_PRESS ){
-		x -= 0.1;
+		x -= speed;
 	}
 	if( temp.getKeyState( GLFW_KEY_D ) == GLFW_PRESS ){
-		x += 0.1;
+		x += speed;
 	}
-	if( temp.getKeyState( GLFW_KEY_LEFT_SHIFT ) == GLFW_PRESS ){
-		y -= 0.1;
+	if( temp.getKeyState( GLFW_KEY_LEFT_CONTROL ) == GLFW_PRESS ){
+		y -= speed;
 	}
 	if( temp.getKeyState( GLFW_KEY_SPACE ) == GLFW_PRESS ){
-		y += 0.1;
+		y += speed;
 	}
 	if( x || y || z )
 		camera->move( x, y, z );
@@ -75,7 +79,7 @@ void SandboxLayer::onEvent( Kestrel::Event& e ){
 					Kestrel::Application::getInstance()->setCursorMode( Kestrel::CursorMode::Normal );
 				cursor_visible = !cursor_visible;
 			}
-			
+
 			return true;
 		});
 
