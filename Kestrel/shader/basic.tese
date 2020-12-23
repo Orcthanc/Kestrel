@@ -26,11 +26,14 @@ const float C = 1;
 const float Far = 100000000;
 
 void main() {
-	gl_Position =
-			u_vp.projection * u_vp.view * u_push_constants.model *
-			vec4(( indata[0].position * gl_TessCoord.x +
+	vec4 modelpos = u_push_constants.model * vec4(( indata[0].position * gl_TessCoord.x +
 			indata[1].position * gl_TessCoord.y +
 			indata[2].position * gl_TessCoord.z ), 1.0 );
+
+	float distance = sqrt( modelpos.x * modelpos.x + modelpos.z * modelpos.z );
+	modelpos.y += sin(distance / 256) * 256;
+
+	gl_Position = u_vp.projection * u_vp.view * modelpos;
 
 	if( logarithmic ){
 		//gl_Position.z = log2(max(1e-6, 1.0 + gl_Position.w)) * Fcoef - 1.0;
@@ -43,4 +46,9 @@ void main() {
 			indata[2].color * gl_TessCoord.z;
 */
 	color = u_push_constants.color;
+	color.x *= 1 - max( 0.0000001, distance / 8000 );
+	color.y *= 1 - max( 0.0000001, ( distance - 4000 ) / 32000 );
+	color.z *= 1 - max( 0.0000001, ( distance - 12000 ) / 32000 );
+
+	//color = vec3( distance, distance, distance );
 }

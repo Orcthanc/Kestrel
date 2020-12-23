@@ -7,13 +7,12 @@
 
 using namespace Kestrel;
 
-TerrainScene::TerrainScene(){
+TerrainScene::TerrainScene( const Terrain& terrain ){
 	PROFILE_FUNCTION();
 
-	Terrain terrain;
 	auto temp = createEntity( "Terrain" );
-	temp.addComponent<TransformComponent>( glm::vec3{ 0, -1, 0 }, glm::quat{ glm::vec3{ -1.5707963, 0, 0 }}, glm::vec3{ 100, 100, 100 });
-	temp.addComponent<TerrainComponent>( terrain );
+	temp.addComponent<TransformComponent>( glm::vec3{ 0, -1, 0 }, glm::quat{ glm::vec3{ -1.5707963, 0, 0 }}, glm::vec3{ 1024, 1024, 1024 });
+	temp.addComponent<TerrainComponent>( std::move( terrain ));
 }
 
 void TerrainScene::onUpdate(){
