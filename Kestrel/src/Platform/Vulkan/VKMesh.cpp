@@ -151,7 +151,7 @@ Mesh VK_MeshRegistry::requestOrLoadMesh( const std::filesystem::path & p ){
 
 	meshes.emplace( p, ++mesh_id );
 	auto m = std::make_shared<VK_Mesh>();
-	m->load_obj( p.c_str() );
+	m->load_obj( p.string().c_str() );
 	mesh_impls.emplace( mesh_id, m );
 	return mesh_id;
 }

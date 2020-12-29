@@ -36,7 +36,7 @@ void SandboxLayer::onUpdate(){
 	float x = 0, y = 0, z = 0;
 	Application& temp = *Application::getInstance();
 
-	float speed = 0.1;
+	float speed = 0.1f;
 	if( temp.getKeyState( GLFW_KEY_LEFT_SHIFT ) == GLFW_PRESS ){
 		speed *= 50;
 	}

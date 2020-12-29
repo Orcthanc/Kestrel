@@ -108,6 +108,8 @@ const char* ast_node_to_string( ast_node_type t ){
 		case AST_NODE_dot: return "AST_NODE_dot";
 		case AST_NODE_string: return "AST_NODE_string";
 	}
+
+	return "AST_NODE_error";
 }
 
 static void ast_node_print_tree_int( ast_node* node, uint32_t offset ){

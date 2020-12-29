@@ -330,7 +330,10 @@ void KST_VK_CameraRenderer::drawMesh( const TransformComponent& transform, const
 	auto mimp = VK_MeshRegistry::getMeshImpl( mesh );
 
 	// TODO clean up (maybe amount instead of size)
-	render_info.cmd_buffer[0]->drawIndexed( mimp->index_amount, 1, mimp->index_offset, mimp->vertex_offset, 0 );
+	render_info.cmd_buffer[0]->drawIndexed( 
+			static_cast<uint32_t>( mimp->index_amount ), 1, 
+			static_cast<uint32_t>( mimp->index_offset ), 
+			static_cast<int32_t>( mimp->vertex_offset ), 0 );
 }
 
 void KST_VK_CameraRenderer::endScene(){

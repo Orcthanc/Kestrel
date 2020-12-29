@@ -28,7 +28,7 @@ void KST_VK_TerrainRenderer::drawTerrain( KST_VK_CameraRenderer *renderer, const
 			TransformComponent new_tran = transform;
 			new_tran.loc.x += tilesize * x;
 			new_tran.loc.z += tilesize * z;
-			renderer->drawMesh( new_tran, terrain_mesh, terrain_material, terrain.high_res_res / 4, glm::vec3( 1, 0, 0 ));
+			renderer->drawMesh( new_tran, terrain_mesh, terrain_material, terrain.high_res_res / 4.0, glm::vec3( 1, 0, 0 ));
 		}
 	}
 
@@ -45,7 +45,7 @@ void KST_VK_TerrainRenderer::drawTerrain( KST_VK_CameraRenderer *renderer, const
 			TransformComponent new_tran = transform;
 			new_tran.loc.x += tilesize * x;
 			new_tran.loc.z += tilesize * z;
-			renderer->drawMesh( new_tran, terrain_mesh, terrain_material, terrain.med_res_res / 4, glm::vec3( 0, 1, 0 ));
+			renderer->drawMesh( new_tran, terrain_mesh, terrain_material, terrain.med_res_res / 4.0, glm::vec3( 0, 1, 0 ));
 		}
 	}
 
@@ -62,7 +62,7 @@ void KST_VK_TerrainRenderer::drawTerrain( KST_VK_CameraRenderer *renderer, const
 			TransformComponent new_tran = transform;
 			new_tran.loc.x += tilesize * x;
 			new_tran.loc.z += tilesize * z;
-			renderer->drawMesh( new_tran, terrain_mesh, terrain_material, terrain.low_res_res / 4, glm::vec3( 0, 0, 1 ));
+			renderer->drawMesh( new_tran, terrain_mesh, terrain_material, terrain.low_res_res / 4.0, glm::vec3( 0, 0, 1 ));
 		}
 	}
 }

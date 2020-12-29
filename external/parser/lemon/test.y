@@ -199,7 +199,7 @@ rvalue(A) ::= PARENTHESIS_LEFT rvalue(B) PARENTHESIS_RIGHT. {
 rvalue(A) ::= STRING(B). {
 	A = malloc( sizeof( ast_node ));
 	A->type = AST_NODE_string;
-	int temp = strlen( B );
+	size_t temp = strlen( B );
 	A->val.identifier.name = malloc( temp - 1 );
 	strncpy( A->val.identifier.name, B + 1, temp - 2 );
 	A->val.identifier.name[temp - 2] = 0;
@@ -234,7 +234,7 @@ rvalue(A) ::= PARENTHESIS_LEFT floatl(B) COMMA floatl(C) COMMA floatl(D) COMMA f
 }
 
 floatl(A) ::= FLOAT(B). {
-	A = atof( B );
+	A = (float)atof( B );
 }
 
 floatl(A) ::= MINUS floatl(B). [UMINUS] {
@@ -250,7 +250,7 @@ rvalue(A) ::= MINUS rvalue(B). [UMINUS] {
 float1(A) ::= FLOAT(B). {
 	A = malloc( sizeof( ast_node ));
 	A->type = AST_NODE_float1;
-	A->val.float1 = atof( B );
+	A->val.float1 = (float)atof( B );
 }
 
 rvalue(A) ::= operator(B). {
