@@ -153,12 +153,16 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 			blend_constants);
 
 	std::vector<vk::PushConstantRange> push_constant_ranges{
-		vk::PushConstantRange( vk::ShaderStageFlagBits::eTessellationControl, 0, sizeof( float )),
-		vk::PushConstantRange( vk::ShaderStageFlagBits::eTessellationEvaluation, 16, sizeof( VK_UniformBufferObj )),
+		vk::PushConstantRange( vk::ShaderStageFlagBits::eTessellationControl | vk::ShaderStageFlagBits::eTessellationEvaluation, 0, sizeof( VK_UniformBufferObj )),
 	};
 
 	std::vector<vk::DescriptorSetLayoutBinding> layout_binding{
-		vk::DescriptorSetLayoutBinding( 0, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eTessellationEvaluation, {} )
+		vk::DescriptorSetLayoutBinding(
+				0,
+				vk::DescriptorType::eUniformBuffer,
+				1,
+				vk::ShaderStageFlagBits::eTessellationEvaluation | vk::ShaderStageFlagBits::eTessellationControl,
+				{} )
 		};
 
 	vk::DescriptorSetLayoutCreateInfo layout_cr_inf(
