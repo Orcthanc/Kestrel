@@ -36,13 +36,13 @@ void main() {
 
 		float tess_facs[3];
 
-		tess_facs[0] = min( distances[1], distances[2] ) / 4096;
-		tess_facs[1] = min( distances[0], distances[2] ) / 4096;
-		tess_facs[2] = min( distances[0], distances[1] ) / 4096;
+		tess_facs[0] = min( distances[1], distances[2] ) / 100000000.0;
+		tess_facs[1] = min( distances[0], distances[2] ) / 100000000.0;
+		tess_facs[2] = min( distances[0], distances[1] ) / 100000000.0;
 
-		gl_TessLevelOuter[0] = max(1, (4096 - tess_facs[0]) / 64);
-		gl_TessLevelOuter[1] = max(1, (4096 - tess_facs[1]) / 64);
-		gl_TessLevelOuter[2] = max(1, (4096 - tess_facs[2]) / 64);
-		gl_TessLevelInner[0] = max(1, (4096 - tess_facs[2]) / 64);
+		gl_TessLevelOuter[0] = max(1, 32 - tess_facs[0]);
+		gl_TessLevelOuter[1] = max(1, 32 - tess_facs[1]);
+		gl_TessLevelOuter[2] = max(1, 32 - tess_facs[2]);
+		gl_TessLevelInner[0] = max(1, 32 - tess_facs[2]);
 	}
 }

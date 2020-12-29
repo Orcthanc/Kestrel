@@ -1,6 +1,6 @@
 #version 450
 
-layout( triangles, equal_spacing, cw ) in;
+layout( triangles, fractional_even_spacing, cw ) in;
 
 layout( constant_id = 0 ) const bool logarithmic = false;
 
