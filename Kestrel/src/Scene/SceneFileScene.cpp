@@ -32,7 +32,7 @@ void SceneFileScene::load( const std::filesystem::path& path ){
 		KST_CORE_ASSERT( istream.is_open(), "Could not open file {}", path.string());
 		auto size = istream.tellg();
 		istream.seekg( 0 );
-		file = (char*)malloc( size.operator long() + 1 );
+		file = (char*)malloc( static_cast<long>( size ) + 1 );
 		istream.read( file, size );
 		file[size] = 0;
 	}
