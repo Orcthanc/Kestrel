@@ -260,13 +260,11 @@ void KST_VK_CameraRenderer::begin_scene( Camera& c, size_t window_index ){
 	render_info.cmd_buffer[0]->bindVertexBuffers( 0, 1, &VK_MeshRegistry::mesh_data.vertex_buffer.buffer.get(), &offset );
 	render_info.cmd_buffer[0]->bindIndexBuffer( *VK_MeshRegistry::mesh_data.index_buffer.buffer, 0, vk::IndexType::eUint32 );
 
-	VK_ViewProj viewproj;
+	view_proj.view = c.view;
+	view_proj.proj = c.proj;
+	view_proj.viewproj = c.proj * c.view;
 
-	viewproj.view = c.view;
-	viewproj.proj = c.proj;
-	viewproj.viewproj = c.proj * c.view;
-
-	memcpy( uniform_buffer.data, &viewproj, sizeof( VK_ViewProj ));
+	memcpy( uniform_buffer.data, &view_proj, sizeof( VK_ViewProj ));
 
 	render_info.target = &render_targets.startPass();
 }
@@ -333,9 +331,9 @@ void KST_VK_CameraRenderer::drawMesh( const TransformComponent& transform, const
 	auto mimp = VK_MeshRegistry::getMeshImpl( mesh );
 
 	// TODO clean up (maybe amount instead of size)
-	render_info.cmd_buffer[0]->drawIndexed( 
-			static_cast<uint32_t>( mimp->index_amount ), 1, 
-			static_cast<uint32_t>( mimp->index_offset ), 
+	render_info.cmd_buffer[0]->drawIndexed(
+			static_cast<uint32_t>( mimp->index_amount ), 1,
+			static_cast<uint32_t>( mimp->index_offset ),
 			static_cast<int32_t>( mimp->vertex_offset ), 0 );
 }
 

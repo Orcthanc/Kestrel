@@ -4,6 +4,8 @@
 #include "Platform/Vulkan/VKMaterial.hpp"
 #include "Platform/Vulkan/VKCameraRenderer.hpp"
 
+#include "glm/gtx/string_cast.hpp"
+
 using namespace Kestrel;
 
 KST_VK_TerrainRenderer KST_VK_TerrainRenderer::instance;
@@ -20,14 +22,22 @@ void KST_VK_TerrainRenderer::drawTerrain( KST_VK_CameraRenderer *renderer, const
 	//TODO Frustrum culling
 
 	float tilesize = transform.scale.x * 2;
-	//renderer->drawMesh( e, transform, terrain_mesh, terrain_material );
+
+	glm::vec4 pos{ 0, 0, 0, 1 };
+
+	pos = glm::inverse( renderer->view_proj.view ) * pos;
+
+	int xoffset = (int)pos.x / (int)tilesize;
+	int zoffset = (int)pos.z / (int)tilesize;
+
+	KST_CORE_INFO( "{}", glm::to_string( pos ));
 
 	//High resolution
 	for( int z = -terrain.high_res_tiles; z <= terrain.high_res_tiles; ++z ){
 		for( int x = -terrain.high_res_tiles; x <= terrain.high_res_tiles; ++x ){
 			TransformComponent new_tran = transform;
-			new_tran.loc.x += tilesize * x;
-			new_tran.loc.z += tilesize * z;
+			new_tran.loc.x += tilesize * ( x + xoffset );
+			new_tran.loc.z += tilesize * ( z + zoffset );
 			renderer->drawMesh( new_tran, terrain_mesh, terrain_material, terrain.high_res_res / 4.0, glm::vec3( 1, 0, 0 ));
 		}
 	}
@@ -43,8 +53,8 @@ void KST_VK_TerrainRenderer::drawTerrain( KST_VK_CameraRenderer *renderer, const
 				continue;
 			}
 			TransformComponent new_tran = transform;
-			new_tran.loc.x += tilesize * x;
-			new_tran.loc.z += tilesize * z;
+			new_tran.loc.x += tilesize * ( x + xoffset );
+			new_tran.loc.z += tilesize * ( z + zoffset );
 			renderer->drawMesh( new_tran, terrain_mesh, terrain_material, terrain.med_res_res / 4.0, glm::vec3( 0, 1, 0 ));
 		}
 	}
@@ -60,8 +70,8 @@ void KST_VK_TerrainRenderer::drawTerrain( KST_VK_CameraRenderer *renderer, const
 				continue;
 			}
 			TransformComponent new_tran = transform;
-			new_tran.loc.x += tilesize * x;
-			new_tran.loc.z += tilesize * z;
+			new_tran.loc.x += tilesize * ( x + xoffset );
+			new_tran.loc.z += tilesize * ( z + zoffset );
 			renderer->drawMesh( new_tran, terrain_mesh, terrain_material, terrain.low_res_res / 4.0, glm::vec3( 0, 0, 1 ));
 		}
 	}

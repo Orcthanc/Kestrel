@@ -106,6 +106,8 @@ namespace Kestrel {
 			void drawMesh( const TransformComponent& t, const Mesh& m, const Material& mat, float tesselation = 1, const glm::vec3& color = { 1, 1, 1 });
 			virtual void endScene() override;
 
+
+			VK_ViewProj view_proj;
 		private:
 			void onSizeChange( bool resetSync );
 
@@ -116,7 +118,6 @@ namespace Kestrel {
 
 			void createImgui( vk::RenderPass );
 
-			//TODO smart ptr
 			KST_VK_DeviceSurface* device_surface = nullptr;
 
 			vk::UniqueCommandPool render_cmd_pool;
