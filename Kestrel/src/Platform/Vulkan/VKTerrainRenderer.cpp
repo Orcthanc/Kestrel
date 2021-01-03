@@ -24,17 +24,31 @@ void KST_VK_TerrainRenderer::drawTerrain( KST_VK_CameraRenderer *renderer, const
 	float tilesize = transform.scale.x * 2;
 
 	glm::vec4 pos{ 0, 0, 0, 1 };
+	glm::vec4 dir{ 0, 0, 1, 0 };
 
-	pos = glm::inverse( renderer->view_proj.view ) * pos;
+	auto temp = glm::inverse( renderer->view_proj.view );
+	pos = temp * pos;
+	dir = temp * dir;
 
 	int xoffset = (int)pos.x / (int)tilesize;
 	int zoffset = (int)pos.z / (int)tilesize;
 
+	glm::vec2 cullmin{ dir.x < 0 ? 0 : 1, dir.z < 0 ? 0 : 1 };
+	glm::vec2 cullmax{ dir.x < 0 ? 1 : 0, dir.z < 0 ? 1 : 0 };
+
+	if( std::abs( dir.x ) < std::abs( dir.z )){
+		cullmin.x = 1;
+		cullmax.x = 1;
+	} else {
+		cullmin.y = 1;
+		cullmax.y = 1;
+	}
+
 	KST_CORE_INFO( "{}", glm::to_string( pos ));
 
 	//High resolution
-	for( int z = -terrain.high_res_tiles; z <= terrain.high_res_tiles; ++z ){
-		for( int x = -terrain.high_res_tiles; x <= terrain.high_res_tiles; ++x ){
+	for( int z = -terrain.high_res_tiles * cullmin.y; z <= terrain.high_res_tiles * cullmax.y; ++z ){
+		for( int x = -terrain.high_res_tiles * cullmin.x; x <= terrain.high_res_tiles * cullmax.x; ++x ){
 			TransformComponent new_tran = transform;
 			new_tran.loc.x += tilesize * ( x + xoffset );
 			new_tran.loc.z += tilesize * ( z + zoffset );
@@ -45,11 +59,11 @@ void KST_VK_TerrainRenderer::drawTerrain( KST_VK_CameraRenderer *renderer, const
 	int med_size = terrain.med_res_tiles + terrain.high_res_tiles;
 
 	//Medium resolution
-	for( int z = -med_size; z <= med_size; ++z ){
-		for( int x = -med_size; x <= med_size; ++x ){
+	for( int z = -med_size * cullmin.y; z <= med_size * cullmax.y; ++z ){
+		for( int x = -med_size * cullmin.x; x <= med_size * cullmax.x; ++x ){
 			if( x >= -terrain.high_res_tiles && x <= terrain.high_res_tiles &&
 					z >= -terrain.high_res_tiles && z <= terrain.high_res_tiles ){
-				x += 2 * terrain.high_res_tiles;
+				x = terrain.high_res_tiles;
 				continue;
 			}
 			TransformComponent new_tran = transform;
@@ -62,11 +76,11 @@ void KST_VK_TerrainRenderer::drawTerrain( KST_VK_CameraRenderer *renderer, const
 	int low_size = med_size + terrain.low_res_tiles;
 
 	//Low resolution
-	for( int z = -low_size; z <= low_size; ++z ){
-		for( int x = -low_size; x <= low_size; ++x ){
+	for( int z = -low_size * cullmin.y; z <= low_size * cullmax.y; ++z ){
+		for( int x = -low_size * cullmin.x; x <= low_size * cullmax.x; ++x ){
 			if( x >= -med_size && x <= med_size &&
 					z >= -med_size && z <= med_size ){
-				x += 2 * med_size;
+				x = med_size;
 				continue;
 			}
 			TransformComponent new_tran = transform;
