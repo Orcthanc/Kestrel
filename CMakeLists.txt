@@ -54,6 +54,21 @@ function( copy_res_dir dir )
 	add_dependencies( ${PROJECT_NAME} ${dir_name} )
 endfunction( copy_res_dir )
 
+function( copy_file file )
+		get_filename_component(FILE_NAME ${file} NAME)
+		get_filename_component(FILE_DIR ${file} DIRECTORY)
+	add_custom_command(
+		OUTPUT "${CMAKE_BINARY_DIR}/res/${PROJECT_NAME}/${FILE_DIR}/${FILE_NAME}"
+		COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/res/${PROJECT_NAME}/${FILE_DIR}"
+		COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/${FILE_DIR}/${FILE_NAME}" "${CMAKE_BINARY_DIR}/res/${PROJECT_NAME}/${FILE_DIR}/${FILE_NAME}"
+		DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${FILE_DIR}/${FILE_NAME}
+		COMMENT "Copying file ${file}"
+	)
+	string( REGEX REPLACE "/" "_slash_" dir_name ${file} )
+	add_custom_target( ${dir_name} ALL DEPENDS "${CMAKE_BINARY_DIR}/res/${PROJECT_NAME}/${FILE_DIR}/${FILE_NAME}" )
+	add_dependencies( ${PROJECT_NAME} ${dir_name} )
+endfunction()
+
 add_subdirectory( external )
 add_subdirectory( Kestrel )
 add_subdirectory( Sandbox )

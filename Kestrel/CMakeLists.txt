@@ -22,6 +22,10 @@ if( KST_COLOR_STATS )
 	target_compile_definitions( ${PROJECT_NAME} PUBLIC KST_COLOR_STATS=1 )
 endif( KST_COLOR_STATS )
 
+copy_file(
+	"shader/basic.json"
+	)
+
 compile_shaders(
 	"shader/basic.vert"
 	"shader/basic.frag"
