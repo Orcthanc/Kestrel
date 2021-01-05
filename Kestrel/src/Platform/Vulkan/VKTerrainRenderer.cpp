@@ -19,7 +19,7 @@ void KST_VK_TerrainRenderer::init(){
 
 void KST_VK_TerrainRenderer::drawTerrain( KST_VK_CameraRenderer *renderer, const TransformComponent &transform, const Terrain &terrain ){
 	PROFILE_FUNCTION();
-	//TODO Frustrum culling
+	//TODO Improve frustrum culling
 
 	float tilesize = transform.scale.x * 2;
 

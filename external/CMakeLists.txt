@@ -1,5 +1,8 @@
+set(JSON_BuildTests OFF CACHE INTERNAL "")
+
 add_subdirectory( glm )
 add_subdirectory( glfw )
+add_subdirectory( json )
 add_subdirectory( imgui )
 add_subdirectory( spdlog )
 add_subdirectory( parser )

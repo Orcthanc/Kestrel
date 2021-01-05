@@ -1,0 +1,58 @@
+{
+	"attribute_descriptions" : [
+		{
+			"name" : "Position",
+			"byte" : 3,
+			"binding" : 0,
+			"location" : 0,
+			"offset" : 0
+		},
+		{
+			"name" : "Normal",
+			"byte" : 3,
+			"binding" : 0,
+			"location" : 1,
+			"offset" : 4
+		},
+		{
+			"name" : "Texture",
+			"byte" : 2,
+			"binding" : 0,
+			"location" : 2,
+			"offset" : 8
+		},
+		{
+			"name" : "Offset",
+			"byte" : 2,
+			"binding" : 1,
+			"location" : 2,
+			"offset" : 16
+		}
+	],
+	"binding_descriptions" : [
+		{
+			"binding" : 0,
+			"size" : 16,
+			"inputrate" : "v"
+		},
+		{
+			"binding" : 1,
+			"size" : 4,
+			"inputrate" : "i"
+		}
+	],
+	"stages" : {
+		"vert" : {
+			"file" : "basic.vert.spv"
+		},
+		"tesc" : {
+			"file" : "basic.tesc.spv"
+		},
+		"tese" : {
+			"file" : "basic.tese.spv"
+		},
+		"frag" : {
+			"file" : "basic.frag.spv"
+		}
+	}
+}

@@ -7,7 +7,7 @@ add_library( ${PROJECT_NAME} STATIC ${${PROJECT_NAME}_SOURCES} )
 find_package( Vulkan REQUIRED )
 
 target_precompile_headers( ${PROJECT_NAME} PUBLIC "src/kstpch.hpp" )
-target_include_directories( ${PROJECT_NAME} PUBLIC "src" glm glfw spdlog::spdlog Vulkan::Vulkan imgui Lexer test_PARSER )
+target_include_directories( ${PROJECT_NAME} PUBLIC "src" glm glfw spdlog::spdlog Vulkan::Vulkan imgui Lexer test_PARSER nlohmann_json::nlohmann_json )
 target_link_libraries( ${PROJECT_NAME} PUBLIC glm glfw spdlog::spdlog Vulkan::Vulkan entt imgui Lexer test_PARSER )
 
 if( COLOR_CONSOLE )

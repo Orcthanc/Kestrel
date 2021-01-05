@@ -13,3 +13,6 @@
 [submodule "external/parser/TokGen"]
 	path = external/parser/TokGen
 	url = https://github.com/Orcthanc/TokGen.git
+[submodule "external/json"]
+	path = external/json
+	url = git@github.com:nlohmann/json
