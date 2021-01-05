@@ -3,10 +3,16 @@
 #include "Platform/Vulkan/VKShader.hpp"
 #include "Platform/Vulkan/VKContext.hpp"
 #include "Platform/Vulkan/VKVertex.hpp"
+
 #include <filesystem>
+
 #include "Core/Application.hpp"
 
+#include "nlohmann/json.hpp"
+
 using namespace Kestrel;
+
+using json = nlohmann::json;
 
 KST_VK_Framebufferset::KST_VK_Framebufferset(): buffer(){}
 
@@ -45,12 +51,12 @@ BindingInfo::BindingInfo(
 	render_mode( render_mode ){}
 
 
-static std::vector<std::pair<ShaderType, const char*>> stages{
-	{ ShaderType::Vertex, ".vert.spv" },
-	{ ShaderType::TessControl, ".tesc.spv" },
-	{ ShaderType::TessEvaluation, ".tese.spv" },
-	{ ShaderType::Geometry, ".geom.spv" },
-	{ ShaderType::Fragment, ".frag.spv" },
+static std::map<std::string, ShaderType> stages{
+	{ "vert", ShaderType::Vertex },
+	{ "tesc", ShaderType::TessControl },
+	{ "tese", ShaderType::TessEvaluation },
+	{ "geom", ShaderType::Geometry },
+	{ "frag", ShaderType::Fragment },
 };
 
 Material VK_Materials::loadMaterial( const char* shader_name ){
@@ -59,18 +65,35 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 	if( material_names.contains( shader_name ))
 		return material_names.at( shader_name );
 
+	std::filesystem::path path( std::string( shader_name ) + ".json" );
+	std::ifstream in( path );
+
+	path.remove_filename();
+
+	json j;
+
+	in >> j;
 
 	VK_Material_T newMat;
 
 	KST_CORE_INFO( "Loading material {}", shader_name );
 	std::vector<KST_VK_Shader> shaders;
 
+	/*
 	for( auto& stage: stages ){
 		std::filesystem::path p{ shader_name + std::string( stage.second )};
 		if( std::filesystem::exists( p )){
 			KST_CORE_INFO( "Loading shader {}", p.string() );
 			shaders.emplace_back( *device->device, p.string(), stage.first );
 		}
+	}
+	*/
+
+	for( auto& [name, stage]: j["stages"].items() ){
+		KST_CORE_INFO( "{} {}", name.c_str(), stage.dump() );
+		KST_CORE_INFO( "{}", stage["file"] );
+		KST_CORE_INFO( "{}", stages[name.c_str()]);
+		shaders.push_back({ *device->device, path / stage["file"], stages[name] });
 	}
 
 	std::vector<vk::PipelineShaderStageCreateInfo> stage_infos;

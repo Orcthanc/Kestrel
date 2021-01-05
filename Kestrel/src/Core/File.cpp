@@ -7,6 +7,10 @@ using namespace Kestrel;
 std::vector<uint8_t> Filereader::read_uint8t( const std::string& filename ){
 	std::ifstream file( filename, std::ios::ate | std::ios::binary | std::ios::in );
 
+	if( !file.is_open() ){
+		KST_CORE_VERIFY( false, "Could not open file {}", filename );
+	}
+
 	std::vector<uint8_t> res( file.tellg() );
 	file.seekg( 0 );
 
