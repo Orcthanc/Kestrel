@@ -15,9 +15,6 @@ namespace Kestrel {
 	};
 
 	struct VK_Vertex {
-		static const std::array<vk::VertexInputAttributeDescription, 3> getAttributeDescription();
-		static const vk::VertexInputBindingDescription getBindingDescription();
-
 		glm::vec3 pos;
 		glm::vec3 normal;
 		glm::vec2 tex;

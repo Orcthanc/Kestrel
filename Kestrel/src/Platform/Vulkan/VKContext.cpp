@@ -197,7 +197,7 @@ void KST_VK_DeviceSurface::create_render_pass(){
 				{},
 				swapchains[0].format.format, //TODO
 				vk::SampleCountFlagBits::e1,
-				vk::AttachmentLoadOp::eLoad,
+				vk::AttachmentLoadOp::eClear,
 				vk::AttachmentStoreOp::eStore,
 				vk::AttachmentLoadOp::eDontCare,
 				vk::AttachmentStoreOp::eDontCare,

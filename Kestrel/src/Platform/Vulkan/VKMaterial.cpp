@@ -320,6 +320,7 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 		newMat.pipelines.emplace_back( std::move( device->device->createGraphicsPipelineUnique( {}, pipeline_info ).value ));
 		pipeline_info.basePipelineHandle = *newMat.pipelines[0];
 	}
+
 	static Material id = 1;
 	newMat.id = id;
 	materials.emplace( id, std::move( newMat ));
