@@ -67,32 +67,21 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 
 	std::filesystem::path path( std::string( shader_name ) + ".json" );
 	std::ifstream in( path );
+	json j;
+	in >> j;
 
 	path.remove_filename();
-
-	json j;
-
-	in >> j;
 
 	VK_Material_T newMat;
 
 	KST_CORE_INFO( "Loading material {}", shader_name );
 	std::vector<KST_VK_Shader> shaders;
 
-	/*
-	for( auto& stage: stages ){
-		std::filesystem::path p{ shader_name + std::string( stage.second )};
-		if( std::filesystem::exists( p )){
-			KST_CORE_INFO( "Loading shader {}", p.string() );
-			shaders.emplace_back( *device->device, p.string(), stage.first );
-		}
-	}
-	*/
+	bool tessellation = false;
 
 	for( auto& [name, stage]: j["stages"].items() ){
-		KST_CORE_INFO( "{} {}", name.c_str(), stage.dump() );
-		KST_CORE_INFO( "{}", stage["file"] );
-		KST_CORE_INFO( "{}", stages[name.c_str()]);
+		if( name == "tesc" )
+			tessellation = true;
 		shaders.push_back({ *device->device, path / stage["file"], stages[name] });
 	}
 
@@ -111,25 +100,69 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 			1, &log_on );
 
 	for( auto& s: shaders ){
-		if( s.type == ShaderType::Vertex || s.type == ShaderType::Fragment || s.type == ShaderType::TessEvaluation ){
-			stage_infos.push_back( vk::PipelineShaderStageCreateInfo( {}, flag_bits_from_stage( s.type ), *s.module, "main", &spec_info ));
-			log_stage_infos.push_back( vk::PipelineShaderStageCreateInfo( {}, flag_bits_from_stage( s.type ), *s.module, "main", &spec_info_log ));
-		} else {
-			stage_infos.push_back({ {}, flag_bits_from_stage( s.type ), *s.module, "main", {} });
-			log_stage_infos.push_back({ {}, flag_bits_from_stage( s.type ), *s.module, "main", {} });
-		}
+		stage_infos.push_back( vk::PipelineShaderStageCreateInfo( {}, flag_bits_from_stage( s.type ), *s.module, "main", &spec_info ));
+		log_stage_infos.push_back( vk::PipelineShaderStageCreateInfo( {}, flag_bits_from_stage( s.type ), *s.module, "main", &spec_info_log ));
 	}
 
+	/*
 	auto attrib_desc = VK_Vertex::getAttributeDescription();
 
 	auto binding_desc = VK_Vertex::getBindingDescription();
+	*/
+
+	std::vector<vk::VertexInputAttributeDescription> attrib_desc;
+	std::vector<vk::VertexInputBindingDescription> binding_desc;
+
+	vk::Format format;
+
+	for( auto& attribute: j["attribute_descriptions"] ){
+		switch( attribute["size"].get<int>() ){
+			case 1:
+				format = vk::Format::eR32Sfloat;
+				break;
+			case 2:
+				format = vk::Format::eR32G32Sfloat;
+				break;
+			case 3:
+				format = vk::Format::eR32G32B32Sfloat;
+				break;
+			case 4:
+				format = vk::Format::eR32G32B32A32Sfloat;
+				break;
+			default:
+				KST_CORE_VERIFY( false, "Shader attribute can not have a vector with more than 4 floats (has {})", attribute["byte"].get<int>() );
+		}
+
+		attrib_desc.emplace_back(
+				attribute["location"].get<uint32_t>(),
+				attribute["binding"].get<uint32_t>(),
+				format,
+				attribute["offset"].get<uint32_t>()
+			);
+	}
+
+	for( auto& binding: j["binding_descriptions"] ){
+		vk::VertexInputRate inputrate;
+		if( binding["inputrate"] == "v" ){
+			inputrate = vk::VertexInputRate::eVertex;
+		} else if( binding["inputrate"] == "i" ){
+			inputrate = vk::VertexInputRate::eInstance;
+		} else {
+			KST_CORE_VERIFY( false, "Invalid vertex input rate {}", binding["inputrate"] );
+		}
+
+		binding_desc.emplace_back(
+				binding["binding"].get<uint32_t>(),
+				binding["stride"].get<uint32_t>(),
+				inputrate );
+	}
 
 	vk::PipelineVertexInputStateCreateInfo vertex_input_info( {},
 			binding_desc,
 			attrib_desc );
 
 	vk::PipelineInputAssemblyStateCreateInfo assembly_info( {},
-			vk::PrimitiveTopology::ePatchList,
+			tessellation ? vk::PrimitiveTopology::ePatchList : vk::PrimitiveTopology::eTriangleList,
 			VK_FALSE );
 
 	vk::PipelineViewportStateCreateInfo viewport_info( {}, 1, nullptr, 1, nullptr );
@@ -242,7 +275,7 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 			stage_infos,
 			&vertex_input_info,
 			&assembly_info,
-			&tess_state_inf,
+			tessellation ? &tess_state_inf : nullptr,
 			&viewport_info,
 			&rasterizer_info,
 			&multisample_info,
