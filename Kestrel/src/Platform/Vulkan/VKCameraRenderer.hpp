@@ -13,6 +13,22 @@
 
 namespace Kestrel {
 
+	/*
+	struct KST_VK_Framebufferset {
+		KST_VK_Framebufferset();
+		KST_VK_Framebufferset( size_t size );
+
+		operator std::vector<vk::UniqueFramebuffer>&();
+		operator const std::vector<vk::UniqueFramebuffer>&() const;
+
+		bool dirty( size_t current_id );
+
+		std::vector<vk::UniqueFramebuffer> buffer;
+		//Dirty flag more or less
+		size_t lastUpdateID = -1;
+	};
+	*/
+
 	struct KST_VK_RenderTarget {
 		std::array<vk::UniqueImage, 2> color_depth;
 		std::array<vk::UniqueDeviceMemory, 2> color_depth_mem;
@@ -23,6 +39,8 @@ namespace Kestrel {
 		vk::UniqueSemaphore render_ready_sema;
 		vk::UniqueSemaphore render_done_sema;
 		vk::UniqueFence render_done_fence;
+
+		vk::UniqueFramebuffer framebuffer;
 	};
 
 	template <size_t tsize>
@@ -143,5 +161,7 @@ namespace Kestrel {
 			std::ofstream color_stat_file{ "color_stats.txt" };
 			KST_VK_Buffer copy_buffer;
 #endif
+
+			friend struct KST_VK_TerrainRenderer;
 	};
 }

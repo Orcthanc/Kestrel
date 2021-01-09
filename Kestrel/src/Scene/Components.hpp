@@ -110,7 +110,7 @@ namespace Kestrel {
 	};
 
 	struct TerrainComponent {
-		TerrainComponent() = default;
+		TerrainComponent(): terrain( null_terrain ){};
 		TerrainComponent( const Terrain& terrain );
 		TerrainComponent( Terrain&& terrain );
 

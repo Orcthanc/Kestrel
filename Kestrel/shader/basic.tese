@@ -40,12 +40,12 @@ void main() {
 		gl_Position.z = log(C* gl_Position.w + 1) / log(C*Far + 1) * gl_Position.w;
 	}
 
-/*	color =
+	color =
 			indata[0].color * gl_TessCoord.x +
 			indata[1].color * gl_TessCoord.y +
 			indata[2].color * gl_TessCoord.z;
-*/
-	color = u_push_constants.color;
+
+	//color = u_push_constants.color;
 	color.x *= 1 - max( 0.0000001, distance / 8000 );
 	color.y *= 1 - max( 0.0000001, ( distance - 4000 ) / 32000 );
 	color.z *= 1 - max( 0.0000001, ( distance - 12000 ) / 32000 );

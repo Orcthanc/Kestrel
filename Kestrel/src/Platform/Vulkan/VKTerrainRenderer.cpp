@@ -3,6 +3,7 @@
 #include "Platform/Vulkan/VKMesh.hpp"
 #include "Platform/Vulkan/VKMaterial.hpp"
 #include "Platform/Vulkan/VKCameraRenderer.hpp"
+#include "Platform/Vulkan/VKTerrain.hpp"
 
 #include "glm/gtx/string_cast.hpp"
 
@@ -19,6 +20,79 @@ void KST_VK_TerrainRenderer::init(){
 
 void KST_VK_TerrainRenderer::drawTerrain( KST_VK_CameraRenderer *renderer, const TransformComponent &transform, const Terrain &terrain ){
 	PROFILE_FUNCTION();
+
+	VK_Terrain_T& ter = VK_TerrainRegistry::terrains.at( terrain );
+
+	//Transform
+	auto model = glm::scale( glm::translate( glm::identity<glm::mat4>(), transform.loc ) * glm::mat4_cast( transform.rot ), transform.scale );
+
+	VK_UniformBufferObj mod_col{ model, glm::vec3( 0, 0, 1 )};
+	renderer->render_info.cmd_buffer[0]->pushConstants(
+			*VK_Materials::getInstance()[ terrain_material ].layout,
+			vk::ShaderStageFlagBits::eTessellationControl | vk::ShaderStageFlagBits::eTessellationEvaluation,
+			0,
+			sizeof( mod_col ),
+			&mod_col );
+
+	float tilesize = transform.scale.x;
+
+	glm::vec4 pos{ 0, 0, 0, 1 };
+
+	auto temp = glm::inverse( renderer->view_proj.view );
+	pos = temp * pos;
+
+	int xoffset = (int)pos.x / (int)tilesize;
+	int zoffset = -(int)pos.z / (int)tilesize;
+
+	std::array<float, 2> offset{ (float)xoffset, (float)zoffset };
+
+	renderer->render_info.cmd_buffer[0]->pushConstants(
+			*VK_Materials::getInstance()[ terrain_material ].layout,
+			vk::ShaderStageFlagBits::eVertex,
+			80,
+			8,
+			offset.data() );
+
+	//Mat
+	if( terrain_material != renderer->render_info.bound_mat ){
+		std::vector<std::array<vk::ImageView, 2>> views;
+
+		views.reserve( renderer->render_targets.size );
+
+		for( auto& t: renderer->render_targets ){
+			views.push_back(std::array<vk::ImageView, 2>{
+					*t.color_depth_view[0],
+					*t.color_depth_view[1] });
+		}
+
+		BindingInfo bind_inf(
+				*renderer->device_surface,
+				renderer,
+				renderer->render_targets.begin()->size,
+				renderer->render_targets.getIndex(),
+				*renderer->render_info.cmd_buffer[0],
+				*renderer->uniform_buffer.buffer,
+				renderer->render_info.render_mode );
+
+		VK_Materials::getInstance()[ terrain_material ].bind( bind_inf );
+
+		renderer->render_info.bound_mat = terrain_material;
+	}
+
+	auto mimp = VK_MeshRegistry::getMeshImpl( terrain_mesh );
+
+	vk::DeviceSize size = 0;
+
+	renderer->render_info.cmd_buffer[0]->bindVertexBuffers( 1, 1, &*ter.instance_offsets.buffer, &size );
+
+	// TODO clean up (maybe amount instead of size)
+	renderer->render_info.cmd_buffer[0]->drawIndexed(
+			static_cast<uint32_t>( mimp->index_amount ),
+			ter.size,
+			static_cast<uint32_t>( mimp->index_offset ),
+			static_cast<int32_t>( mimp->vertex_offset ), 0 );
+
+	/*
 	//TODO Improve frustrum culling
 
 	float tilesize = transform.scale.x * 2;
@@ -89,4 +163,5 @@ void KST_VK_TerrainRenderer::drawTerrain( KST_VK_CameraRenderer *renderer, const
 			renderer->drawMesh( new_tran, terrain_mesh, terrain_material, terrain.low_res_res / 4.0, glm::vec3( 0, 0, 1 ));
 		}
 	}
+	*/
 }

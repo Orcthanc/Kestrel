@@ -27,6 +27,13 @@
 			"binding" : 1,
 			"location" : 3,
 			"offset" : 0
+		},
+		{
+			"name" : "Resolution",
+			"size" : 1,
+			"binding" : 1,
+			"location" : 4,
+			"offset" : 8
 		}
 	],
 	"binding_descriptions" : [
@@ -37,8 +44,27 @@
 		},
 		{
 			"binding" : 1,
-			"stride" : 4,
+			"stride" : 12,
 			"inputrate" : "i"
+		}
+	],
+	"push_constants" : [
+		{
+			"name" : "model",
+			"offset" : 0,
+			"size" : 76,
+			"stages" : [
+				"tesc",
+				"tese"
+			]
+		},
+		{
+			"name" : "offset_correction",
+			"offset" : 80,
+			"size" : 8,
+			"stages" : [
+				"vert"
+			]
 		}
 	],
 	"stages" : {

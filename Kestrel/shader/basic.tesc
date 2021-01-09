@@ -31,14 +31,14 @@ void main() {
 
 		for( int i = 0; i < 3; i++ ){
 			vec4 pos = u_vp.view * u_push.model * vec4( indata[i].position, 1.0 );
-			distances[i] = dot( pos, pos );
+			distances[i] = sqrt(dot( pos, pos ));
 		}
 
 		float tess_facs[3];
 
-		tess_facs[0] = min( distances[1], distances[2] ) / 100000000.0;
-		tess_facs[1] = min( distances[0], distances[2] ) / 100000000.0;
-		tess_facs[2] = min( distances[0], distances[1] ) / 100000000.0;
+		tess_facs[0] = min( distances[1], distances[2] ) / 1024.0;
+		tess_facs[1] = min( distances[0], distances[2] ) / 1024.0;
+		tess_facs[2] = min( distances[0], distances[1] ) / 1024.0;
 
 		gl_TessLevelOuter[0] = max(1, 32 - tess_facs[0]);
 		gl_TessLevelOuter[1] = max(1, 32 - tess_facs[1]);

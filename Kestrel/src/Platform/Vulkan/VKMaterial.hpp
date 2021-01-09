@@ -10,28 +10,12 @@
 namespace Kestrel {
 	struct KST_VK_DeviceSurface;
 
-	struct KST_VK_Framebufferset {
-		KST_VK_Framebufferset();
-		KST_VK_Framebufferset( size_t size );
-
-		operator std::vector<vk::UniqueFramebuffer>&();
-		operator const std::vector<vk::UniqueFramebuffer>&() const;
-
-		bool dirty( size_t current_id );
-
-		std::vector<vk::UniqueFramebuffer> buffer;
-		//Dirty flag more or less
-		size_t lastUpdateID = -1;
-	};
-
 	using RendererID = void*;
 
 	struct BindingInfo {
 		BindingInfo(
 				KST_VK_DeviceSurface& device,
 				RendererID id,
-				size_t dirty_check_id,
-				std::vector<std::array<vk::ImageView, 2>>& imgs,
 				vk::Extent2D img_size,
 				size_t img_bind_index,
 				vk::CommandBuffer cmd_buffer,
@@ -66,7 +50,6 @@ namespace Kestrel {
 		vk::UniqueDescriptorSetLayout desc_layout;
 		vk::UniqueDescriptorPool desc_pool;
 		vk::RenderPass renderpass;
-		std::unordered_map<RendererID, KST_VK_Framebufferset> framebuffers;
 		std::unordered_map<RendererID, std::vector<vk::UniqueDescriptorSet>> desc_sets;
 	};
 

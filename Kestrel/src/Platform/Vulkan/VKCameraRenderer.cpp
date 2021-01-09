@@ -10,6 +10,7 @@
 #include "Platform/Vulkan/VKVertex.hpp"
 #include "Platform/Vulkan/VKMesh.hpp"
 #include "Platform/Vulkan/VKTerrainRenderer.hpp"
+#include "Platform/Vulkan/VKTerrain.hpp"
 
 #include "imgui_impl_glfw.h"
 
@@ -48,7 +49,6 @@ void KST_VK_CameraRenderer::setDeviceSurface( KST_VK_DeviceSurface* surface ){
 	transfer_queue = device_surface->device->getQueue( device_surface->queue_families.transfer.value(), 0 );
 
 	createBuffers();
-	//allocMemory();
 	createSynchronization();
 	createImages();
 	createImgui( *KST_VK_Context::get().device.renderpass );
@@ -181,6 +181,22 @@ void KST_VK_CameraRenderer::createImages(){
 		img_view_inf.format = vk::Format::eD32Sfloat;
 
 		r.color_depth_view[1] = device_surface->device->createImageViewUnique( img_view_inf );
+
+		std::vector<vk::ImageView> attachments{
+			*r.color_depth_view[0],
+			*r.color_depth_view[1]
+		};
+
+		vk::FramebufferCreateInfo framebuf_inf(
+			{},
+			*KST_VK_Context::get().device.renderpass,
+			attachments,
+			device_surface->swapchains[0].size.width,
+			device_surface->swapchains[0].size.height,
+			1
+		);
+
+		r.framebuffer = device_surface->device->createFramebufferUnique( framebuf_inf );
 	}
 
 #ifdef KST_COLOR_STATS
@@ -256,8 +272,16 @@ void KST_VK_CameraRenderer::begin_scene( Camera& c, size_t window_index ){
 	vk::CommandBufferBeginInfo beg_inf( {}, {} );
 	render_info.cmd_buffer[0]->begin( beg_inf );
 
+	std::array<vk::Buffer, 1> buffers{
+		VK_MeshRegistry::mesh_data.vertex_buffer.buffer.get(),
+	};
+
+	std::array<vk::DeviceSize, 1> offsets{
+		0,
+	};
+
 	vk::DeviceSize offset = 0;
-	render_info.cmd_buffer[0]->bindVertexBuffers( 0, 1, &VK_MeshRegistry::mesh_data.vertex_buffer.buffer.get(), &offset );
+	render_info.cmd_buffer[0]->bindVertexBuffers( 0, buffers, offsets );
 	render_info.cmd_buffer[0]->bindIndexBuffer( *VK_MeshRegistry::mesh_data.index_buffer.buffer, 0, vk::IndexType::eUint32 );
 
 	view_proj.view = c.view;
@@ -267,6 +291,24 @@ void KST_VK_CameraRenderer::begin_scene( Camera& c, size_t window_index ){
 	memcpy( uniform_buffer.data, &view_proj, sizeof( VK_ViewProj ));
 
 	render_info.target = &render_targets.startPass();
+
+	std::array<vk::ClearValue, 2> clear_values{
+		vk::ClearColorValue(std::array<float, 4>{ 0.0, 0.0, 0.0, 0.0 }),
+		vk::ClearDepthStencilValue( 1.0f, 0 )
+	};
+
+	if( any_flag( render_info.render_mode & RenderModeFlags::eInverse )){
+		clear_values[1] = vk::ClearDepthStencilValue( 0.0f, 0 );
+	}
+
+	vk::RenderPassBeginInfo render_beg_inf(
+			*KST_VK_Context::get().device.renderpass,
+			*render_info.target->framebuffer,
+			{{ 0, 0 }, render_info.target->size },
+			clear_values
+		);
+
+	render_info.cmd_buffer[0]->beginRenderPass( render_beg_inf, vk::SubpassContents::eInline );
 }
 
 void KST_VK_CameraRenderer::draw( Entity e ){
@@ -299,9 +341,6 @@ void KST_VK_CameraRenderer::drawMesh( const TransformComponent& transform, const
 
 	//Mat
 	if( mat != render_info.bound_mat ){
-		if( render_info.bound_mat != -1 ){
-			render_info.cmd_buffer[0]->endRenderPass();
-		}
 		std::vector<std::array<vk::ImageView, 2>> views;
 
 		views.reserve( render_targets.size );
@@ -315,8 +354,6 @@ void KST_VK_CameraRenderer::drawMesh( const TransformComponent& transform, const
 		BindingInfo bind_inf(
 				*device_surface,
 				this,
-				current_id,
-				views,
 				render_targets.begin()->size,
 				render_targets.getIndex(),
 				*render_info.cmd_buffer[0],

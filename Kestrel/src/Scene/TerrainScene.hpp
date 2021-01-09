@@ -8,7 +8,7 @@ namespace Kestrel {
 
 	struct TerrainScene: public Scene {
 		public:
-			TerrainScene( const Terrain& = Terrain() );
+			TerrainScene( const Terrain& );
 			virtual ~TerrainScene() = default;
 
 			virtual void onUpdate() override;

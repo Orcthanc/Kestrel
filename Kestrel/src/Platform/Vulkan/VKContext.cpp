@@ -5,6 +5,7 @@
 #include "Platform/Vulkan/VKMaterial.hpp"
 #include "Platform/Vulkan/VKMesh.hpp"
 #include "Platform/Vulkan/Base.hpp"
+#include "Platform/Vulkan/VKTerrain.hpp"
 
 #include "Scene/Components.hpp"
 
@@ -13,6 +14,7 @@ using namespace Kestrel;
 KST_VK_Context* KST_VK_Context::curr_context;
 
 KST_VK_DeviceSurface::~KST_VK_DeviceSurface(){
+	//Materials
 	VK_Materials::getInstance().materials.clear();
 
 	// Cameras
@@ -26,6 +28,9 @@ KST_VK_DeviceSurface::~KST_VK_DeviceSurface(){
 	VK_MeshRegistry::copy_inf = {};
 	VK_MeshRegistry::meshes.clear();
 	VK_MeshRegistry::mesh_impls.clear();
+
+	//Terrains
+	VK_TerrainRegistry::destroy();
 }
 
 const std::vector<const char*> KST_VK_DeviceSurface::dev_exts = {
@@ -187,6 +192,7 @@ void KST_VK_DeviceSurface::create( KST_VK_Context& c ){
 
 	create_render_pass();
 	init_meshes( std::move( temp ));
+	VK_TerrainRegistry::init( this );
 }
 
 void KST_VK_DeviceSurface::create_render_pass(){

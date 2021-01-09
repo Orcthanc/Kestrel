@@ -14,27 +14,9 @@ using namespace Kestrel;
 
 using json = nlohmann::json;
 
-KST_VK_Framebufferset::KST_VK_Framebufferset(): buffer(){}
-
-KST_VK_Framebufferset::KST_VK_Framebufferset( size_t size ): buffer( size ){}
-
-KST_VK_Framebufferset::operator std::vector<vk::UniqueFramebuffer>& (){
-	return buffer;
-}
-
-KST_VK_Framebufferset::operator const std::vector<vk::UniqueFramebuffer>& () const {
-	return buffer;
-}
-
-bool KST_VK_Framebufferset::dirty( size_t current_id ){
-	return current_id == lastUpdateID;
-}
-
 BindingInfo::BindingInfo(
 		KST_VK_DeviceSurface& device,
 		RendererID id,
-		size_t dirty_check_id,
-		std::vector<std::array<vk::ImageView, 2>>& imgs,
 		vk::Extent2D img_size,
 		size_t img_bind_index,
 		vk::CommandBuffer cmd_buffer,
@@ -42,8 +24,6 @@ BindingInfo::BindingInfo(
 		RenderModeFlags render_mode ):
 	device( device ),
 	id( id ),
-	dirty_check_id( dirty_check_id ),
-	img_views( imgs ),
 	img_size( img_size ),
 	img_bind_index( img_bind_index ),
 	cmd_buffer( cmd_buffer ),
@@ -103,12 +83,6 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 		stage_infos.push_back( vk::PipelineShaderStageCreateInfo( {}, flag_bits_from_stage( s.type ), *s.module, "main", &spec_info ));
 		log_stage_infos.push_back( vk::PipelineShaderStageCreateInfo( {}, flag_bits_from_stage( s.type ), *s.module, "main", &spec_info_log ));
 	}
-
-	/*
-	auto attrib_desc = VK_Vertex::getAttributeDescription();
-
-	auto binding_desc = VK_Vertex::getBindingDescription();
-	*/
 
 	std::vector<vk::VertexInputAttributeDescription> attrib_desc;
 	std::vector<vk::VertexInputBindingDescription> binding_desc;
@@ -208,9 +182,27 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 			color_blend_attachments,
 			blend_constants);
 
-	std::vector<vk::PushConstantRange> push_constant_ranges{
-		vk::PushConstantRange( vk::ShaderStageFlagBits::eTessellationControl | vk::ShaderStageFlagBits::eTessellationEvaluation, 0, sizeof( VK_UniformBufferObj )),
-	};
+	std::vector<vk::PushConstantRange> push_constant_ranges;
+
+	for( auto& range: j["push_constants"] ){
+		vk::ShaderStageFlags stages;
+		for( auto& stage: range["stages"] ){
+			if( stage == "vert" )
+				stages |= vk::ShaderStageFlagBits::eVertex;
+			else if( stage == "geom" )
+				stages |= vk::ShaderStageFlagBits::eGeometry;
+			else if( stage == "tesc" )
+				stages |= vk::ShaderStageFlagBits::eTessellationControl;
+			else if( stage == "tese" )
+				stages |= vk::ShaderStageFlagBits::eTessellationEvaluation;
+			else if( stage == "frag" )
+				stages |= vk::ShaderStageFlagBits::eFragment;
+			else
+				KST_CORE_ERROR( "Ignoring invalid stage: {}", stage.get<std::string>());
+		}
+
+		push_constant_ranges.emplace_back( stages, range["offset"], range["size"] );
+	}
 
 	std::vector<vk::DescriptorSetLayoutBinding> layout_binding{
 		vk::DescriptorSetLayoutBinding(
@@ -357,56 +349,6 @@ void VK_Material_T::bind( const BindingInfo& bind_inf ){
 		);
 
 	bind_inf.device.device->updateDescriptorSets( 1, &write_desc, 0, nullptr );
-
-	vk::Framebuffer buf;
-
-	// Creates if it does not exist and checks if up to date
-	if( !framebuffers[ bind_inf.id ].dirty( bind_inf.dirty_check_id )){
-		std::vector<vk::UniqueFramebuffer>& framebufs = framebuffers[ bind_inf.id ].buffer;
-
-		framebufs.resize( bind_inf.img_views.size() );
-
-		for( size_t i = 0; i < framebufs.size(); ++i ){
-
-			std::vector<vk::ImageView> attachments{
-				bind_inf.img_views[i][0],
-				bind_inf.img_views[i][1] };
-
-			vk::FramebufferCreateInfo framebuf_inf(
-					{},
-					renderpass,
-					attachments,
-					bind_inf.img_size.width,
-					bind_inf.img_size.height,
-					1
-				);
-
-			framebufs[i] = bind_inf.device.device->createFramebufferUnique( framebuf_inf );
-
-		}
-
-		buf = *framebufs[ bind_inf.img_bind_index ];
-	} else {
-		buf = *framebuffers.at( bind_inf.id ).buffer[ bind_inf.img_bind_index ];
-	}
-
-	std::array<vk::ClearValue, 2> clear_values{
-		vk::ClearColorValue(std::array<float, 4>{ 0.0, 0.0, 0.0, 0.0 }),
-		vk::ClearDepthStencilValue( 1.0f, 0 )
-	};
-
-	if( any_flag( bind_inf.render_mode & RenderModeFlags::eInverse )){
-		clear_values[1] = vk::ClearDepthStencilValue( 0.0f, 0 );
-	}
-
-	vk::RenderPassBeginInfo beg_inf(
-			renderpass,
-			buf,
-			{{ 0, 0 }, bind_inf.img_size },
-			clear_values
-		);
-
-	bind_inf.cmd_buffer.beginRenderPass( beg_inf, vk::SubpassContents::eInline );
 
 	bind_inf.cmd_buffer.bindPipeline(
 			vk::PipelineBindPoint::eGraphics,
