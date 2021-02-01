@@ -190,6 +190,7 @@ vk::SurfaceFormatKHR KST_VK_Swapchain::find_format( const KSTVKSwapchainDetails&
 	for( const auto& format: capabilities.formats ){
 		if( format.format == vk::Format::eB8G8R8A8Srgb
 				&& format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear ){
+			KST_CORE_INFO( "Using format {}/{}", vk::to_string( format.format ), vk::to_string( format.colorSpace ));
 			return format;
 		}
 	}

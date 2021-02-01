@@ -78,7 +78,7 @@ void KST_VK_Context::Init( const ContextInformation& c_inf ){
 				}
 			}
 			if( !found )
-				KST_CORE_INFO( "Could not enable layer {}. (Not present)", l );
+				KST_CORE_WARN( "Could not enable layer {}. (Not present)", l );
 		}
 	}
 #endif //NDEBUG
@@ -90,6 +90,10 @@ void KST_VK_Context::Init( const ContextInformation& c_inf ){
 	glfwExt = glfwGetRequiredInstanceExtensions( &glfwExtCount );
 
 	std::vector<const char*> exts( glfwExt, glfwExt + glfwExtCount );
+
+	for( auto& ext: exts ){
+		KST_CORE_INFO( "{}", ext );
+	}
 
 	vk::InstanceCreateInfo cr_inf( {}, &appinfo, layers, exts );
 
