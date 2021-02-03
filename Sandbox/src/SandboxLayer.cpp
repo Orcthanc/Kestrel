@@ -28,7 +28,7 @@ SandboxLayer::SandboxLayer( const std::string& s ): Layer{ s }{
 
 	auto cam = Application::getInstance()->current_scene->createEntity( "Camera" );
 	cam.addComponent<TransformComponent>();
-	camera = std::make_shared<NaiveCamera>( 45.0, 960.0/1080.0, 0.1, 100000000.0 );
+	camera = std::make_shared<NaiveCamera>( glm::radians( 90.0 ), 960.0/1080.0, 0.1, 100000000.0 );
 	cam.addComponent<CameraComponent>( camera );
 }
 

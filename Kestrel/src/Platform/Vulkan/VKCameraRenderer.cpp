@@ -261,6 +261,9 @@ void KST_VK_CameraRenderer::begin_scene( Camera& c, size_t window_index ){
 
 	render_info.render_mode = c.camera_render_mode;
 
+	//TODO
+	render_info.tessellation = 1;
+
 	vk::CommandBufferAllocateInfo alloc_inf(
 			*render_cmd_pool,
 			vk::CommandBufferLevel::ePrimary,
@@ -334,10 +337,17 @@ void KST_VK_CameraRenderer::drawMesh( const TransformComponent& transform, const
 	VK_UniformBufferObj mod_col{ model, color };
 	render_info.cmd_buffer[0]->pushConstants(
 			*VK_Materials::getInstance()[ mat ].layout,
-			vk::ShaderStageFlagBits::eTessellationControl | vk::ShaderStageFlagBits::eTessellationEvaluation,
+			vk::ShaderStageFlagBits::eTessellationEvaluation,
 			0,
 			sizeof( mod_col ),
 			&mod_col );
+
+	render_info.cmd_buffer[0]->pushConstants(
+			*VK_Materials::getInstance()[ mat ].layout,
+			vk::ShaderStageFlagBits::eTessellationControl,
+			80,
+			4,
+			&render_info.tessellation );
 
 	//Mat
 	if( mat != render_info.bound_mat ){

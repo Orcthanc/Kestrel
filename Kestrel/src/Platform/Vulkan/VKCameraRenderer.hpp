@@ -97,8 +97,9 @@ namespace Kestrel {
 		std::vector<vk::UniqueCommandBuffer> cmd_buffer;
 		Material bound_mat = static_cast<Material>( -1 );
 		size_t window_index = static_cast<size_t>( -1 );
-		KST_VK_RenderTarget* target;
-		RenderModeFlags render_mode;
+		KST_VK_RenderTarget* target = nullptr;
+		RenderModeFlags render_mode{};
+		float tessellation = 1;
 	};
 
 	struct PresentSynchronization {

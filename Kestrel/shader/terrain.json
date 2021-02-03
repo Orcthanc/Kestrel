@@ -1,0 +1,84 @@
+{
+	"attribute_descriptions" : [
+		{
+			"name" : "Position",
+			"size" : 3,
+			"binding" : 0,
+			"location" : 0,
+			"offset" : 0
+		},
+		{
+			"name" : "Normal",
+			"size" : 3,
+			"binding" : 0,
+			"location" : 1,
+			"offset" : 12
+		},
+		{
+			"name" : "Texture",
+			"size" : 2,
+			"binding" : 0,
+			"location" : 2,
+			"offset" : 24
+		},
+		{
+			"name" : "Offset",
+			"size" : 2,
+			"binding" : 1,
+			"location" : 3,
+			"offset" : 0
+		},
+		{
+			"name" : "Resolution",
+			"size" : 1,
+			"binding" : 1,
+			"location" : 4,
+			"offset" : 8
+		}
+	],
+	"binding_descriptions" : [
+		{
+			"binding" : 0,
+			"stride" : 32,
+			"inputrate" : "v"
+		},
+		{
+			"binding" : 1,
+			"stride" : 12,
+			"inputrate" : "i"
+		}
+	],
+	"push_constants" : [
+		{
+			"name" : "model",
+			"offset" : 0,
+			"size" : 76,
+			"stages" : [
+				"tesc",
+				"tese"
+			]
+		},
+		{
+			"name" : "offset_correction",
+			"offset" : 80,
+			"size" : 8,
+			"stages" : [
+				"vert"
+			]
+		}
+	],
+	"stages" : {
+		"vert" : {
+			"file" : "terrain.vert.spv"
+		},
+		"tesc" : {
+			"file" : "terrain.tesc.spv"
+		},
+		"tese" : {
+			"file" : "terrain.tese.spv"
+		},
+		"frag" : {
+			"file" : "terrain.frag.spv"
+		}
+	}
+}

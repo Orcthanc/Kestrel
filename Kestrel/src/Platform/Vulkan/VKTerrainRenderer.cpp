@@ -15,7 +15,7 @@ void KST_VK_TerrainRenderer::init(){
 	PROFILE_FUNCTION();
 
 	instance.terrain_mesh = Mesh::createMesh( "../res/Kestrel/res/models/Terrain4x4.obj" );
-	instance.terrain_material = VK_Materials::getInstance().loadMaterial( "../res/Kestrel/shader/basic" );
+	instance.terrain_material = VK_Materials::getInstance().loadMaterial( "../res/Kestrel/shader/terrain" );
 }
 
 void KST_VK_TerrainRenderer::drawTerrain( KST_VK_CameraRenderer *renderer, const TransformComponent &transform, const Terrain &terrain ){

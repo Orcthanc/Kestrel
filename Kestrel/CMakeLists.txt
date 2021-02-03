@@ -23,12 +23,17 @@ if( KST_COLOR_STATS )
 endif( KST_COLOR_STATS )
 
 copy_file( "shader/basic.json" )
+copy_file( "shader/terrain.json" )
 
 compile_shaders(
 	"shader/basic.vert"
 	"shader/basic.frag"
 	"shader/basic.tesc"
 	"shader/basic.tese"
+	"shader/terrain.vert"
+	"shader/terrain.frag"
+	"shader/terrain.tesc"
+	"shader/terrain.tese"
 	)
 
 copy_res_dir( "res/models" )

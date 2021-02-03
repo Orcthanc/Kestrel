@@ -13,7 +13,7 @@ layout( location = 0 ) out VertData {
 } outdata[];
 
 layout( push_constant ) uniform push_constants {
-	mat4 model;
+	layout( offset = 80 )float tesc;
 } u_push;
 
 layout( binding = 0 ) uniform vp {
@@ -27,22 +27,9 @@ void main() {
 	outdata[gl_InvocationID].color = indata[gl_InvocationID].color;
 
 	if( gl_InvocationID == 0 ){
-		float distances[3];
-
-		for( int i = 0; i < 3; i++ ){
-			vec4 pos = u_vp.view * u_push.model * vec4( indata[i].position, 1.0 );
-			distances[i] = sqrt(dot( pos, pos ));
-		}
-
-		float tess_facs[3];
-
-		tess_facs[0] = min( distances[1], distances[2] ) / 1024.0;
-		tess_facs[1] = min( distances[0], distances[2] ) / 1024.0;
-		tess_facs[2] = min( distances[0], distances[1] ) / 1024.0;
-
-		gl_TessLevelOuter[0] = max(1, 32 - tess_facs[0]);
-		gl_TessLevelOuter[1] = max(1, 32 - tess_facs[1]);
-		gl_TessLevelOuter[2] = max(1, 32 - tess_facs[2]);
-		gl_TessLevelInner[0] = max(1, 32 - tess_facs[2]);
+		gl_TessLevelOuter[0] = u_push.tesc;
+		gl_TessLevelOuter[1] = u_push.tesc;
+		gl_TessLevelOuter[2] = u_push.tesc;
+		gl_TessLevelInner[0] = u_push.tesc;
 	}
 }
