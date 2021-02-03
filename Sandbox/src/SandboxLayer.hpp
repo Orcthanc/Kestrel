@@ -13,4 +13,6 @@ struct SandboxLayer: public Kestrel::Layer {
 	virtual void onEvent( Kestrel::Event &e ) override;
 
 	std::shared_ptr<Kestrel::NaiveCamera> camera;
+
+	Kestrel::Entity plane1, plane2;
 };

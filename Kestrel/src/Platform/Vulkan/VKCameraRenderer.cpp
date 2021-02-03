@@ -20,6 +20,10 @@
 
 using namespace Kestrel;
 
+#ifdef KST_COLOR_STATS
+RenderFeedBack Kestrel::render_feed_back = {};
+#endif
+
 KST_VK_CameraRenderer::KST_VK_CameraRenderer( KST_VK_DeviceSurface* surface ){
 	PROFILE_FUNCTION();
 
@@ -638,21 +642,13 @@ void KST_VK_CameraRenderer::endScene(){
 			}
 		}
 
-		static bool past_crit = false;
 		static size_t counter = 0;
 		if( colors.contains( 0xff00ff00 ) || colors.contains( 0xff000000 ) || colors.contains( 0x00000000 )){
-			if( past_crit )
-				++counter;
-		} else
-			past_crit = true;
-
-		if( counter >= 100 )
-			Application::getInstance()->running = false;
-
-		for( auto& [key, value]: colors ){
-			color_stat_file << std::hex << key << ':' << std::dec << value << " ";
+			render_feed_back.is_hit = true;
+		} else {
+			render_feed_back.is_hit = false;
 		}
-		color_stat_file << "\n";
+
 #endif
 
 		//TODO remove

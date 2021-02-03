@@ -205,7 +205,7 @@ vk::PresentModeKHR KST_VK_Swapchain::find_mode( const KSTVKSwapchainDetails& cap
 
 	for( const auto& mode: capabilities.present_modes ){
 		//TODO vsync on/off
-		if( mode == vk::PresentModeKHR::eMailbox ){
+		if( mode == vk::PresentModeKHR::eImmediate ){
 			return mode;
 		}
 	}

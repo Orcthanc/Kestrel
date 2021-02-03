@@ -29,6 +29,15 @@ namespace Kestrel {
 	};
 	*/
 
+#ifdef KST_COLOR_STATS
+	struct RenderFeedBack {
+		double distance, last_hit, time_since_hit;
+		bool is_hit;
+	};
+
+	extern RenderFeedBack render_feed_back;
+#endif
+
 	struct KST_VK_RenderTarget {
 		std::array<vk::UniqueImage, 2> color_depth;
 		std::array<vk::UniqueDeviceMemory, 2> color_depth_mem;
