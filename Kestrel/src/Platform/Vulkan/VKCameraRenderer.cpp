@@ -649,6 +649,10 @@ void KST_VK_CameraRenderer::endScene(){
 			render_feed_back.is_hit = false;
 		}
 
+		if( colors.contains( 0xff00ff00 ))
+			render_feed_back.green = colors.at( 0xff00ff00 );
+		else
+			render_feed_back.green = 0;
 #endif
 
 		//TODO remove

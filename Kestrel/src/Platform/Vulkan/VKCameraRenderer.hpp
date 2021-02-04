@@ -32,6 +32,7 @@ namespace Kestrel {
 #ifdef KST_COLOR_STATS
 	struct RenderFeedBack {
 		double distance, last_hit, time_since_hit;
+		size_t green;
 		bool is_hit;
 	};
 
@@ -168,7 +169,6 @@ namespace Kestrel {
 			KST_VK_ImguiWindowData imgui;
 
 #ifdef KST_COLOR_STATS
-			std::ofstream color_stat_file{ "color_stats.txt" };
 			KST_VK_Buffer copy_buffer;
 #endif
 

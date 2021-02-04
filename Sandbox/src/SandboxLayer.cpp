@@ -19,17 +19,6 @@ static float run_distances[100] = { 0.001, 0.007999999999999997, 0.0269999999999
 static size_t run_num = 0;
 
 SandboxLayer::SandboxLayer( const std::string& s ): Layer{ s }{
-	//terrain = std::make_unique<VK_BasicTerrain>();
-/*
-	auto temp = Application::getInstance()->current_scene->createEntity( "TestName" );
-	auto mat = VK_Materials::getInstance().loadMaterial( "../res/Kestrel/shader/basic" );
-	auto mesh = std::make_shared<Mesh>();
-	mesh->load_obj<VK_Mesh>( "../res/Kestrel/res/models/Terrain4x4.obj" );
-	//mesh->load_obj<VK_Mesh>( "../res/Kestrel/res/models/Test.obj" );
-	temp.addComponent<MeshComponent>( mesh );
-	temp.addComponent<MaterialComponent>( mat );
-	temp.addComponent<TransformComponent>( glm::vec3{ 0, 0, 0.0 }, glm::quat( glm::vec3{ 0.0f, 0.0f, 0.2f }), glm::vec3{ 0.9, 0.9, 1.0 });
-*/
 #ifndef SB_KST_TERRAIN
 	auto& scene = Application::getInstance()->current_scene;
 
@@ -51,10 +40,6 @@ SandboxLayer::SandboxLayer( const std::string& s ): Layer{ s }{
 	cam.addComponent<TransformComponent>();
 	camera = std::make_shared<NaiveCamera>( glm::radians( 90.0 ), 960.0/1080.0, 0.1, 100000000.0 );
 	cam.addComponent<CameraComponent>( camera );
-
-#ifdef KST_COLOR_STATS
-	render_feed_back.distance = run_distances[run_num] * 1000;
-#endif
 }
 
 void SandboxLayer::onUpdate(){
@@ -66,7 +51,6 @@ void SandboxLayer::onUpdate(){
 	if( temp.getKeyState( GLFW_KEY_LEFT_SHIFT ) == GLFW_PRESS ){
 		speed *= 50;
 	}
-	//TODO move to onEvent
 	if( temp.getKeyState( GLFW_KEY_W ) == GLFW_PRESS ){
 		z -= speed;
 	}
@@ -94,15 +78,39 @@ void SandboxLayer::onUpdate(){
 
 	static size_t steps = 0;
 	static bool forward = true;
+	static float last_val;
+	static size_t iteration = 1;
+	static bool reset = true;
+	static size_t s = 1;
+
+	if( reset ){
+		pos = { 0, 0, 0.1 };
+		steps = 0;
+		forward = true;
+		iteration = 1;
+		reset = false;
+		render_feed_back = {};
+		render_feed_back.distance = run_distances[run_num] * 64;
+		s = 1;
+
+		plane2.getComponent<TransformComponent>().loc.z = -run_distances[run_num];
+
+		KST_INFO( "Starting run {:2} with dz = {:.12}", run_num, render_feed_back.distance );
+	}
+
+
 	if( forward ){
 		if( render_feed_back.is_hit ){
 			render_feed_back.last_hit = pos.z;
 			render_feed_back.time_since_hit = 0;
-			render_feed_back.distance /= 2.0;
+			render_feed_back.distance /= 1.777777777777;
 			forward = false;
-			KST_INFO( "Iteration 0 hit at {}... Starting next iteration with dz = {}", render_feed_back.last_hit, render_feed_back.distance );
+			KST_INFO( "Iteration  0 hit at {:.12} Starting next iteration with dz = {:.12}", render_feed_back.last_hit, render_feed_back.distance );
 		} else {
-			pos.z += render_feed_back.distance;
+			pos.z = 0.1 + render_feed_back.distance * s;
+			if( !( ++s % 1000 )){
+				KST_INFO( "{}", pos.z );
+			}
 		}
 	}
 	else {
@@ -113,7 +121,6 @@ void SandboxLayer::onUpdate(){
 			render_feed_back.time_since_hit += 1;
 		}
 
-		static float last_val;
 		last_val = render_feed_back.last_hit - steps * render_feed_back.distance;
 
 		++steps;
@@ -124,14 +131,22 @@ void SandboxLayer::onUpdate(){
 
 		pos.z = render_feed_back.last_hit - steps * render_feed_back.distance;
 
-		if( pos.z <= 0.1 || render_feed_back.time_since_hit > 64 ){
+		if( pos.z <= 0.1 || render_feed_back.time_since_hit > 256 ){
 			pos.z = render_feed_back.last_hit;
-			render_feed_back.distance /= 2;
+			render_feed_back.distance /= 1.777777777777;
 			render_feed_back.time_since_hit = 0;
 			steps = 0;
-			static size_t iteration = 1;
 
-			KST_INFO( "Iteration {} hit at {}... Starting next iteration with dz = {}", iteration, pos.z, render_feed_back.distance );
+			if( iteration == 30 ){
+				color_stat_file << std::fixed << std::setprecision( 12 ) << run_distances[run_num] << ":" << pos.z << std::endl;
+				reset = true;
+				++run_num;
+				if( run_num >= 99 )
+					Application::getInstance()->running = false;
+				return;
+			}
+
+			KST_INFO( "Iteration {:2} hit at {:.12} Starting next iteration with dz = {:.12}", iteration, pos.z, render_feed_back.distance );
 			iteration++;
 		}
 	}
