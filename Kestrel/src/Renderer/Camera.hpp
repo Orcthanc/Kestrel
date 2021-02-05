@@ -53,7 +53,7 @@ namespace Kestrel {
 			glm::mat4 view{};
 			glm::mat4 proj{};
 
-			RenderModeFlags camera_render_mode{ RenderModeFlags::eNone };
+			RenderModeFlags camera_render_mode{ RenderModeFlags::eInverse };
 
 		private:
 			std::unique_ptr<CameraRenderer> renderer;

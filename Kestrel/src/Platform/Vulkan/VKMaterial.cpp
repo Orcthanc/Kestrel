@@ -287,7 +287,7 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 
 	for( flag_integral i = 0; i <= static_cast<flag_integral>( RenderModeFlags::eAllFlags ); ++i ){
 		if( any_flag( RenderModeFlags::eInverse & i )){
-			depth_info.depthCompareOp = vk::CompareOp::eGreaterOrEqual;
+			depth_info.depthCompareOp = vk::CompareOp::eGreater;
 		} else {
 			depth_info.depthCompareOp = vk::CompareOp::eLessOrEqual;
 		}

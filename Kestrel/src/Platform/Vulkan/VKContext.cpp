@@ -216,7 +216,7 @@ void KST_VK_DeviceSurface::create_render_pass(){
 
 		vk::AttachmentDescription( 		//depthbuffer
 				{},
-				vk::Format::eD32Sfloat, //TODO
+				vk::Format::eD24UnormS8Uint, //TODO
 				vk::SampleCountFlagBits::e1,
 				vk::AttachmentLoadOp::eClear,
 				vk::AttachmentStoreOp::eDontCare, //TODO maybe store for analysis

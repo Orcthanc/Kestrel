@@ -128,7 +128,7 @@ void KST_VK_CameraRenderer::createImages(){
 		r.size = device_surface->swapchains[0].size;
 	}
 
-	img_inf.format = vk::Format::eD32Sfloat;
+	img_inf.format = vk::Format::eD24UnormS8Uint;
 	img_inf.usage = vk::ImageUsageFlagBits::eDepthStencilAttachment;
 
 	for( auto& r: render_targets ){
@@ -182,7 +182,7 @@ void KST_VK_CameraRenderer::createImages(){
 
 		img_view_inf.image = *r.color_depth[1];
 		img_view_inf.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eDepth;
-		img_view_inf.format = vk::Format::eD32Sfloat;
+		img_view_inf.format = vk::Format::eD24UnormS8Uint;
 
 		r.color_depth_view[1] = device_surface->device->createImageViewUnique( img_view_inf );
 
@@ -227,7 +227,6 @@ void KST_VK_CameraRenderer::createImages(){
 	copy_buffer.memory = device_surface->device->allocateMemoryUnique( mem_inf );
 	device_surface->device->bindBufferMemory( *copy_buffer.buffer, *copy_buffer.memory, 0 );
 	copy_buffer.data = device_surface->device->mapMemory( *copy_buffer.memory, 0, buf_size );
-
 #endif
 }
 
@@ -330,6 +329,8 @@ void KST_VK_CameraRenderer::draw( Entity e ){
 		auto [transform, terrain] = e.getComponents<TransformComponent, TerrainComponent>();
 		KST_VK_TerrainRenderer::get().drawTerrain( this, transform, terrain );
 	}
+
+	//KST_CORE_INFO( "Drawing {}", e.getComponent<NameComponent>().name );
 }
 
 void KST_VK_CameraRenderer::drawMesh( const TransformComponent& transform, const Mesh& mesh, const Material& mat, float tessellation, const glm::vec3& color ){

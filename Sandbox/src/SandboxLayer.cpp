@@ -141,7 +141,7 @@ void SandboxLayer::onUpdate(){
 				color_stat_file << std::fixed << std::setprecision( 12 ) << run_distances[run_num] << ":" << pos.z << std::endl;
 				reset = true;
 				++run_num;
-				if( run_num >= 99 )
+				if( run_num > 99 )
 					Application::getInstance()->running = false;
 				return;
 			}
