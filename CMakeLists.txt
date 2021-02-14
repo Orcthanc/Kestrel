@@ -10,6 +10,9 @@ option( COLOR_CONSOLE "Enables colored console output" OFF )
 option( KST_PROFILING "Enables performance measuring" OFF )
 option( KST_COLOR_STATS "Measure color value distribution of the resulting images" OFF )
 
+option( SB_KST_TERRAIN "Create the Terrain Scene" ON )
+option( SB_MANUAL "Use manual controls" ON )
+
 find_program(GLSLANG_VALIDATOR NAMES glslangValidator)
 if(NOT GLSLANG_VALIDATOR)
 	message(FATAL_ERROR "glslangValidator not found!")

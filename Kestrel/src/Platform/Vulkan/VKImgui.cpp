@@ -11,9 +11,13 @@ Imgui_InitInfo::Imgui_InitInfo( vk::Queue queue, vk::RenderPass render_pass, uin
 void KST_VK_ImguiWindowData::init( KST_VK_Context& context, Imgui_InitInfo init_info ) {
 	PROFILE_FUNCTION();
 
-	ImGui::CreateContext();
+	if( initialized ){
+		ImGui_ImplVulkan_Shutdown();
+	} else {
+		ImGui::CreateContext();
 
-	ImGui_ImplGlfw_InitForVulkan( context.windows[0].window, true ); //TODO set to false
+		ImGui_ImplGlfw_InitForVulkan( context.windows[0].window, true ); //TODO set to false
+	}
 
 	ImGui_ImplVulkan_InitInfo imgui_vulkan_inf;
 

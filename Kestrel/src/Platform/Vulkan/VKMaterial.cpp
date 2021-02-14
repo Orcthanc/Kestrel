@@ -245,8 +245,6 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 			{},
 			dynamic_states );
 
-	newMat.renderpass = *KST_VK_Context::get().device.renderpass;
-
 	vk::PipelineDepthStencilStateCreateInfo depth_info (
 			{},
 			VK_TRUE,							//Depth test
@@ -276,7 +274,7 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 			&blend_state_info,
 			&dynamic_state_info,
 			*newMat.layout,
-			newMat.renderpass,
+			*KST_VK_Context::get().device.renderpass_int,
 			0,
 			{},
 			-1 );
@@ -289,7 +287,7 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 		if( any_flag( RenderModeFlags::eInverse & i )){
 			depth_info.depthCompareOp = vk::CompareOp::eGreater;
 		} else {
-			depth_info.depthCompareOp = vk::CompareOp::eLessOrEqual;
+			depth_info.depthCompareOp = vk::CompareOp::eLess;
 		}
 
 		if( any_flag( RenderModeFlags::eLogarithmic & i )){
@@ -299,9 +297,9 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 		}
 
 		if( any_flag( RenderModeFlags::eIntegerDepth & i )){
-			//TODO
+			pipeline_info.renderPass = *KST_VK_Context::get().device.renderpass_int;
 		} else {
-			//TODO
+			pipeline_info.renderPass = *KST_VK_Context::get().device.renderpass;
 		}
 
 		if( any_flag( RenderModeFlags::eWireframe & i )){

@@ -21,23 +21,32 @@ layout( binding = 0 ) uniform vp {
 } u_vp;
 
 layout( location = 0 ) out vec3 color;
+layout( location = 1 ) out float z_out;
 
 const float C = 1;
-const float Far = 100000000;
+const float Far = 1000000;
 
 void main() {
-	vec4 modelpos = u_push_constants.model * vec4(( indata[0].position * gl_TessCoord.x +
+	volatile vec4 modelpos = u_push_constants.model * vec4(( indata[0].position * gl_TessCoord.x +
 			indata[1].position * gl_TessCoord.y +
 			indata[2].position * gl_TessCoord.z ), 1.0 );
 
 	float distance = sqrt( modelpos.x * modelpos.x + modelpos.z * modelpos.z );
-	modelpos.y += sin(distance / 256) * 256;
+	modelpos.y += sin(distance / 512) * 256;
+	float col_fac = cos(distance / 512) * 0.4 + 0.6;
 
-	gl_Position = u_vp.projection * u_vp.view * modelpos;
+	//modelpos = u_vp.view * modelpos;
+	//gl_Position = u_vp.projection * modelpos;
+
+	gl_Position = u_vp.view_projection * modelpos;
 
 	if( logarithmic ){
 		//gl_Position.z = log2(max(1e-6, 1.0 + gl_Position.w)) * Fcoef - 1.0;
-		gl_Position.z = log(C* gl_Position.w + 1) / log(C*Far + 1) * gl_Position.w;
+		z_out = log(gl_Position.w + 1) / log(Far + 1);
+
+		//z_out = gl_Position.w / 1000000;
+
+		gl_Position.z = z_out * gl_Position.w;
 	}
 
 	color =
@@ -46,9 +55,9 @@ void main() {
 			indata[2].color * gl_TessCoord.z;
 
 	//color = u_push_constants.color;
-	color.x *= 1 - max( 0.0000001, distance / 8000 );
-	color.y *= 1 - max( 0.0000001, ( distance - 4000 ) / 32000 );
-	color.z *= 1 - max( 0.0000001, ( distance - 12000 ) / 32000 );
+	color.x *= max( 0, 1 - max( 0.0000001, distance / 16000 )) * col_fac;
+	color.y *= max( 0, 1 - max( 0.0000001, ( distance - 8000 ) / 40000 )) * col_fac;
+	color.z *= max( 0, 1 - max( 0.0000001, ( distance - 12000 ) / 60000 )) * col_fac;
 
 	//color = vec3( distance, distance, distance );
 }

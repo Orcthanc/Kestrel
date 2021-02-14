@@ -14,6 +14,8 @@
 
 #include "imgui_impl_glfw.h"
 
+#include <chrono>
+
 #ifdef KST_COLOR_STATS
 #include <future>
 #endif
@@ -128,7 +130,11 @@ void KST_VK_CameraRenderer::createImages(){
 		r.size = device_surface->swapchains[0].size;
 	}
 
-	img_inf.format = vk::Format::eD24UnormS8Uint;
+	if( integer_db )
+		img_inf.format = vk::Format::eD24UnormS8Uint;
+	else
+		img_inf.format = vk::Format::eD32Sfloat;
+
 	img_inf.usage = vk::ImageUsageFlagBits::eDepthStencilAttachment;
 
 	for( auto& r: render_targets ){
@@ -182,7 +188,11 @@ void KST_VK_CameraRenderer::createImages(){
 
 		img_view_inf.image = *r.color_depth[1];
 		img_view_inf.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eDepth;
-		img_view_inf.format = vk::Format::eD24UnormS8Uint;
+
+		if( integer_db )
+			img_view_inf.format = vk::Format::eD24UnormS8Uint;
+		else
+			img_view_inf.format = vk::Format::eD32Sfloat;
 
 		r.color_depth_view[1] = device_surface->device->createImageViewUnique( img_view_inf );
 
@@ -199,6 +209,9 @@ void KST_VK_CameraRenderer::createImages(){
 			device_surface->swapchains[0].size.height,
 			1
 		);
+
+		if( integer_db )
+			framebuf_inf.renderPass = *KST_VK_Context::get().device.renderpass_int;
 
 		r.framebuffer = device_surface->device->createFramebufferUnique( framebuf_inf );
 	}
@@ -242,6 +255,10 @@ void KST_VK_CameraRenderer::onSizeChange( bool resetSync ){
 	PROFILE_FUNCTION();
 	device_surface->device->waitIdle();
 
+	if( integer_db )
+		createImgui( *KST_VK_Context::get().device.renderpass_int );
+	else
+		createImgui( *KST_VK_Context::get().device.renderpass );
 
 	device_surface->swapchains[ render_info.window_index ].create(
 			(*device_surface->windows)[ render_info.window_index ].surface,
@@ -258,13 +275,23 @@ void KST_VK_CameraRenderer::onSizeChange( bool resetSync ){
 void KST_VK_CameraRenderer::begin_scene( Camera& c, size_t window_index ){
 	PROFILE_FUNCTION();
 
+	bool this_int_db = false;
+
+	if( any_flag( render_info.render_mode & RenderModeFlags::eIntegerDepth )){
+		this_int_db = true;
+	}
+
+	if( this_int_db ^ integer_db ){
+		integer_db = this_int_db;
+		onSizeChange( false );
+	}
+
 	render_info = {};
 
 	render_info.window_index = window_index;
 
 	render_info.render_mode = c.camera_render_mode;
 
-	//TODO
 	render_info.tessellation = 1;
 
 	vk::CommandBufferAllocateInfo alloc_inf(
@@ -313,6 +340,10 @@ void KST_VK_CameraRenderer::begin_scene( Camera& c, size_t window_index ){
 			{{ 0, 0 }, render_info.target->size },
 			clear_values
 		);
+
+	if( integer_db ){
+		render_beg_inf.renderPass = *KST_VK_Context::get().device.renderpass_int;
+	}
 
 	render_info.cmd_buffer[0]->beginRenderPass( render_beg_inf, vk::SubpassContents::eInline );
 }
@@ -426,9 +457,19 @@ void KST_VK_CameraRenderer::endScene(){
 		KST_CORE_VERIFY( false, "Could not reset fence" );
 	}
 
+	graphics_queue.waitIdle();
+	auto start_t = std::chrono::steady_clock::now();
+
+
 	if (vk::Result::eSuccess != graphics_queue.submit(1, &sub_inf, {})) {
 		throw std::runtime_error( "Error during queue_submit" );
 	}
+
+	graphics_queue.waitIdle();
+
+	auto end_t = std::chrono::steady_clock::now();
+
+	frame_times << std::chrono::duration_cast<std::chrono::microseconds>( end_t - start_t ).count() << std::endl;
 
 
 #ifdef KST_COLOR_STATS

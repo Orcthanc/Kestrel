@@ -40,8 +40,13 @@ void NaiveCamera::recalc_proj(){
 
 	float A, B;
 	if( any_flag( camera_render_mode & RenderModeFlags::eInverse )){
+#if 1
 		A = -far_plane / ( near_plane - far_plane ) - 1;
 		B = -far_plane * near_plane / ( near_plane - far_plane );
+#else
+		A = 0;
+		B = near_plane;
+#endif
 	} else {
 		A = far_plane / ( near_plane - far_plane );
 		B = far_plane * near_plane / ( near_plane - far_plane );

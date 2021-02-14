@@ -216,10 +216,10 @@ void KST_VK_DeviceSurface::create_render_pass(){
 
 		vk::AttachmentDescription( 		//depthbuffer
 				{},
-				vk::Format::eD24UnormS8Uint, //TODO
+				vk::Format::eD32Sfloat,
 				vk::SampleCountFlagBits::e1,
 				vk::AttachmentLoadOp::eClear,
-				vk::AttachmentStoreOp::eDontCare, //TODO maybe store for analysis
+				vk::AttachmentStoreOp::eDontCare,
 				vk::AttachmentLoadOp::eDontCare,
 				vk::AttachmentStoreOp::eDontCare,
 				vk::ImageLayout::eUndefined,
@@ -258,6 +258,10 @@ void KST_VK_DeviceSurface::create_render_pass(){
 			1, &sub_dependency );
 
 	renderpass = device->createRenderPassUnique( render_pass_info );
+
+	attachment_descriptions[1].setFormat( vk::Format::eD24UnormS8Uint );
+
+	renderpass_int = device->createRenderPassUnique( render_pass_info );
 }
 
 void KST_VK_DeviceSurface::init_meshes( vk::UniqueCommandPool&& pool ){

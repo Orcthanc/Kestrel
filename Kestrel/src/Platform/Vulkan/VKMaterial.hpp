@@ -49,7 +49,6 @@ namespace Kestrel {
 		vk::UniquePipelineLayout layout;
 		vk::UniqueDescriptorSetLayout desc_layout;
 		vk::UniqueDescriptorPool desc_pool;
-		vk::RenderPass renderpass;
 		std::unordered_map<RendererID, std::vector<vk::UniqueDescriptorSet>> desc_sets;
 	};
 

@@ -13,22 +13,6 @@
 
 namespace Kestrel {
 
-	/*
-	struct KST_VK_Framebufferset {
-		KST_VK_Framebufferset();
-		KST_VK_Framebufferset( size_t size );
-
-		operator std::vector<vk::UniqueFramebuffer>&();
-		operator const std::vector<vk::UniqueFramebuffer>&() const;
-
-		bool dirty( size_t current_id );
-
-		std::vector<vk::UniqueFramebuffer> buffer;
-		//Dirty flag more or less
-		size_t lastUpdateID = -1;
-	};
-	*/
-
 #ifdef KST_COLOR_STATS
 	struct RenderFeedBack {
 		double distance, last_hit, time_since_hit;
@@ -167,6 +151,11 @@ namespace Kestrel {
 			size_t current_id = 0;
 
 			KST_VK_ImguiWindowData imgui;
+
+			bool integer_db = false;
+
+
+			std::ofstream frame_times{ "FrameTimes" };
 
 #ifdef KST_COLOR_STATS
 			KST_VK_Buffer copy_buffer;

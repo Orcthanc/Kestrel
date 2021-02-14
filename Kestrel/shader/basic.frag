@@ -3,9 +3,13 @@
 
 layout( constant_id = 0 ) const bool logarithmic = false;
 
-layout( location = 0 ) in vec3 fragColor;
+layout( location = 0 ) in frag{
+	vec3 color;
+	float z;
+} u_frag;
 layout( location = 0 ) out vec4 outColor;
 
 void main() {
-	outColor = vec4( fragColor, 1.0 );
+	//gl_FragDepth = u_frag.z;
+	outColor = vec4( u_frag.color, 1.0 );
 }
