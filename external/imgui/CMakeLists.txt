@@ -1,6 +1,6 @@
 project( imgui )
 
-set( ${PROJECT_NAME}_SOURCES "./imgui/imgui_demo.cpp" "./imgui/imgui.cpp" "./imgui/imgui_draw.cpp" "./imgui/imgui_widgets.cpp" "./imgui/backends/imgui_impl_vulkan.cpp" "./imgui/backends/imgui_impl_glfw.cpp" )
+set( ${PROJECT_NAME}_SOURCES "./imgui/imgui_demo.cpp" "./imgui/imgui.cpp" "./imgui/imgui_draw.cpp" "./imgui/imgui_widgets.cpp" "./imgui/backends/imgui_impl_vulkan.cpp" "./imgui/backends/imgui_impl_glfw.cpp" "./imgui/imgui_tables.cpp" )
 
 find_package( Vulkan REQUIRED )
 
