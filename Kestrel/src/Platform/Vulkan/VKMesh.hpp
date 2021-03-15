@@ -1,9 +1,9 @@
 #pragma once
 
+#include "Platform/Vulkan/Base.hpp"
+
 #include "Renderer/Mesh.hpp"
 #include "Platform/Vulkan/VKVertex.hpp"
-
-#include "Platform/Vulkan/Base.hpp"
 
 #include <filesystem>
 #include <map>

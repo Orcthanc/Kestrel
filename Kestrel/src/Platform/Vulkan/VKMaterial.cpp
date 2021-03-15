@@ -62,8 +62,8 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 	for( auto& [name, stage]: j["stages"].items() ){
 		if( name == "tesc" )
 			tessellation = true;
-		shaders.push_back({ *device->device, path / stage["file"], stages[name] });
-		KST_CORE_INFO( "Loading file {}", (path / stage["file"]).string() );
+		shaders.push_back(KST_VK_Shader( *device->device, (path / stage["file"].get<std::string>()).string(), stages[name] ));
+		KST_CORE_INFO( "Loading file {}", (path / stage["file"].get<std::string>()).string() );
 	}
 
 	std::vector<vk::PipelineShaderStageCreateInfo> stage_infos;
