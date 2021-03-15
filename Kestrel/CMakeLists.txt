@@ -4,6 +4,7 @@ file( GLOB_RECURSE ${PROJECT_NAME}_SOURCES "*/*.cpp" )
 
 add_library( ${PROJECT_NAME} STATIC ${${PROJECT_NAME}_SOURCES} )
 
+find_package( glm REQUIRED )
 find_package( Vulkan REQUIRED )
 
 target_precompile_headers( ${PROJECT_NAME} PUBLIC "src/kstpch.hpp" )
