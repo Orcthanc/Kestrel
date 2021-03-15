@@ -17,7 +17,7 @@ void VK_TerrainRegistry::init( KST_VK_DeviceSurface* dev ){
 }
 
 Terrain VK_TerrainRegistry::createTerrain( const TerrainInfo& t ){
-	size_t buffer_size = std::pow(( t.hi_tiles + t.mid_tiles + t.lo_tiles ) * 2 + 1, 2 );
+	size_t buffer_size = static_cast<size_t>(std::pow(( t.hi_tiles + t.mid_tiles + t.lo_tiles ) * 2 + 1, 2 ));
 
 	KST_VK_Buffer buf;
 
@@ -32,8 +32,8 @@ Terrain VK_TerrainRegistry::createTerrain( const TerrainInfo& t ){
 
 	for( int y = -himilo; y <= himilo; ++y ){
 		for( int x = -himilo; x <= himilo; ++x ){
-			data[index++] = x;
-			data[index++] = y;
+			data[index++] = static_cast<float>( x );
+			data[index++] = static_cast<float>( y );
 			if( std::max( std::abs( x ), std::abs( y )) > himi )
 				data[index++] = 2;
 			else

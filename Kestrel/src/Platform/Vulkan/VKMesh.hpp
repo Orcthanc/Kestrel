@@ -15,8 +15,8 @@ namespace Kestrel {
 
 			void load_obj(const char *path);
 
-			size_t vertex_offset, vertex_size;
-			size_t index_offset, index_amount;
+			size_t vertex_offset{}, vertex_size{};
+			size_t index_offset{}, index_amount{};
 	};
 
 	struct VK_MeshRegistry {
