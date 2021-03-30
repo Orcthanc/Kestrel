@@ -1,3 +1,5 @@
+#include "Platform/Vulkan/VKMesh.hpp"
+
 #include "Platform/Vulkan/VKCameraRenderer.hpp"
 
 #include "Core/Application.hpp"
@@ -8,7 +10,6 @@
 
 #include "Platform/Vulkan/VKMaterial.hpp"
 #include "Platform/Vulkan/VKVertex.hpp"
-#include "Platform/Vulkan/VKMesh.hpp"
 #include "Platform/Vulkan/VKTerrainRenderer.hpp"
 #include "Platform/Vulkan/VKTerrain.hpp"
 

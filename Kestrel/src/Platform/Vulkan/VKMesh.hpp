@@ -1,11 +1,10 @@
 #pragma once
 
 #include "Resource/Resource.hpp"
+#include "Platform/Vulkan/Base.hpp"
 
 #include "Renderer/Mesh.hpp"
 #include "Platform/Vulkan/VKVertex.hpp"
-
-#include "Platform/Vulkan/Base.hpp"
 
 #include <filesystem>
 #include <map>
@@ -15,8 +14,8 @@ namespace Kestrel {
 		public:
 			virtual ~VK_Mesh() = default;
 
-			size_t vertex_offset, vertex_size;
-			size_t index_offset, index_amount;
+			size_t vertex_offset{}, vertex_size{};
+			size_t index_offset{}, index_amount{};
 	};
 
 /*

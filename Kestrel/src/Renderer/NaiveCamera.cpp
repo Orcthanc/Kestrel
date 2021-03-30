@@ -51,7 +51,7 @@ void NaiveCamera::recalc_proj(){
 		A = far_plane / ( near_plane - far_plane );
 		B = far_plane * near_plane / ( near_plane - far_plane );
 	}
-	float temp = glm::cot( 0.5 * fov );
+	float temp = static_cast<float>( glm::cot( 0.5 * fov ));
 	proj = glm::mat4(
 			temp / aspect, 0, 0, 0,
 			0, -temp, 0, 0,
