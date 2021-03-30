@@ -8,7 +8,7 @@ Mesh Mesh::createMesh( const std::filesystem::path &p ){
 	switch( render_path ){
 		case RenderPath::Vulkan:
 		{
-			return VK_MeshRegistry::requestOrLoadMesh( p );
+			return VK_MeshRegistry::requestResourceHandle( p );
 		}
 		case RenderPath::None:
 		{

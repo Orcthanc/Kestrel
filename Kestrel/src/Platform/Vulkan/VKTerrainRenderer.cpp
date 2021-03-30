@@ -79,7 +79,7 @@ void KST_VK_TerrainRenderer::drawTerrain( KST_VK_CameraRenderer *renderer, const
 		renderer->render_info.bound_mat = terrain_material;
 	}
 
-	auto mimp = VK_MeshRegistry::getMeshImpl( terrain_mesh );
+	auto mimp = VK_MeshRegistry::requestResource( terrain_mesh );
 
 	vk::DeviceSize size = 0;
 

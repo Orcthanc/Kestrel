@@ -28,3 +28,12 @@ namespace Kestrel {
 		static constexpr uint32_t null = 0;
 	};
 }
+
+namespace std {
+	template<>
+	struct hash<Kestrel::Mesh> {
+		size_t operator()( const Kestrel::Mesh& m ) const noexcept {
+			return std::hash<uint32_t>{}( m.id );
+		}
+	};
+}

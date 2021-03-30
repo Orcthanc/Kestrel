@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Resource/Resource.hpp"
+
 #include "Renderer/Mesh.hpp"
 #include "Platform/Vulkan/VKVertex.hpp"
 
@@ -13,11 +15,11 @@ namespace Kestrel {
 		public:
 			virtual ~VK_Mesh() = default;
 
-			void load_obj(const char *path);
-
 			size_t vertex_offset, vertex_size;
 			size_t index_offset, index_amount;
 	};
+
+/*
 
 	struct VK_MeshRegistry {
 		public:
@@ -52,4 +54,32 @@ namespace Kestrel {
 			friend struct VK_Mesh;
 			friend struct KST_VK_DeviceSurface;
 	};
+
+*/
+
+	struct SharedMeshResources {
+		KST_VK_DeviceSurface* device;
+
+		struct CopyInfo {
+			vk::Queue queue;
+			vk::UniqueCommandPool pool;
+		} copy_inf;
+
+		struct MeshRegData {
+			bool initialized = false;
+			KST_VK_Buffer vertex_buffer;
+			KST_VK_Buffer index_buffer;
+		} mesh_data;
+	};
+
+	using VK_MeshRegistry = ResourceRegistry<VK_Mesh, Mesh, SharedMeshResources, std::filesystem::path>;
+
+	template<>template<>
+	void VK_MeshRegistry::initialize(
+			KST_VK_DeviceSurface*,
+			vk::Queue copy_queue,
+			vk::UniqueCommandPool&& copy_pool,
+			size_t max_vertex_size,
+			size_t max_index_size );
+
 }

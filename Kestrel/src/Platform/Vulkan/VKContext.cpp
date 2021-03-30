@@ -24,10 +24,7 @@ KST_VK_DeviceSurface::~KST_VK_DeviceSurface(){
 	}
 
 	//Meshes
-	VK_MeshRegistry::mesh_data = {};
-	VK_MeshRegistry::copy_inf = {};
-	VK_MeshRegistry::meshes.clear();
-	VK_MeshRegistry::mesh_impls.clear();
+	VK_MeshRegistry::clear();
 
 	//Terrains
 	VK_TerrainRegistry::destroy();
@@ -265,10 +262,17 @@ void KST_VK_DeviceSurface::create_render_pass(){
 }
 
 void KST_VK_DeviceSurface::init_meshes( vk::UniqueCommandPool&& pool ){
-	VK_MeshRegistry::initialize(
+	VK_MeshRegistry::initialize<
+		KST_VK_DeviceSurface*,
+		vk::Queue,
+		vk::UniqueCommandPool&&,
+		size_t,
+		size_t>(
 			this,
 			device->getQueue( queue_families.transfer.value(), 0 ),
-			std::move( pool ));
+			std::move( pool ),
+			100000 * sizeof( VK_Vertex ),
+			600000 * sizeof( uint32_t ));
 }
 
 uint32_t KST_VK_DeviceSurface::find_memory_type( uint32_t filter, vk::MemoryPropertyFlags flags ){

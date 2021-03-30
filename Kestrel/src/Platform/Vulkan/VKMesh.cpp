@@ -4,14 +4,19 @@
 
 using namespace Kestrel;
 
-std::map<const std::filesystem::path, Mesh> VK_MeshRegistry::meshes;
-std::map<Mesh, std::shared_ptr<VK_Mesh>> VK_MeshRegistry::mesh_impls;
-VK_MeshRegistry::MeshRegData VK_MeshRegistry::mesh_data;
+/*
+template<>
+std::map<std::filesystem::path, Mesh> VK_MeshRegistry::resource_locations;
+template<>
+std::unordered_map<Mesh, std::shared_ptr<VK_Mesh>> VK_MeshRegistry::resources;
+template<>
+SharedMeshResources VK_MeshRegistry::shared_resources;
 KST_VK_DeviceSurface* VK_MeshRegistry::device;
 VK_MeshRegistry::CopyInfo VK_MeshRegistry::copy_inf;
+*/
 
-
-void VK_Mesh::load_obj( const char *path ){
+template<>
+std::shared_ptr<VK_Mesh> VK_MeshRegistry::load_resource( const std::filesystem::path& path ){
 	PROFILE_FUNCTION();
 
 	std::vector<VK_Vertex> verts;
@@ -20,8 +25,8 @@ void VK_Mesh::load_obj( const char *path ){
 	std::ifstream file( path, std::ios::binary );
 
 	if( !file.is_open() ){
-		KST_CORE_WARN( "Could not load file {}", path );
-		return;
+		KST_CORE_WARN( "Could not load file {}", path.generic_string() );
+		return nullptr;
 	}
 
 	std::string temp;
@@ -38,7 +43,7 @@ void VK_Mesh::load_obj( const char *path ){
 			x = y = z = -12;
 			file >> x >> y >> z;
 			if( file.fail() ){
-				KST_CORE_ERROR( "Could not read file {}", path );
+				KST_CORE_ERROR( "Could not read file {}", path.generic_string() );
 				break;
 			}
 			file >> w;
@@ -94,36 +99,41 @@ void VK_Mesh::load_obj( const char *path ){
 */
 
 	vk::CommandBufferAllocateInfo alloc_inf(
-			*VK_MeshRegistry::copy_inf.pool,
+			*shared_resources.copy_inf.pool,
 			vk::CommandBufferLevel::ePrimary,
 			2 );
-	auto commandbuffers = VK_MeshRegistry::device->device->allocateCommandBuffersUnique( alloc_inf );
+	auto commandbuffers = shared_resources.device->device->allocateCommandBuffersUnique( alloc_inf );
 
 	KST_VK_CopyInf cop_inf(
-			VK_MeshRegistry::device,
-			VK_MeshRegistry::copy_inf.queue,
+			shared_resources.device,
+			shared_resources.copy_inf.queue,
 			*commandbuffers[0] );
 
 	static size_t vertex_amnt = 0;
 	static size_t indic_amnt = 0;
 
-	vertex_offset = vertex_amnt;
-	vertex_size = verts.size();
+	auto m = std::make_shared<VK_Mesh>();
+
+	m->vertex_offset = vertex_amnt;
+	m->vertex_size = verts.size();
 	vertex_amnt += verts.size();
 
-	index_offset = indic_amnt;
-	index_amount = indices.size();
+	m->index_offset = indic_amnt;
+	m->index_amount = indices.size();
 	indic_amnt += indices.size();
 
-	VK_Utils::copy_to_buffer_device_local( cop_inf, VK_MeshRegistry::mesh_data.vertex_buffer, VK_MeshRegistry::mesh_data.vertex_buffer.current_offset, verts.data(), sizeof(verts[0]) * verts.size());
-	VK_MeshRegistry::mesh_data.vertex_buffer.current_offset += sizeof( verts[0] ) * verts.size();
+	VK_Utils::copy_to_buffer_device_local( cop_inf, shared_resources.mesh_data.vertex_buffer, shared_resources.mesh_data.vertex_buffer.current_offset, verts.data(), sizeof(verts[0]) * verts.size());
+	shared_resources.mesh_data.vertex_buffer.current_offset += sizeof( verts[0] ) * verts.size();
 
 	cop_inf.cmd_buf = *commandbuffers[1];
 
-	VK_Utils::copy_to_buffer_device_local( cop_inf, VK_MeshRegistry::mesh_data.index_buffer, VK_MeshRegistry::mesh_data.index_buffer.current_offset, indices.data(), sizeof( indices[0] ) * indices.size());
-	VK_MeshRegistry::mesh_data.index_buffer.current_offset += sizeof( indices[0] ) * indices.size();
+	VK_Utils::copy_to_buffer_device_local( cop_inf, shared_resources.mesh_data.index_buffer, shared_resources.mesh_data.index_buffer.current_offset, indices.data(), sizeof( indices[0] ) * indices.size());
+	shared_resources.mesh_data.index_buffer.current_offset += sizeof( indices[0] ) * indices.size();
+
+	return m;
 }
 
+/*
 Mesh VK_MeshRegistry::requestMesh( const std::filesystem::path& p ){
 	PROFILE_FUNCTION();
 
@@ -161,7 +171,9 @@ std::shared_ptr<VK_Mesh> VK_MeshRegistry::getMeshImpl( Mesh m ){
 
 	return mesh_impls.at( m );
 }
+*/
 
+template<>template<>
 void VK_MeshRegistry::initialize(
 		KST_VK_DeviceSurface* device,
 		vk::Queue queue,
@@ -175,16 +187,16 @@ void VK_MeshRegistry::initialize(
 			vk::MemoryPropertyFlagBits::eDeviceLocal );
 
 
-	mesh_data.vertex_buffer.create( buf_cr_inf );
+	shared_resources.mesh_data.vertex_buffer.create( buf_cr_inf );
 
 	buf_cr_inf.size = index_hint;
 	buf_cr_inf.usage = vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst;
 
-	mesh_data.index_buffer.create( buf_cr_inf );
+	shared_resources.mesh_data.index_buffer.create( buf_cr_inf );
 
-	VK_MeshRegistry::device = device;
-	copy_inf.queue = queue;
-	copy_inf.pool = std::move( pool );
+	VK_MeshRegistry::shared_resources.device = device;
+	shared_resources.copy_inf.queue = queue;
+	shared_resources.copy_inf.pool = std::move( pool );
 
-	mesh_data.initialized = true;
+	shared_resources.mesh_data.initialized = true;
 }

@@ -306,7 +306,7 @@ void KST_VK_CameraRenderer::begin_scene( Camera& c, size_t window_index ){
 	render_info.cmd_buffer[0]->begin( beg_inf );
 
 	std::array<vk::Buffer, 1> buffers{
-		VK_MeshRegistry::mesh_data.vertex_buffer.buffer.get(),
+		VK_MeshRegistry::shared_resources.mesh_data.vertex_buffer.buffer.get(),
 	};
 
 	std::array<vk::DeviceSize, 1> offsets{
@@ -315,7 +315,7 @@ void KST_VK_CameraRenderer::begin_scene( Camera& c, size_t window_index ){
 
 	vk::DeviceSize offset = 0;
 	render_info.cmd_buffer[0]->bindVertexBuffers( 0, buffers, offsets );
-	render_info.cmd_buffer[0]->bindIndexBuffer( *VK_MeshRegistry::mesh_data.index_buffer.buffer, 0, vk::IndexType::eUint32 );
+	render_info.cmd_buffer[0]->bindIndexBuffer( *VK_MeshRegistry::shared_resources.mesh_data.index_buffer.buffer, 0, vk::IndexType::eUint32 );
 
 	view_proj.view = c.view;
 	view_proj.proj = c.proj;
@@ -411,7 +411,7 @@ void KST_VK_CameraRenderer::drawMesh( const TransformComponent& transform, const
 		render_info.bound_mat = mat;
 	}
 
-	auto mimp = VK_MeshRegistry::getMeshImpl( mesh );
+	auto mimp = VK_MeshRegistry::requestResource( mesh );
 
 	// TODO clean up (maybe amount instead of size)
 	render_info.cmd_buffer[0]->drawIndexed(
