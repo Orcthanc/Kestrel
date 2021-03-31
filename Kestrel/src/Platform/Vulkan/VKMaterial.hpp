@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Resource/Resource.hpp"
 #include "Renderer/Material.hpp"
 #include "Renderer/CameraModes.hpp"
 #include <vulkan/vulkan.hpp>
@@ -44,13 +45,15 @@ namespace Kestrel {
 
 		void bind( const BindingInfo& );
 
-		Material id;
+		uint32_t id;
 		std::vector<vk::UniquePipeline> pipelines;
 		vk::UniquePipelineLayout layout;
 		vk::UniqueDescriptorSetLayout desc_layout;
 		vk::UniqueDescriptorPool desc_pool;
 		std::unordered_map<RendererID, std::vector<vk::UniqueDescriptorSet>> desc_sets;
 	};
+
+/*
 
 	struct VK_Materials: public Materials {
 		public:
@@ -71,4 +74,16 @@ namespace Kestrel {
 
 			friend KST_VK_DeviceSurface;
 	};
+
+	*/
+
+	struct SharedMaterialResources {
+		KST_VK_DeviceSurface* device;
+		std::vector<vk::UniqueFramebuffer> framebuffers;
+	};
+
+	using VK_Materials = ResourceRegistry<VK_Material_T, Material, SharedMaterialResources, std::filesystem::path>;
+
+	template<>template<>
+	void VK_Materials::initialize( KST_VK_DeviceSurface* device );
 }

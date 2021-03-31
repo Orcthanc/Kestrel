@@ -15,7 +15,7 @@ void KST_VK_TerrainRenderer::init(){
 	PROFILE_FUNCTION();
 
 	instance.terrain_mesh = Mesh::createMesh( "../res/Kestrel/res/models/Terrain4x4.obj" );
-	instance.terrain_material = VK_Materials::getInstance().loadMaterial( "../res/Kestrel/shader/terrain" );
+	instance.terrain_material = VK_Materials::requestResourceHandle( "../res/Kestrel/shader/terrain" );
 }
 
 void KST_VK_TerrainRenderer::drawTerrain( KST_VK_CameraRenderer *renderer, const TransformComponent &transform, const Terrain &terrain ){
@@ -28,7 +28,7 @@ void KST_VK_TerrainRenderer::drawTerrain( KST_VK_CameraRenderer *renderer, const
 
 	VK_UniformBufferObj mod_col{ model, glm::vec3( 0, 0, 1 )};
 	renderer->render_info.cmd_buffer[0]->pushConstants(
-			*VK_Materials::getInstance()[ terrain_material ].layout,
+			*VK_Materials::requestResource( terrain_material )->layout,
 			vk::ShaderStageFlagBits::eTessellationControl | vk::ShaderStageFlagBits::eTessellationEvaluation,
 			0,
 			sizeof( mod_col ),
@@ -47,7 +47,7 @@ void KST_VK_TerrainRenderer::drawTerrain( KST_VK_CameraRenderer *renderer, const
 	std::array<float, 2> offset{ (float)xoffset, (float)zoffset };
 
 	renderer->render_info.cmd_buffer[0]->pushConstants(
-			*VK_Materials::getInstance()[ terrain_material ].layout,
+			*VK_Materials::requestResource( terrain_material )->layout,
 			vk::ShaderStageFlagBits::eVertex,
 			80,
 			8,
@@ -74,7 +74,7 @@ void KST_VK_TerrainRenderer::drawTerrain( KST_VK_CameraRenderer *renderer, const
 				*renderer->uniform_buffer.buffer,
 				renderer->render_info.render_mode );
 
-		VK_Materials::getInstance()[ terrain_material ].bind( bind_inf );
+		VK_Materials::requestResource( terrain_material )->bind( bind_inf );
 
 		renderer->render_info.bound_mat = terrain_material;
 	}

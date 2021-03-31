@@ -15,7 +15,7 @@ KST_VK_Context* KST_VK_Context::curr_context;
 
 KST_VK_DeviceSurface::~KST_VK_DeviceSurface(){
 	//Materials
-	VK_Materials::getInstance().materials.clear();
+	VK_Materials::clear();
 
 	// Cameras
 	auto view = Application::getInstance()->current_scene->getView<CameraComponent>();
@@ -182,8 +182,7 @@ void KST_VK_DeviceSurface::create( KST_VK_Context& c ){
 				*device );
 	}
 
-	//TODO
-	VK_Materials::getInstance().device = this;
+	VK_Materials::initialize( this );
 
 	vk::CommandPoolCreateInfo pool_cr_inf(
 			vk::CommandPoolCreateFlagBits::eTransient,

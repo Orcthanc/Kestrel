@@ -39,22 +39,21 @@ static std::map<std::string, ShaderType> stages{
 	{ "frag", ShaderType::Fragment },
 };
 
-Material VK_Materials::loadMaterial( const char* shader_name ){
+template<>
+std::shared_ptr<VK_Material_T> VK_Materials::load_resource( const std::filesystem::path& shader_name ){
 	PROFILE_FUNCTION();
 
-	if( material_names.contains( shader_name ))
-		return material_names.at( shader_name );
-
-	std::filesystem::path path( std::string( shader_name ) + ".json" );
+	std::filesystem::path path( shader_name );
+	path += std::string( ".json" );
 	std::ifstream in( path );
 	json j;
 	in >> j;
 
 	path.remove_filename();
 
-	VK_Material_T newMat;
+	auto newMat = std::make_shared<VK_Material_T>();
 
-	KST_CORE_INFO( "Loading material {}", shader_name );
+	KST_CORE_INFO( "Loading material {}", shader_name.generic_string() );
 	std::vector<KST_VK_Shader> shaders;
 
 	bool tessellation = false;
@@ -62,7 +61,7 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 	for( auto& [name, stage]: j["stages"].items() ){
 		if( name == "tesc" )
 			tessellation = true;
-		shaders.push_back(KST_VK_Shader( *device->device, (path / stage["file"].get<std::string>()).string(), stages[name] ));
+		shaders.push_back( KST_VK_Shader( *shared_resources.device->device, (path / stage["file"].get<std::string>()).string(), stages[name] ));
 		KST_CORE_INFO( "Loading file {}", (path / stage["file"].get<std::string>()).string() );
 	}
 
@@ -217,14 +216,14 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 	vk::DescriptorSetLayoutCreateInfo layout_cr_inf(
 		{}, layout_binding );
 
-	newMat.desc_layout = device->device->createDescriptorSetLayoutUnique( layout_cr_inf );
+	newMat->desc_layout = shared_resources.device->device->createDescriptorSetLayoutUnique( layout_cr_inf );
 
 	vk::PipelineLayoutCreateInfo layout_info(
 			{},
-			1, &*newMat.desc_layout,
+			1, &*newMat->desc_layout,
 			static_cast<uint32_t>( push_constant_ranges.size()), push_constant_ranges.data() );
 
-	newMat.layout = device->device->createPipelineLayoutUnique( layout_info );
+	newMat->layout = shared_resources.device->device->createPipelineLayoutUnique( layout_info );
 
 	std::array<vk::DescriptorPoolSize, 1> desc_pool_size{
 		vk::DescriptorPoolSize( vk::DescriptorType::eUniformBuffer, 1 )
@@ -235,7 +234,7 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 			1,
 			desc_pool_size );
 
-	newMat.desc_pool = device->device->createDescriptorPoolUnique( desc_pool_inf );
+	newMat->desc_pool = shared_resources.device->device->createDescriptorPoolUnique( desc_pool_inf );
 
 	std::array<vk::DynamicState, 2> dynamic_states{
 			vk::DynamicState::eViewport,
@@ -273,7 +272,7 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 			&depth_info,
 			&blend_state_info,
 			&dynamic_state_info,
-			*newMat.layout,
+			*newMat->layout,
 			*KST_VK_Context::get().device.renderpass_int,
 			0,
 			{},
@@ -281,7 +280,7 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 
 	using flag_integral = std::underlying_type_t<RenderModeFlags>;
 
-	newMat.pipelines.reserve( static_cast<flag_integral>( RenderModeFlags::eAllFlags ));
+	newMat->pipelines.reserve( static_cast<flag_integral>( RenderModeFlags::eAllFlags ));
 
 	for( flag_integral i = 0; i <= static_cast<flag_integral>( RenderModeFlags::eAllFlags ); ++i ){
 		if( any_flag( RenderModeFlags::eInverse & i )){
@@ -308,15 +307,15 @@ Material VK_Materials::loadMaterial( const char* shader_name ){
 			rasterizer_info.polygonMode = vk::PolygonMode::eFill;
 		}
 
-		newMat.pipelines.emplace_back( std::move( device->device->createGraphicsPipelineUnique( {}, pipeline_info ).value ));
-		pipeline_info.basePipelineHandle = *newMat.pipelines[0];
+		newMat->pipelines.emplace_back( std::move( shared_resources.device->device->createGraphicsPipelineUnique( {}, pipeline_info ).value ));
+		pipeline_info.basePipelineHandle = *newMat->pipelines[0];
 	}
 
-	static Material id = 1;
-	newMat.id = id;
-	materials.emplace( id, std::move( newMat ));
-	material_names[shader_name] = id;
-	return id++;
+	static uint32_t id = 0;
+
+	newMat->id = ++id;
+
+	return newMat;
 }
 
 void VK_Material_T::bind( const BindingInfo& bind_inf ){
@@ -369,6 +368,13 @@ void VK_Material_T::bind( const BindingInfo& bind_inf ){
 	bind_inf.cmd_buffer.bindDescriptorSets( vk::PipelineBindPoint::eGraphics, *layout, 0, *desc_set[0], {} );
 }
 
+template<>template<>
+void VK_Materials::initialize( KST_VK_DeviceSurface* device ){
+	shared_resources.device = device;
+}
+
+/*
+
 VK_Materials& VK_Materials::getInstance(){
 	static VK_Materials mats;
 	return mats;
@@ -387,3 +393,4 @@ const VK_Material_T& VK_Materials::operator[]( Material mat ) const {
 	KST_CORE_ASSERT( materials.contains( mat ), "Could not load material {}", mat );
 	return materials.at( mat );
 }
+*/

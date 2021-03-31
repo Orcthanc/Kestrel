@@ -373,14 +373,14 @@ void KST_VK_CameraRenderer::drawMesh( const TransformComponent& transform, const
 
 	VK_UniformBufferObj mod_col{ model, color };
 	render_info.cmd_buffer[0]->pushConstants(
-			*VK_Materials::getInstance()[ mat ].layout,
+			*VK_Materials::requestResource( mat )->layout,
 			vk::ShaderStageFlagBits::eTessellationEvaluation,
 			0,
 			sizeof( mod_col ),
 			&mod_col );
 
 	render_info.cmd_buffer[0]->pushConstants(
-			*VK_Materials::getInstance()[ mat ].layout,
+			*VK_Materials::requestResource( mat )->layout,
 			vk::ShaderStageFlagBits::eTessellationControl,
 			80,
 			4,
@@ -407,7 +407,7 @@ void KST_VK_CameraRenderer::drawMesh( const TransformComponent& transform, const
 				*uniform_buffer.buffer,
 				render_info.render_mode );
 
-		VK_Materials::getInstance()[ mat ].bind( bind_inf );
+		VK_Materials::requestResource( mat )->bind( bind_inf );
 
 		render_info.bound_mat = mat;
 	}
