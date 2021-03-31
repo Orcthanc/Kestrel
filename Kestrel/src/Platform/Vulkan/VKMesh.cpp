@@ -4,17 +4,6 @@
 
 using namespace Kestrel;
 
-/*
-template<>
-std::map<std::filesystem::path, Mesh> VK_MeshRegistry::resource_locations;
-template<>
-std::unordered_map<Mesh, std::shared_ptr<VK_Mesh>> VK_MeshRegistry::resources;
-template<>
-SharedMeshResources VK_MeshRegistry::shared_resources;
-KST_VK_DeviceSurface* VK_MeshRegistry::device;
-VK_MeshRegistry::CopyInfo VK_MeshRegistry::copy_inf;
-*/
-
 template<>
 std::shared_ptr<VK_Mesh> VK_MeshRegistry::load_resource( const std::filesystem::path& path ){
 	PROFILE_FUNCTION();
@@ -132,46 +121,6 @@ std::shared_ptr<VK_Mesh> VK_MeshRegistry::load_resource( const std::filesystem::
 
 	return m;
 }
-
-/*
-Mesh VK_MeshRegistry::requestMesh( const std::filesystem::path& p ){
-	PROFILE_FUNCTION();
-
-	KST_CORE_ASSERT( mesh_data.initialized, "MeshRegistry needs to be initialized first" );
-
-	auto temp = meshes.find( p );
-
-	if( temp == meshes.end())
-		return Mesh::null;
-
-	return meshes.at( p );
-}
-
-Mesh VK_MeshRegistry::requestOrLoadMesh( const std::filesystem::path & p ){
-	PROFILE_FUNCTION();
-
-	KST_CORE_ASSERT( mesh_data.initialized, "MeshRegistry needs to be initialized first" );
-
-	auto temp = requestMesh( p );
-	if( temp != Mesh::null ){
-		return temp;
-	}
-
-	static Mesh mesh_id = 0;
-
-	meshes.emplace( p, ++mesh_id );
-	auto m = std::make_shared<VK_Mesh>();
-	m->load_obj( p.string().c_str() );
-	mesh_impls.emplace( mesh_id, m );
-	return mesh_id;
-}
-
-std::shared_ptr<VK_Mesh> VK_MeshRegistry::getMeshImpl( Mesh m ){
-	PROFILE_FUNCTION();
-
-	return mesh_impls.at( m );
-}
-*/
 
 template<>template<>
 void VK_MeshRegistry::initialize(

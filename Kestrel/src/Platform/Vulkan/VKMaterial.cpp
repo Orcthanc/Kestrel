@@ -372,25 +372,3 @@ template<>template<>
 void VK_Materials::initialize( KST_VK_DeviceSurface* device ){
 	shared_resources.device = device;
 }
-
-/*
-
-VK_Materials& VK_Materials::getInstance(){
-	static VK_Materials mats;
-	return mats;
-}
-
-VK_Material_T& VK_Materials::operator[]( Material mat ){
-	PROFILE_FUNCTION();
-
-	KST_CORE_ASSERT( materials.contains( mat ), "Could not load material {}", mat );
-	return materials.at( mat );
-}
-
-const VK_Material_T& VK_Materials::operator[]( Material mat ) const {
-	PROFILE_FUNCTION();
-
-	KST_CORE_ASSERT( materials.contains( mat ), "Could not load material {}", mat );
-	return materials.at( mat );
-}
-*/

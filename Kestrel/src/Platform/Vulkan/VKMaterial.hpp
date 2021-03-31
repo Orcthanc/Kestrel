@@ -53,30 +53,6 @@ namespace Kestrel {
 		std::unordered_map<RendererID, std::vector<vk::UniqueDescriptorSet>> desc_sets;
 	};
 
-/*
-
-	struct VK_Materials: public Materials {
-		public:
-			virtual Material loadMaterial( const char* shader_name ) override;
-
-			//TODO wrapper and maybe refcounting
-			static VK_Materials& getInstance();
-
-			VK_Material_T& operator[]( Material mat );
-			const VK_Material_T& operator[]( Material mat ) const;
-
-			std::vector<vk::UniqueFramebuffer> framebuffers;
-
-		private:
-			std::map<std::filesystem::path, Material> material_names;
-			std::unordered_map<Material, VK_Material_T> materials;
-			KST_VK_DeviceSurface* device;
-
-			friend KST_VK_DeviceSurface;
-	};
-
-	*/
-
 	struct SharedMaterialResources {
 		KST_VK_DeviceSurface* device;
 		std::vector<vk::UniqueFramebuffer> framebuffers;
