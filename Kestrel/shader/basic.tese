@@ -2,8 +2,6 @@
 
 layout( triangles, fractional_even_spacing, cw ) in;
 
-layout( constant_id = 0 ) const bool logarithmic = false;
-
 layout( location = 0 ) in VertData {
 	vec3 position;
 	vec3 color;
@@ -38,12 +36,6 @@ void main() {
 	gl_Position = u_vp.projection * modelpos;
 
 	//gl_Position = u_vp.view_projection * modelpos;
-
-	if( logarithmic ){
-		//gl_Position.z = log2(max(1e-6, 1.0 + gl_Position.w)) * Fcoef - 1.0;
-		u_frag.z = log(gl_Position.w + 0.9) / log(Far + 0.9);
-		gl_Position.z = u_frag.z * gl_Position.w;
-	}
 
 	//W-buffer
 	//gl_Position.z = gl_Position.w / Far;

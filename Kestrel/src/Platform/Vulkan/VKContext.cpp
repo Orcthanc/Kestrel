@@ -48,7 +48,7 @@ void KST_VK_Context::Init( const ContextInformation& c_inf ){
 			VK_MAKE_VERSION( c_inf.major_version, c_inf.minor_version, c_inf.patch_version ),
 			"Kestrel",
 			VK_MAKE_VERSION( VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH ),
-			VK_API_VERSION_1_2 );
+			VK_API_VERSION_1_4 );
 
 
 	std::vector<const char*> layers;
@@ -254,10 +254,6 @@ void KST_VK_DeviceSurface::create_render_pass(){
 			1, &sub_dependency );
 
 	renderpass = device->createRenderPassUnique( render_pass_info );
-
-	attachment_descriptions[1].setFormat( vk::Format::eD24UnormS8Uint );
-
-	renderpass_int = device->createRenderPassUnique( render_pass_info );
 }
 
 void KST_VK_DeviceSurface::init_meshes( vk::UniqueCommandPool&& pool ){

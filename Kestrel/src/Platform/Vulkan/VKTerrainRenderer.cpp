@@ -5,8 +5,6 @@
 #include "Platform/Vulkan/VKCameraRenderer.hpp"
 #include "Platform/Vulkan/VKTerrain.hpp"
 
-#include "glm/gtx/string_cast.hpp"
-
 using namespace Kestrel;
 
 KST_VK_TerrainRenderer KST_VK_TerrainRenderer::instance;

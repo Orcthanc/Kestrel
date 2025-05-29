@@ -5,7 +5,6 @@
 #include "Platform/Vulkan/VKCameraRenderer.hpp"
 
 #include <glm/gtc/reciprocal.hpp>
-#include <glm/gtx/string_cast.hpp>
 
 using namespace Kestrel;
 

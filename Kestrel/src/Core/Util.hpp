@@ -65,10 +65,10 @@ namespace Kestrel {
 	E operator^( const E& lhs, const E& rhs ){
 		return static_cast<E>( static_cast<std::underlying_type_t<E>>( lhs ) ^ static_cast<std::underlying_type_t<E>>( rhs ));
 	}
-	template<typename E, typename = std::enable_if_t<std::is_enum_v<E>>>
-	E operator|( const E& lhs, const E& rhs ){
-		return static_cast<E>( static_cast<std::underlying_type_t<E>>( lhs ) | static_cast<std::underlying_type_t<E>>( rhs ));
-	}
+	//template<typename E, typename = std::enable_if_t<std::is_enum_v<E>>>
+	//E operator|( const E& lhs, const E& rhs ){
+	//	return static_cast<E>( static_cast<std::underlying_type_t<E>>( lhs ) | static_cast<std::underlying_type_t<E>>( rhs ));
+	//}
 
 	template<typename E, typename = std::enable_if_t<std::is_enum_v<E>>>
 	E& operator&=( E& lhs, const E& rhs ){

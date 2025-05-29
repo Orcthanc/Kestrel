@@ -211,9 +211,6 @@ void KST_VK_CameraRenderer::createImages(){
 			1
 		);
 
-		if( integer_db )
-			framebuf_inf.renderPass = *KST_VK_Context::get().device.renderpass_int;
-
 		r.framebuffer = device_surface->device->createFramebufferUnique( framebuf_inf );
 	}
 
@@ -256,10 +253,7 @@ void KST_VK_CameraRenderer::onSizeChange( bool resetSync ){
 	PROFILE_FUNCTION();
 	device_surface->device->waitIdle();
 
-	if( integer_db )
-		createImgui( *KST_VK_Context::get().device.renderpass_int );
-	else
-		createImgui( *KST_VK_Context::get().device.renderpass );
+	createImgui( *KST_VK_Context::get().device.renderpass );
 
 	device_surface->swapchains[ render_info.window_index ].create(
 			(*device_surface->windows)[ render_info.window_index ].surface,
@@ -341,10 +335,6 @@ void KST_VK_CameraRenderer::begin_scene( Camera& c, size_t window_index ){
 			{{ 0, 0 }, render_info.target->size },
 			clear_values
 		);
-
-	if( integer_db ){
-		render_beg_inf.renderPass = *KST_VK_Context::get().device.renderpass_int;
-	}
 
 	render_info.cmd_buffer[0]->beginRenderPass( render_beg_inf, vk::SubpassContents::eInline );
 }

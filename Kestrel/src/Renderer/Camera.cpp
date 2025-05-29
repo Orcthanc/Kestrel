@@ -1,8 +1,5 @@
 #include "Renderer/Camera.hpp"
 
-//TODO remove
-#include "glm/gtx/string_cast.hpp"
-
 using namespace Kestrel;
 
 void Camera::move( float x, float y, float z ){

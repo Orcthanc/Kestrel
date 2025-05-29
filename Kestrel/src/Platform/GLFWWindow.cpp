@@ -59,7 +59,7 @@ KST_GLFW_VK_Window::KST_GLFW_VK_Window( WindowSettings s ): w_settings{ std::mov
 				}
 				case GLFW_REPEAT:
 				{
-					KST_CORE_WARN( "GLFW_REPEAT unimplemented" );
+					//KST_CORE_WARN( "GLFW_REPEAT unimplemented" );
 					break;
 				}
 			}

@@ -67,21 +67,21 @@ std::shared_ptr<VK_Material_T> VK_Materials::load_resource( const std::filesyste
 
 	std::vector<vk::PipelineShaderStageCreateInfo> stage_infos;
 	std::vector<vk::PipelineShaderStageCreateInfo> log_stage_infos;
-
+	
 	uint8_t log_off = 0;
 	uint8_t log_on = 1;
 	vk::SpecializationMapEntry log_entry( 0, 0, 1 );
 	vk::SpecializationInfo spec_info(
 			1, &log_entry,
 			1, &log_off );
-
+	
 	vk::SpecializationInfo spec_info_log(
 			1, &log_entry,
 			1, &log_on );
-
+	
 	for( auto& s: shaders ){
-		stage_infos.push_back( vk::PipelineShaderStageCreateInfo( {}, flag_bits_from_stage( s.type ), *s.module, "main", &spec_info ));
-		log_stage_infos.push_back( vk::PipelineShaderStageCreateInfo( {}, flag_bits_from_stage( s.type ), *s.module, "main", &spec_info_log ));
+		stage_infos.push_back( vk::PipelineShaderStageCreateInfo( {}, flag_bits_from_stage( s.type ), *s.module, "main", nullptr ));
+		log_stage_infos.push_back( vk::PipelineShaderStageCreateInfo( {}, flag_bits_from_stage( s.type ), *s.module, "main", nullptr ));
 	}
 
 	std::vector<vk::VertexInputAttributeDescription> attrib_desc;
@@ -273,7 +273,7 @@ std::shared_ptr<VK_Material_T> VK_Materials::load_resource( const std::filesyste
 			&blend_state_info,
 			&dynamic_state_info,
 			*newMat->layout,
-			*KST_VK_Context::get().device.renderpass_int,
+			*KST_VK_Context::get().device.renderpass,
 			0,
 			{},
 			-1 );
@@ -293,12 +293,6 @@ std::shared_ptr<VK_Material_T> VK_Materials::load_resource( const std::filesyste
 			pipeline_info.pStages = log_stage_infos.data();
 		} else {
 			pipeline_info.pStages = stage_infos.data();
-		}
-
-		if( any_flag( RenderModeFlags::eIntegerDepth & i )){
-			pipeline_info.renderPass = *KST_VK_Context::get().device.renderpass_int;
-		} else {
-			pipeline_info.renderPass = *KST_VK_Context::get().device.renderpass;
 		}
 
 		if( any_flag( RenderModeFlags::eWireframe & i )){

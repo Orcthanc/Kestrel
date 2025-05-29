@@ -37,6 +37,10 @@ namespace Kestrel {
 		eController = 1 << 4
 	};
 
+	inline EventDomain operator|(const EventDomain& lhs, const EventDomain& rhs) {
+		return static_cast<EventDomain>( static_cast<std::underlying_type_t<EventDomain>>( lhs ) | static_cast<std::underlying_type_t<EventDomain>>( rhs ));
+	}
+
 	class Event {
 		public:
 			virtual ~Event() = default;

@@ -37,7 +37,6 @@ namespace Kestrel {
 			std::vector<KST_GLFW_VK_Window>* windows = nullptr; // Managed by context
 
 			vk::UniqueRenderPass renderpass;
-			vk::UniqueRenderPass renderpass_int;
 
 		private:
 			void choose_card( const std::vector<vk::ExtensionProperties>& requiredExtensions, vk::Instance instance );
