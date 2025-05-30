@@ -52,7 +52,6 @@ SandboxLayer::SandboxLayer( const std::string& s ): Layer{ s }{
 
 void SandboxLayer::onUpdate(){
 #ifdef SB_KST_TERRAIN
-#ifdef SB_MANUAL
 	float x = 0, y = 0, z = 0;
 	Application& temp = *Application::getInstance();
 
@@ -80,124 +79,6 @@ void SandboxLayer::onUpdate(){
 	}
 	if( x || y || z )
 		camera->move( x, y, z );
-#else
-
-	static size_t frame = 0;
-	if( frame == 9999 )
-		Kestrel::Application::getInstance()->running = false;
-
-	camera->pos.y = std::max( 10.0, -790.0 + frame * 0.2 );
-
-	if( frame < 4000 ){
-		camera->rot = glm::quat( glm::vec3(( 1 - std::abs( std::cos( 0.00025 * std::numbers::pi * frame ))) * -1.7, 0, 0.01 ));
-	} else {
-		camera->rot = glm::quat( glm::vec3( std::log(( frame - 3999 )) / 20, 0, 0.01 ));
-	}
-
-	camera->recalc_view();
-
-	++frame;
-
-#endif
-#endif
-
-#ifdef KST_COLOR_STATS
-	static glm::vec3 pos = { 0, 0, 0.1 };
-
-	static size_t steps = 0;
-	static bool forward = true;
-	static float last_val;
-	static size_t iteration = 1;
-	static bool reset = true;
-	static size_t s = 1;
-
-	if( reset ){
-		pos = { 0, 0, 0.1 };
-		steps = 0;
-		forward = true;
-		iteration = 1;
-		reset = false;
-		render_feed_back = {};
-		render_feed_back.distance = run_distances[run_num] /* run_distances[run_num]*/ * 64 * 16 * 0.00001;
-		s = 1;
-
-		plane2.getComponent<TransformComponent>().loc = glm::conjugate( rot ) * glm::vec3{ 0, 0, -run_distances[run_num] * 0.00001 } * rot;
-		//plane2.getComponent<TransformComponent>().loc.z = -run_distances[run_num] * 0.00001;
-
-		KST_INFO( "Starting run {:2} with dz = {:.12}", run_num, render_feed_back.distance );
-	}
-
-	if( forward ){
-		if( render_feed_back.is_hit ){
-			render_feed_back.last_hit = pos.z;
-			render_feed_back.time_since_hit = 0;
-			render_feed_back.distance /= 1.777777777777;
-			forward = false;
-			KST_INFO( "Iteration  0 hit at {:.12} Starting next iteration with dz = {:.12}", render_feed_back.last_hit, render_feed_back.distance );
-		} else {
-			pos.z = 0.1 + render_feed_back.distance * s;
-			if( !( ++s % 20000 )){
-				color_stat_file << std::fixed << std::setprecision( 12 ) << run_distances[run_num] << ":" << -1 << std::endl;
-				reset = true;
-				++run_num;
-				if( run_num > 99 )
-					Application::getInstance()->running = false;
-				return;
-
-			}
-		}
-	}
-	else {
-		if( render_feed_back.is_hit ){
-			render_feed_back.time_since_hit = 0;
-			render_feed_back.last_hit = pos.z;
-		} else {
-			render_feed_back.time_since_hit += 1;
-		}
-
-		last_val = render_feed_back.last_hit - steps * render_feed_back.distance;
-
-		++steps;
-
-		if( last_val == render_feed_back.last_hit - steps * render_feed_back.distance ){
-			KST_INFO( "Found first hit" );
-		}
-
-		pos.z = render_feed_back.last_hit - steps * render_feed_back.distance;
-
-		if( pos.z <= 0.1 || render_feed_back.time_since_hit > 256 ){
-			pos.z = render_feed_back.last_hit;
-			render_feed_back.distance /= 1.777777777777;
-			render_feed_back.time_since_hit = 0;
-			steps = 0;
-
-			if( iteration == 30 ){
-				color_stat_file << std::fixed << std::setprecision( 12 ) << run_distances[run_num] << ":" << pos.z << std::endl;
-				reset = true;
-				++run_num;
-				if( run_num > 99 )
-					Application::getInstance()->running = false;
-				return;
-			}
-
-			KST_INFO( "Iteration {:2} hit at {:.12} Starting next iteration with dz = {:.12}", iteration, pos.z, render_feed_back.distance );
-			iteration++;
-		}
-	}
-
-	pos.y = 0;
-	//pos.x = 5 * pos.z;
-	pos.x = 0;
-	//glm::quat rot2( glm::vec3{ 0, -1, 0 });
-	camera->pos = glm::inverse( glm::mat4_cast( rot )) * glm::vec4( pos, 1 );
-	//camera->pos = glm::conjugate( rot2 ) * pos * rot2;
-	//camera->pos = pos;
-	camera->recalc_view();
-
-	float size = 1.2 * (pos.z + 0.1);
-
-	plane1.getComponent<TransformComponent>().scale = { size, size, size };
-	plane2.getComponent<TransformComponent>().scale = { size, size, size };
 #endif
 }
 
@@ -241,7 +122,6 @@ void SandboxLayer::onEvent( Kestrel::Event& e ){
 	d.dispatch<Kestrel::MouseMovedEvent>( [&]( Kestrel::MouseMovedEvent& e ){
 			//KST_INFO( "Mouse moved to {}, {}", e.x, e.y );
 #ifdef SB_KST_TERRAIN
-#ifdef SB_MANUAL
 			const double rot_speed = 0.01;
 			static double last_x = e.x;
 			static double last_y = e.y;
@@ -249,7 +129,6 @@ void SandboxLayer::onEvent( Kestrel::Event& e ){
 			camera->rotate( glm::quat( glm::vec3{ ( e.y - last_y ) * rot_speed, 0, 0 }));
 			last_x = e.x;
 			last_y = e.y;
-#endif
 #endif
 			return true;
 		});

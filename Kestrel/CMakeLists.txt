@@ -19,14 +19,6 @@ if( KST_PROFILING )
 	target_compile_definitions( ${PROJECT_NAME} PUBLIC KST_PROFILING=1 )
 endif( KST_PROFILING )
 
-if( KST_COLOR_STATS )
-	target_compile_definitions( ${PROJECT_NAME} PUBLIC KST_COLOR_STATS=1 )
-endif( KST_COLOR_STATS )
-
-if( SB_MANUAL )
-	target_compile_definitions( ${PROJECT_NAME} PUBLIC SB_MANUAL=1 )
-endif( SB_MANUAL )
-
 copy_file( "shader/basic.json" )
 copy_file( "shader/terrain.json" )
 

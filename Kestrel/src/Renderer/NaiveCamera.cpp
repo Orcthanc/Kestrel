@@ -39,13 +39,8 @@ void NaiveCamera::recalc_proj(){
 
 	float A, B;
 	if( any_flag( camera_render_mode & RenderModeFlags::eInverse )){
-#if 1
 		A = -far_plane / ( near_plane - far_plane ) - 1;
 		B = -far_plane * near_plane / ( near_plane - far_plane );
-#else
-		A = 0;
-		B = near_plane;
-#endif
 	} else {
 		A = far_plane / ( near_plane - far_plane );
 		B = far_plane * near_plane / ( near_plane - far_plane );
@@ -72,20 +67,14 @@ void NaiveCamera::updateRenderMode(RenderModeFlags new_mode){
 
 void NaiveCamera::onImgui(){
 	bool inverse     = any_flag( camera_render_mode & RenderModeFlags::eInverse );
-	bool logarithmic = any_flag( camera_render_mode & RenderModeFlags::eLogarithmic );
-	bool integer     = any_flag( camera_render_mode & RenderModeFlags::eIntegerDepth );
 	bool wireframe   = any_flag( camera_render_mode & RenderModeFlags::eWireframe );
 
 	ImGui::Checkbox( "Inverse depth buffer", &inverse );
-	ImGui::Checkbox( "Logarithmic depth buffer", &logarithmic );
-	ImGui::Checkbox( "Integer depth buffer (unimplemented)", &integer );
 	ImGui::Checkbox( "Wireframe", &wireframe );
 
 	RenderModeFlags res{ RenderModeFlags::eNone };
 
 	res |= inverse     ? RenderModeFlags::eInverse      : RenderModeFlags::eNone;
-	res |= logarithmic ? RenderModeFlags::eLogarithmic  : RenderModeFlags::eNone;
-	res |= integer     ? RenderModeFlags::eIntegerDepth : RenderModeFlags::eNone;
 	res |= wireframe   ? RenderModeFlags::eWireframe    : RenderModeFlags::eNone;
 
 	updateRenderMode( res );

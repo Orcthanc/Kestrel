@@ -15,7 +15,4 @@ struct SandboxLayer: public Kestrel::Layer {
 	std::shared_ptr<Kestrel::NaiveCamera> camera;
 
 	Kestrel::Entity plane1, plane2;
-#ifdef KST_COLOR_STATS
-	std::ofstream color_stat_file{ "color_stats.txt" };
-#endif
 };

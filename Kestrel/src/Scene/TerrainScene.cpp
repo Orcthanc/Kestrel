@@ -20,7 +20,6 @@ void TerrainScene::onUpdate(){
 
 	auto cams = getView<NameComponent, CameraComponent>();
 
-#ifdef SB_MANUAL
 	ImGui::Begin( "Cameras" );
 	for( auto& comps: cams ){
 		auto [name, cam] = cams.get<NameComponent, CameraComponent>( comps );
@@ -33,7 +32,6 @@ void TerrainScene::onUpdate(){
 	}
 
 	ImGui::End();
-#endif
 
 	//ImGui::ShowDemoWindow();
 }

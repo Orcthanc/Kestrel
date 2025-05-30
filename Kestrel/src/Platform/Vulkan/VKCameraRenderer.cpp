@@ -17,15 +17,7 @@
 
 #include <chrono>
 
-#ifdef KST_COLOR_STATS
-#include <future>
-#endif
-
 using namespace Kestrel;
-
-#ifdef KST_COLOR_STATS
-RenderFeedBack Kestrel::render_feed_back = {};
-#endif
 
 KST_VK_CameraRenderer::KST_VK_CameraRenderer( KST_VK_DeviceSurface* surface ){
 	PROFILE_FUNCTION();
@@ -84,13 +76,6 @@ void KST_VK_CameraRenderer::createSynchronization(){
 	sync.image_presentable = device_surface->device->createSemaphoreUnique( sem_inf );
 
 	vk::FenceCreateInfo fence_cr_inf( vk::FenceCreateFlagBits::eSignaled );
-
-#ifdef KST_COLOR_STATS
-	sync.color_cpy_start = device_surface->device->createSemaphoreUnique( sem_inf );
-
-	vk::FenceCreateInfo fence_inf;
-	sync.color_cpy_done = device_surface->device->createFenceUnique( fence_inf );
-#endif
 
 	for( auto& r: render_targets ){
 		r.render_ready_sema = device_surface->device->createSemaphoreUnique( sem_inf );
@@ -213,32 +198,6 @@ void KST_VK_CameraRenderer::createImages(){
 
 		r.framebuffer = device_surface->device->createFramebufferUnique( framebuf_inf );
 	}
-
-#ifdef KST_COLOR_STATS
-	auto buf_size = device_surface->swapchains[0].size.width * device_surface->swapchains[0].size.height * 4;
-	vk::BufferCreateInfo buf_cr_inf(
-			{},
-			buf_size,
-			vk::BufferUsageFlagBits::eTransferDst,
-			vk::SharingMode::eExclusive,
-			{}
-		);
-
-	copy_buffer.buffer = device_surface->device->createBufferUnique( buf_cr_inf );
-
-
-	auto memory_reqs = device_surface->device->getBufferMemoryRequirements( *copy_buffer.buffer );
-	vk::MemoryAllocateInfo mem_inf(
-			memory_reqs.size,
-			device_surface->find_memory_type(
-				memory_reqs.memoryTypeBits,
-				vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent )
-		);
-
-	copy_buffer.memory = device_surface->device->allocateMemoryUnique( mem_inf );
-	device_surface->device->bindBufferMemory( *copy_buffer.buffer, *copy_buffer.memory, 0 );
-	copy_buffer.data = device_surface->device->mapMemory( *copy_buffer.memory, 0, buf_size );
-#endif
 }
 
 void KST_VK_CameraRenderer::createImgui( vk::RenderPass render_pass ){
@@ -269,17 +228,6 @@ void KST_VK_CameraRenderer::onSizeChange( bool resetSync ){
 
 void KST_VK_CameraRenderer::begin_scene( Camera& c, size_t window_index ){
 	PROFILE_FUNCTION();
-
-	bool this_int_db = false;
-
-	if( any_flag( render_info.render_mode & RenderModeFlags::eIntegerDepth )){
-		this_int_db = true;
-	}
-
-	if( this_int_db ^ integer_db ){
-		integer_db = this_int_db;
-		onSizeChange( false );
-	}
 
 	render_info = {};
 
@@ -430,9 +378,6 @@ void KST_VK_CameraRenderer::endScene(){
 	std::vector<vk::CommandBuffer> buffers{ *render_info.cmd_buffer[0] };
 	std::vector signal_semas{
 		*render_info.target->render_done_sema,
-#ifdef KST_COLOR_STATS
-		*sync.color_cpy_start,
-#endif
 	};
 
 	vk::SubmitInfo sub_inf(
@@ -461,75 +406,6 @@ void KST_VK_CameraRenderer::endScene(){
 	auto end_t = std::chrono::steady_clock::now();
 
 	frame_times << std::chrono::duration_cast<std::chrono::microseconds>( end_t - start_t ).count() << std::endl;
-
-
-#ifdef KST_COLOR_STATS
-
-	//Copy image to cpu
-	vk::CommandBufferAllocateInfo al_inf(
-			*transfer_cmd_pool,
-			vk::CommandBufferLevel::ePrimary,
-			1 );
-
-	auto transferbuffer2 = device_surface->device->allocateCommandBuffersUnique( al_inf );
-	{
-		vk::CommandBufferBeginInfo beg_inf(
-				vk::CommandBufferUsageFlagBits::eOneTimeSubmit, {});
-
-		transferbuffer2[0]->begin( beg_inf );
-
-		vk::BufferMemoryBarrier mem_bar(
-				vk::AccessFlagBits::eHostRead,
-				vk::AccessFlagBits::eTransferWrite,
-				device_surface->queue_families.transfer.value(),
-				device_surface->queue_families.transfer.value(),
-				*copy_buffer.buffer,
-				0,
-				VK_WHOLE_SIZE );
-
-		transferbuffer2[0]->pipelineBarrier(
-				vk::PipelineStageFlagBits::eHost,
-				vk::PipelineStageFlagBits::eTransfer,
-				{},
-				0, nullptr,
-				1, &mem_bar,
-				0, nullptr );
-
-		vk::BufferImageCopy img_cpy(
-				0,
-				0,
-				0,
-				{ vk::ImageAspectFlagBits::eColor, 0, 0, 1 },
-				{ 0, 0, 0 },
-				{
-					render_targets[ render_targets.getIndex() ].size.width,
-					render_targets[ render_targets.getIndex() ].size.height,
-					1
-				}
-			);
-
-		transferbuffer2[0]->copyImageToBuffer(
-				*render_info.target->color_depth[0],
-				vk::ImageLayout::eTransferSrcOptimal,
-				*copy_buffer.buffer,
-				1, &img_cpy );
-
-		transferbuffer2[0]->end();
-
-		std::array wait_sema{ *sync.color_cpy_start };
-		std::array<vk::PipelineStageFlags, 1> wait_stages{ vk::PipelineStageFlagBits::eTransfer };
-
-		vk::SubmitInfo sub_inf2(
-				wait_sema,
-				wait_stages,
-				*transferbuffer2[0],
-				{} );
-
-		KST_CORE_VERIFY( vk::Result::eSuccess == transfer_queue.submit( 1, &sub_inf2, *sync.color_cpy_done ), "Queue submit failed in line {}", __LINE__ );
-	}
-#endif
-
-
 
 	auto img_res = device_surface->device->acquireNextImageKHR(
 			*device_surface->swapchains[render_info.window_index].swapchain,
@@ -645,48 +521,6 @@ void KST_VK_CameraRenderer::endScene(){
 		} catch( vk::OutOfDateKHRError e ){
 			onSizeChange( false );
 		}
-
-#ifdef KST_COLOR_STATS
-		KST_CORE_VERIFY( vk::Result::eSuccess == device_surface->device->waitForFences( 1, &*sync.color_cpy_done, VK_TRUE, UINT64_MAX ), "Wait for fence failed in line {}", __LINE__ );
-
-		KST_CORE_VERIFY( vk::Result::eSuccess == device_surface->device->resetFences( 1, &*sync.color_cpy_done ), "Wait for fence failed in line {}", __LINE__ );
-
-		std::unordered_map<uint32_t, uint32_t> colors;
-		std::vector<std::future<std::unordered_map<uint32_t, uint32_t>>> futures;
-
-		size_t max_size = render_info.target->size.width * render_info.target->size.height;
-		constexpr size_t threads = 8;
-		size_t step = max_size / threads;
-
-		for( size_t i = 0; i < threads; ++i ){
-			futures.emplace_back( std::async( [max_size, step]( size_t id, void* data ){
-					std::unordered_map<uint32_t, uint32_t> colors2;
-					for( size_t i = id * step; i < ( id == threads - 1 ? max_size : ( id + 1 ) * step ); ++i ){
-						++colors2[ reinterpret_cast<uint32_t*>( data )[i]];
-					}
-					return colors2;
-				}, i, copy_buffer.data ));
-			std::unordered_map<uint32_t, uint32_t> colors2;
-		}
-
-		for( auto& f: futures ){
-			for( auto& [key, value]: f.get()){
-				colors[key] += value;
-			}
-		}
-
-		static size_t counter = 0;
-		if( colors.contains( 0xff00ff00 ) || colors.contains( 0xff000000 ) || colors.contains( 0x00000000 )){
-			render_feed_back.is_hit = true;
-		} else {
-			render_feed_back.is_hit = false;
-		}
-
-		if( colors.contains( 0xff00ff00 ))
-			render_feed_back.green = colors.at( 0xff00ff00 );
-		else
-			render_feed_back.green = 0;
-#endif
 
 		//TODO remove
 		present_queue.waitIdle();

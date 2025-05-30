@@ -66,22 +66,9 @@ std::shared_ptr<VK_Material_T> VK_Materials::load_resource( const std::filesyste
 	}
 
 	std::vector<vk::PipelineShaderStageCreateInfo> stage_infos;
-	std::vector<vk::PipelineShaderStageCreateInfo> log_stage_infos;
-	
-	uint8_t log_off = 0;
-	uint8_t log_on = 1;
-	vk::SpecializationMapEntry log_entry( 0, 0, 1 );
-	vk::SpecializationInfo spec_info(
-			1, &log_entry,
-			1, &log_off );
-	
-	vk::SpecializationInfo spec_info_log(
-			1, &log_entry,
-			1, &log_on );
 	
 	for( auto& s: shaders ){
 		stage_infos.push_back( vk::PipelineShaderStageCreateInfo( {}, flag_bits_from_stage( s.type ), *s.module, "main", nullptr ));
-		log_stage_infos.push_back( vk::PipelineShaderStageCreateInfo( {}, flag_bits_from_stage( s.type ), *s.module, "main", nullptr ));
 	}
 
 	std::vector<vk::VertexInputAttributeDescription> attrib_desc;
@@ -288,12 +275,8 @@ std::shared_ptr<VK_Material_T> VK_Materials::load_resource( const std::filesyste
 		} else {
 			depth_info.depthCompareOp = vk::CompareOp::eLess;
 		}
-
-		if( any_flag( RenderModeFlags::eLogarithmic & i )){
-			pipeline_info.pStages = log_stage_infos.data();
-		} else {
-			pipeline_info.pStages = stage_infos.data();
-		}
+		
+		pipeline_info.pStages = stage_infos.data();
 
 		if( any_flag( RenderModeFlags::eWireframe & i )){
 			rasterizer_info.polygonMode = vk::PolygonMode::eLine;

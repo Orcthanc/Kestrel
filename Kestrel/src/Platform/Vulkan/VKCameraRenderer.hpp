@@ -12,17 +12,6 @@
 #include "Scene/Components.hpp"
 
 namespace Kestrel {
-
-#ifdef KST_COLOR_STATS
-	struct RenderFeedBack {
-		double distance, last_hit, time_since_hit;
-		size_t green;
-		bool is_hit;
-	};
-
-	extern RenderFeedBack render_feed_back;
-#endif
-
 	struct KST_VK_RenderTarget {
 		std::array<vk::UniqueImage, 2> color_depth;
 		std::array<vk::UniqueDeviceMemory, 2> color_depth_mem;
@@ -99,10 +88,6 @@ namespace Kestrel {
 	struct PresentSynchronization {
 		vk::UniqueSemaphore start_rendering;
 		vk::UniqueSemaphore image_presentable;
-#ifdef KST_COLOR_STATS
-		vk::UniqueSemaphore color_cpy_start;
-		vk::UniqueFence color_cpy_done;
-#endif
 	};
 
 	struct KST_VK_CameraRenderer: public CameraRenderer {
@@ -156,10 +141,6 @@ namespace Kestrel {
 
 
 			std::ofstream frame_times{ "FrameTimes" };
-
-#ifdef KST_COLOR_STATS
-			KST_VK_Buffer copy_buffer;
-#endif
 
 			friend struct KST_VK_TerrainRenderer;
 	};
